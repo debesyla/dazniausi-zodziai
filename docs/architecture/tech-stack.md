@@ -18,7 +18,7 @@ This is the definitive technology selection for the entire project. All developm
 | Authentication | N/A | - | User auth | No user accounts needed |
 | Frontend Testing | Vitest | 1.x | Unit testing | Fast, integrates with SvelteKit if expanded |
 | Backend Testing | N/A | - | Testing | No backend |
-| E2E Testing | Playwright | 1.x | End-to-end | For UI interactions |
+| E2E Testing | TBD | - | End-to-end | For UI interactions |
 | Build Tool | Vite | 5.x | Bundling | Svelte's default, fast builds |
 | Bundler | Vite | 5.x | Asset bundling | Included in build tool |
 | IaC Tool | N/A | - | Infrastructure | Static hosting, no IaC needed |

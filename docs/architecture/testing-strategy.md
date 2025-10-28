@@ -61,12 +61,4 @@ N/A
 
 ### E2E Test
 
-```typescript
-import { test, expect } from '@playwright/test';
-
-test('search filters table', async ({ page }) => {
-  await page.goto('/');
-  await page.fill('input[placeholder="Search"]', 'labas');
-  await expect(page.locator('table tr')).toHaveCount(1);
-});
-```
+TBD - Testing framework to be selected.

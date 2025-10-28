@@ -28,7 +28,3 @@ vite.config.ts.timestamp-*
 
 # VS Code
 .vscode/
-
-# Playwright
-playwright-report/
-test-results/

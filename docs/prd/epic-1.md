@@ -8,13 +8,13 @@ Completely remove the existing testing setup and implement a new testing framewo
 
 **Existing System Context:**
 
-- Current relevant functionality: The application has Playwright for e2e testing and Vitest for unit testing, but the tests may not be working correctly with Svelte.
-- Technology stack: Svelte 5, Vite, Vitest, Playwright
+- Current relevant functionality: The application had Playwright for e2e testing and Vitest for unit testing, but the tests may not be working correctly with Svelte.
+- Technology stack: Svelte 5, Vite, Vitest
 - Integration points: Tests run on components and the built app
 
 **Enhancement Details:**
 
-- What's being added/changed: Remove all existing tests and configurations, set up a proper testing framework using Vitest with @testing-library/svelte for unit and integration tests, and optionally reconfigure or replace Playwright if needed.
+- What's being added/changed: Remove all existing tests and configurations, set up a proper testing framework using Vitest with @testing-library/svelte for unit and integration tests.
 - How it integrates: Tests will target Svelte components and routes directly.
 - Success criteria: All new tests pass, coverage is adequate, CI/CD pipeline updated.
 
