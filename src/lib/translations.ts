@@ -15,7 +15,7 @@ export const translations = {
     errorLoadingData: 'Klaida Kraunant Duomenis',
     author: 'Autorius',
     year: 'Metai',
-    datasetInformation: 'Duomenų Rinkinio Informacija',
+    datasetInformation: 'Duomenų informacija:',
     words: 'Žodžiai',
     
     // DownloadButton component
@@ -23,8 +23,8 @@ export const translations = {
     
     // Main page
     pageTitle: 'Dažniausi lietuviški žodžiai',
-    description: 'Tyrinėkite lietuviškų žodžių dažnumo duomenis naudodami interaktyvią, kultūriškai įkvėptą sąsają.',
-    selectDataset: 'Pasirinkite Duomenų Rinkinį',
+    description: 'Kokius žodžius tariame dažniausiai?',
+    selectDataset: 'Pasirinkite duomenis',
     dataset1: 'Lietuvos Kalbos Institutas (2023)',
     dataset2: 'Vilniaus Universiteto Lingvistikos Departamentas (2024)',
   }
