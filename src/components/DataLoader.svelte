@@ -1,5 +1,4 @@
 <script lang="ts">
-  import { onMount } from 'svelte';
   import { loadDataset } from '$lib/data';
   import { filterWords } from '$lib/utils';
   import SearchBar from './SearchBar.svelte';
@@ -27,16 +26,17 @@
 
   let filteredWords = $derived(dataset?.words ? filterWords(dataset.words, searchQuery) : []);
 
-  onMount(async () => {
-    try {
-      dataset = await loadDataset(filename);
-      error = null;
-    } catch (err) {
-      error = err instanceof Error ? err.message : String(err);
-      dataset = null;
-    } finally {
+  $effect(() => {
+    loading = true;
+    error = null;
+    dataset = null;
+    loadDataset(filename).then((d) => {
+      dataset = d;
       loading = false;
-    }
+    }).catch((err) => {
+      error = err instanceof Error ? err.message : String(err);
+      loading = false;
+    });
   });
 </script>
 
