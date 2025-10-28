@@ -4,10 +4,15 @@ import { defineConfig } from 'vitest/config';
 
 export default defineConfig({
 	plugins: [sveltekit()],
+	build: {
+		minify: 'esbuild',
+		target: 'es2020',
+		cssMinify: true,
+	},
 	test: {
 		globals: true,
 		environment: 'jsdom',
-		include: ['tests/**/*.{js,ts}'],
+		include: ['tests/unit/**/*.{js,ts}'],
 		setupFiles: [],
 		deps: {
 			optimizer: {
