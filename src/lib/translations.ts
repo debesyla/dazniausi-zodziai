@@ -23,10 +23,8 @@ export const translations = {
     
     // Main page
     pageTitle: 'Dažniausi lietuviški žodžiai',
-    description: 'Kokius žodžius tariame dažniausiai?',
+    description: 'Kokius žodžius sakome dažniausiai?',
     selectDataset: 'Pasirinkite duomenis',
-    dataset1: 'Lietuvos Kalbos Institutas (2023)',
-    dataset2: 'Vilniaus Universiteto Lingvistikos Departamentas (2024)',
   }
 };
 
