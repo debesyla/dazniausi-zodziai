@@ -1,6 +1,6 @@
 {
-  "author": "Vilnius University Linguistics Department",
-  "year": 2024,
+  "author": "ABC",
+  "year": 2021,
   "words": [
     {
       "word": "labas",
@@ -46,11 +46,6 @@
       "word": "blogai",
       "type": "adverb",
       "frequency": 3600
-    },
-    {
-      "word": "namas",
-      "type": "noun",
-      "frequency": 3300
     }
   ]
 }

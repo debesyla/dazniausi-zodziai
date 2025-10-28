@@ -1,8 +1,14 @@
-<script>
+<script lang="ts">
   import DataLoader from '../components/DataLoader.svelte';
   import { t } from '$lib/translations';
+  import { getAvailableDatasets } from '$lib/data';
 
-  let selectedFilename = $state('sample-dataset.json');
+  let selectedFilename = $state(getAvailableDatasets()[0]?.filename || 'sample-dataset.json');
+
+  let options = $derived(getAvailableDatasets().map(({filename, author}) => ({
+    value: filename,
+    label: author
+  })));
 </script>
 
 <svelte:head>
@@ -15,8 +21,9 @@
 <div class="dataset-selector">
   <label for="dataset-select">{t('selectDataset')}:</label>
   <select id="dataset-select" bind:value={selectedFilename}>
-    <option value="sample-dataset.json">{t('dataset1')}</option>
-    <option value="sample-dataset-2.json">{t('dataset2')}</option>
+    {#each options as opt}
+      <option value={opt.value}>{opt.label}</option>
+    {/each}
   </select>
 </div>
 

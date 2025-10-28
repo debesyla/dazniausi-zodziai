@@ -61,3 +61,17 @@ export async function loadDataset(filename: string): Promise<Dataset> {
     throw error;
   }
 }
+
+/**
+ * Gets the list of available JSON dataset filenames with their authors
+ * @returns Array of objects with filename and author
+ */
+export function getAvailableDatasets(): { filename: string; author: string }[] {
+  const modules = import.meta.glob('/static/data/*.json', { import: 'default', eager: true });
+  return Object.entries(modules)
+    .map(([path, data]: [string, any]) => ({
+      filename: path.split('/').pop()!,
+      author: data.author
+    }))
+    .sort((a, b) => a.filename.localeCompare(b.filename));
+}

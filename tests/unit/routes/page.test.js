@@ -6,6 +6,14 @@ vi.mock('../../../src/lib/translations', () => ({
   t: vi.fn((key) => key)
 }));
 
+// Mock data
+vi.mock('../../../src/lib/data', () => ({
+  getAvailableDatasets: vi.fn(() => [
+    { filename: 'sample-dataset-2.json', author: 'Vilnius University Linguistics Department' },
+    { filename: 'sample-dataset.json', author: 'Lithuanian Language Institute' }
+  ])
+}));
+
 // Mock DataLoader
 vi.mock('../../../src/components/DataLoader.svelte', () => ({
   default: vi.fn(() => ({ render: () => ({ html: '<div>DataLoader</div>', css: '' }) }))
@@ -22,7 +30,7 @@ describe('Page', () => {
 
     const select = getByRole('combobox');
     expect(select).toBeInTheDocument();
-    expect(select).toHaveValue('sample-dataset.json');
+    expect(select).toHaveValue('sample-dataset-2.json');
   });
 
   it('renders dataset options', () => {
@@ -31,7 +39,9 @@ describe('Page', () => {
     const select = getByRole('combobox');
     const options = select.querySelectorAll('option');
     expect(options).toHaveLength(2);
-    expect(options[0]).toHaveValue('sample-dataset.json');
-    expect(options[1]).toHaveValue('sample-dataset-2.json');
+    expect(options[0]).toHaveValue('sample-dataset-2.json');
+    expect(options[0]).toHaveTextContent('Vilnius University Linguistics Department');
+    expect(options[1]).toHaveValue('sample-dataset.json');
+    expect(options[1]).toHaveTextContent('Lithuanian Language Institute');
   });
 });

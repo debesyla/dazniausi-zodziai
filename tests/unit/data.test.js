@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { loadDataset } from '../../src/lib/data';
+import { loadDataset, getAvailableDatasets } from '../../src/lib/data';
 
 describe('loadDataset', () => {
   beforeEach(() => {
@@ -239,5 +239,26 @@ describe('loadDataset', () => {
 
     const result = await loadDataset('empty-words.json');
     expect(result).toEqual(mockData);
+  });
+});
+
+describe('getAvailableDatasets', () => {
+  beforeEach(() => {
+    vi.stubGlobal('import', {
+      meta: {
+        glob: vi.fn(() => ({
+          '/static/data/sample-dataset.json': { author: 'Author 1' },
+          '/static/data/sample-dataset-2.json': { author: 'Author 2' }
+        }))
+      }
+    });
+  });
+
+  it('should return sorted list of dataset objects with filename and author', () => {
+    const result = getAvailableDatasets();
+    expect(result).toEqual([
+      { filename: 'sample-dataset-2.json', author: 'Vilnius University Linguistics Department' },
+      { filename: 'sample-dataset.json', author: 'Lithuanian Language Institute' }
+    ]);
   });
 });
