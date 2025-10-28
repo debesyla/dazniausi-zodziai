@@ -1,4 +1,4 @@
-import { render } from '@testing-library/svelte';
+import { render } from '@testing-library/svelte/svelte5';
 import DataTable from '../../../src/components/DataTable.svelte';
 
 const mockWords = [
@@ -17,7 +17,7 @@ test('DataTable renders table with words', () => {
   const headers = getAllByRole('columnheader');
   expect(headers).toHaveLength(3);
   expect(headers[0]).toHaveTextContent('Žodis');
-  expect(headers[2]).toHaveTextContent('Dažnumas');
+  expect(headers[2]).toHaveTextContent('Dažnumas ↑');
 });
 
 test('DataTable sortable headers have correct class', () => {
@@ -26,6 +26,6 @@ test('DataTable sortable headers have correct class', () => {
   const wordHeader = getByText('Žodis');
   expect(wordHeader).toHaveClass('sortable');
 
-  const freqHeader = getByText('Dažnumas');
+  const freqHeader = getByText('Dažnumas ↑');
   expect(freqHeader).toHaveClass('sortable');
 });

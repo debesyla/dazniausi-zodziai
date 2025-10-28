@@ -1,4 +1,4 @@
-import { render } from '@testing-library/svelte';
+import { render } from '@testing-library/svelte/svelte5';
 import SearchBar from '../../../src/components/SearchBar.svelte';
 
 test('SearchBar renders input and button with accessibility when value is set', () => {

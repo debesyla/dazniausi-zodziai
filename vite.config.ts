@@ -11,9 +11,9 @@ export default defineConfig({
 	},
 	test: {
 		globals: true,
-		environment: 'jsdom',
+		environment: 'happy-dom',
 		include: ['tests/unit/**/*.{js,ts}'],
-		setupFiles: [],
+		setupFiles: ['tests/setup.js'],
 		deps: {
 			optimizer: {
 				web: {
