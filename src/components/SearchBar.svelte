@@ -1,11 +1,12 @@
 <script>
+  import { t } from '$lib/translations';
   let { value = $bindable('') } = $props();
 </script>
 
 <div class="search-bar">
-  <input bind:value type="text" placeholder="Search words..." />
+  <input bind:value type="text" placeholder={t('searchPlaceholder')} />
   {#if value}
-  <button type="button" onclick={() => value = ''} aria-label="Clear search">✕</button>
+  <button type="button" onclick={() => value = ''} aria-label={t('clearSearch')}>✕</button>
   {/if}
 </div>
 

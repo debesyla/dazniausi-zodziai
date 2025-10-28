@@ -1,15 +1,16 @@
 <script lang="ts">
   import pkg from 'papaparse';
+  import { t } from '$lib/translations';
   const { unparse } = pkg;
 
   let { words, metadata }: { words: { word: string; type?: string; frequency: number }[]; metadata: { author: string; year: number } } = $props();
 
   function downloadCSV() {
     const csvData = [
-      ['Author', metadata.author],
-      ['Year', metadata.year],
+      [t('author'), metadata.author],
+      [t('year'), metadata.year],
       [], // blank line
-      ['Word', 'Type', 'Frequency'],
+      [t('word'), t('type'), t('frequency')],
       ...words.map(w => [w.word, w.type || '', w.frequency])
     ];
 
@@ -24,7 +25,7 @@
   }
 </script>
 
-<button onclick={downloadCSV}>Atsisiųsti duomenis .csv formatu</button>
+<button onclick={downloadCSV}>{t('downloadData')}</button>
 
 <style>
   button {

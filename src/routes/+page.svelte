@@ -1,21 +1,22 @@
 <script>
   import DataLoader from '../components/DataLoader.svelte';
+  import { t } from '$lib/translations';
 
   let selectedFilename = $state('sample-dataset.json');
 </script>
 
 <svelte:head>
-  <title>Dažniausi Žodžiai</title>
+  <title>{t('pageTitle')}</title>
 </svelte:head>
 
-<h1>Dažniausi lietuviški žodžiai</h1>
-<p>Explore Lithuanian word frequency data with an interactive, culturally-inspired interface.</p>
+<h1>{t('pageTitle')}</h1>
+<p>{t('description')}</p>
 
 <div class="dataset-selector">
-  <label for="dataset-select">Select Dataset:</label>
+  <label for="dataset-select">{t('selectDataset')}:</label>
   <select id="dataset-select" bind:value={selectedFilename}>
-    <option value="sample-dataset.json">Lithuanian Language Institute (2023)</option>
-    <option value="sample-dataset-2.json">Vilnius University Linguistics Department (2024)</option>
+    <option value="sample-dataset.json">{t('dataset1')}</option>
+    <option value="sample-dataset-2.json">{t('dataset2')}</option>
   </select>
 </div>
 

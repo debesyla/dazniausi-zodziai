@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { t } from '$lib/translations';
   let { words = [] }: { words?: { word: string; type?: string; frequency: number }[] } = $props();
 
   let sortKey = $state<'word' | 'frequency'>('frequency');
@@ -33,9 +34,9 @@
 <table>
   <thead>
     <tr>
-      <th onclick={() => sortBy('word')} class="sortable">Word {sortKey === 'word' ? (sortAsc ? '↑' : '↓') : ''}</th>
-      <th>Type</th>
-      <th onclick={() => sortBy('frequency')} class="sortable">Frequency {sortKey === 'frequency' ? (sortAsc ? '↑' : '↓') : ''}</th>
+      <th onclick={() => sortBy('word')} class="sortable">{t('word')} {sortKey === 'word' ? (sortAsc ? '↑' : '↓') : ''}</th>
+      <th>{t('type')}</th>
+      <th onclick={() => sortBy('frequency')} class="sortable">{t('frequency')} {sortKey === 'frequency' ? (sortAsc ? '↑' : '↓') : ''}</th>
     </tr>
   </thead>
   <tbody>

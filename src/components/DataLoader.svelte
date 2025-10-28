@@ -1,6 +1,7 @@
 <script lang="ts">
   import { loadDataset } from '$lib/data';
   import { filterWords } from '$lib/utils';
+  import { t } from '$lib/translations';
   import SearchBar from './SearchBar.svelte';
   import DataTable from './DataTable.svelte';
   import DownloadButton from './DownloadButton.svelte';
@@ -41,19 +42,19 @@
 </script>
 
 {#if loading}
-  <div class="loading">Loading dataset...</div>
+  <div class="loading">{t('loading')}</div>
 {:else if error}
   <div class="error">
-    <h3>Error Loading Data</h3>
+    <h3>{t('errorLoadingData')}</h3>
     <p>{error}</p>
   </div>
 {:else if dataset}
   <div class="dataset">
-    <h2>Dataset Information</h2>
-    <p><strong>Author:</strong> {dataset.author}</p>
-    <p><strong>Year:</strong> {dataset.year}</p>
+    <h2>{t('datasetInformation')}</h2>
+    <p><strong>{t('author')}:</strong> {dataset.author}</p>
+    <p><strong>{t('year')}:</strong> {dataset.year}</p>
     
-    <h3>Words ({filteredWords.length})</h3>
+    <h3>{t('words')} ({filteredWords.length})</h3>
     <SearchBar bind:value={searchQuery} />
     <DownloadButton words={filteredWords} metadata={{author: dataset.author, year: dataset.year}} />
     <DataTable words={filteredWords} />

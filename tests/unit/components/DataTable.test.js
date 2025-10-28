@@ -16,16 +16,16 @@ test('DataTable renders table with words', () => {
 
   const headers = getAllByRole('columnheader');
   expect(headers).toHaveLength(3);
-  expect(headers[0]).toHaveTextContent('Word');
-  expect(headers[2]).toHaveTextContent('Frequency');
+  expect(headers[0]).toHaveTextContent('Žodis');
+  expect(headers[2]).toHaveTextContent('Dažnumas');
 });
 
 test('DataTable sortable headers have correct class', () => {
   const { getByText } = render(DataTable, { words: mockWords });
 
-  const wordHeader = getByText('Word');
+  const wordHeader = getByText('Žodis');
   expect(wordHeader).toHaveClass('sortable');
 
-  const freqHeader = getByText('Frequency');
+  const freqHeader = getByText('Dažnumas');
   expect(freqHeader).toHaveClass('sortable');
 });
