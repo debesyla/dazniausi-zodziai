@@ -13,7 +13,11 @@
 - Bounce rate below 40%.  
 - User session duration over 5 minutes.  
 
-### Background Context  
+### Post-MVP Enhancement Goals
+- Generate a second example word data .json file and implement a way to switch data sources in the website.  
+- Translate all text lines in the website to Lithuanian, making the UI fully Lithuanian.  
+
+### Background Context### Background Context  
 This project addresses the challenge of inaccessible Lithuanian word frequency data from various researchers, which exists in raw tab-separated files. By creating a static Svelte-based website, we provide an interactive, culturally-inspired interface for linguists, researchers, and students to browse, filter, download, and compare datasets. The solution emphasizes a unique Baltic amber terminal design to make data exploration engaging, filling a gap where generic tools fail to cater to Lithuanian linguistic needs. This initiative supports digital preservation of language data and enhances accessibility for academic and educational purposes.  
 
 ### Change Log  
@@ -29,6 +33,8 @@ FR1: The application must load JSON-formatted datasets containing metadata such 
 FR2: Display loaded words in a sortable table view, allowing sorting by word (A-Z) and frequency count.  
 FR3: Include a search bar to filter words by text input.  
 FR4: Enable users to download the displayed data in a suitable format (e.g., CSV or JSON).  
+FR5: Implement data source switching functionality, allowing users to select between multiple JSON datasets.  
+FR6: Translate all UI text to Lithuanian and ensure full localization of the interface.  
 
 ### Non Functional
 NFR1: Page load time must be under 2 seconds for datasets up to 10 files.  
