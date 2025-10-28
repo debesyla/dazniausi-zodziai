@@ -25,7 +25,7 @@ describe('loadDataset', () => {
     const result = await loadDataset('test.json');
     
     expect(result).toEqual(mockData);
-    expect(global.fetch).toHaveBeenCalledWith('/data/test.json');
+    expect(global.fetch).toHaveBeenCalledWith('data/test.json');
   });
 
   it('should throw error for missing file (404)', async () => {
