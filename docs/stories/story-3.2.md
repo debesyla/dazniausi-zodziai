@@ -11,7 +11,7 @@ so that I can access and export data anytime.
 2.4: No layout breaks on screens <768px wide.
 
 ### Status
-Ready for Review
+Done
 
 ### Dev Notes
 **Previous Story Insights:** Depends on Stories 2.1-3.1; table and theme complete.

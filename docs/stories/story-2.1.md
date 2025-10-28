@@ -11,7 +11,7 @@ so that I can organize data for analysis.
 1.4: Table updates dynamically without page reload.
 
 ### Status
-Ready for Done
+Done
 
 ### Dev Notes
 **Previous Story Insights:** Depends on Story 1.2; data loading complete.

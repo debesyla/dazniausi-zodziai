@@ -11,7 +11,7 @@ so that I can quickly find specific words or patterns.
 2.4: Clear search option resets the view.
 
 ### Status
-Ready for Review
+Done
 
 ### Dev Notes
 **Previous Story Insights:** Depends on Story 2.1; table component exists.

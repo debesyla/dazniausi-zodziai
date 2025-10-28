@@ -11,7 +11,7 @@ so that I have a runnable app foundation for further development.
 1.4: Repository is initialized with Git and basic structure (src/, data/).  
 
 ### Status
-Ready for Review
+Done
 
 ### Dev Notes
 **Previous Story Insights:** This is the first story; no previous insights.

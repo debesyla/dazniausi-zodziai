@@ -11,7 +11,7 @@ so that the app feels culturally inspired and engaging.
 1.4: Design evokes a terminal feel without hindering readability.
 
 ### Status
-Ready
+Done
 
 ### Dev Notes
 **Previous Story Insights:** Depends on Stories 2.1-2.2; UI components exist.

@@ -11,7 +11,7 @@ so that the app can access and display word frequency data.
 2.4: Error handling for invalid JSON or missing files.
 
 ### Status
-Ready for Review
+Done
 
 ### Dev Notes
 **Previous Story Insights:** Builds on Story 1.1; project structure and Svelte setup complete.
