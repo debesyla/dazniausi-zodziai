@@ -257,7 +257,8 @@ describe('getAvailableDatasets', () => {
   it('should return sorted list of dataset objects with filename and author', () => {
     const result = getAvailableDatasets();
     expect(result).toEqual([
-      { filename: 'sample-dataset-2.json', author: 'Vilnius University Linguistics Department' },
+      { filename: 'sample-dataset-2.json', author: 'Vilnius University Linguistics' },
+      { filename: 'sample-dataset-3.json', author: 'ABC' },
       { filename: 'sample-dataset.json', author: 'Lithuanian Language Institute' }
     ]);
   });

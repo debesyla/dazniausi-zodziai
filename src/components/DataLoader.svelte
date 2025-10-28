@@ -24,8 +24,11 @@
   let loading = $state(true);
   let error = $state<string | null>(null);
   let searchQuery = $state('');
+  let selectedTypes = $state<string[]>([]);
 
-  let filteredWords = $derived(dataset?.words ? filterWords(dataset.words, searchQuery) : []);
+  let uniqueTypes = $derived(dataset ? [...new Set(dataset.words.map(w => w.type).filter(Boolean))] : []);
+
+  let filteredWords = $derived(dataset?.words ? filterWords(dataset.words, searchQuery, selectedTypes) : []);
 
   $effect(() => {
     loading = true;
@@ -56,6 +59,17 @@
     
     <h3>{t('words')} ({filteredWords.length})</h3>
     <SearchBar bind:value={searchQuery} />
+    {#if uniqueTypes.length > 0}
+      <div class="type-filter">
+        <h4>{t('filterByType')}</h4>
+        {#each uniqueTypes as type}
+          <label>
+            <input type="checkbox" bind:group={selectedTypes} value={type} />
+            {type}
+          </label>
+        {/each}
+      </div>
+    {/if}
     <DownloadButton words={filteredWords} metadata={{author: dataset.author, year: dataset.year}} />
     <DataTable words={filteredWords} />
   </div>
@@ -91,6 +105,21 @@
 
   .dataset h3 {
     margin: 1.5rem 0 0.5rem 0;
+    color: var(--text-color);
+  }
+
+  .type-filter {
+    margin: 0.5rem 0;
+  }
+
+  .type-filter h4 {
+    margin: 0 0 0.5rem 0;
+    color: var(--text-color);
+  }
+
+  .type-filter label {
+    display: inline-block;
+    margin-right: 1rem;
     color: var(--text-color);
   }
 </style>

@@ -17,6 +17,7 @@ export const translations = {
     year: 'Metai',
     datasetInformation: 'Duomenų informacija:',
     words: 'Žodžiai',
+    filterByType: 'Filtruoti pagal tipą:',
     
     // DownloadButton component
     downloadData: 'Atsisiųsti duomenis .csv formatu',

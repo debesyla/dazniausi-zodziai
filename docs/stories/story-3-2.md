@@ -35,7 +35,54 @@ So that users can select types to filter the displayed words.
 8. Documentation is updated if needed  
 9. No regression in existing functionality verified
 
-#### Technical Notes
+#### Tasks
+
+- [x] Filter UI designed (dropdown or checkboxes)
+- [x] UI implemented in component
+- [x] Types extracted from data for options
+
+#### Dev Agent Record
+
+**Implementation Details:**
+
+- **Filter UI Design:** Implemented as checkboxes for multiple type selection, allowing users to filter by one or more word types.
+
+- **UI Implementation:** Added type filter section in DataLoader.svelte with checkboxes for each unique type extracted from the dataset. Uses Svelte's bind:group for multiple selection.
+
+- **Types Extraction:** Unique types are derived from dataset.words, filtering out undefined types.
+
+- **Integration:** Extended filterWords function in utils.ts and utils.js to accept optional selectedTypes array. Updated DataLoader to pass selectedTypes to filterWords. Added translation for filter label.
+
+**Debug Log References:**
+
+- None
+
+**Completion Notes List:**
+
+- Implemented type filter UI with checkboxes.
+- Updated filterWords function to support type filtering.
+- Added tests for new functionality.
+- No regressions in existing functionality.
+
+#### File List
+
+- Modified: src/components/DataLoader.svelte
+- Modified: src/lib/utils.ts
+- Modified: src/lib/utils.js
+- Modified: src/lib/translations.ts
+- Modified: tests/unit/utils/filter.test.js
+- Modified: docs/stories/story-3-2.md
+
+#### Change Log
+
+- Added type filter UI with checkboxes in DataLoader.svelte.
+- Extended filterWords function to support type filtering.
+- Added translation for filter label.
+- Added tests for type filtering functionality.
+
+#### Status
+
+Ready for Review
 
 - **Integration Approach:** Add filter component above table
 - **Existing Pattern Reference:** Svelte component patterns

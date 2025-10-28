@@ -35,7 +35,41 @@ So that the table shows only words matching the selected types.
 8. Documentation is updated if needed  
 9. No regression in existing functionality verified
 
-#### Technical Notes
+#### Tasks
+
+- [x] Filtering logic implemented
+- [x] Table updates reactively based on selection
+- [x] Multiple types can be selected
+
+#### Dev Agent Record
+
+**Implementation Details:**
+
+- Filtering logic was implemented in story 3-2 as part of the UI design. The filterWords function in utils.ts and utils.js was extended to accept an optional selectedTypes array, filtering words to only include those with types in the selected list.
+
+- Table updates reactively via Svelte's derived state in DataLoader.svelte, where filteredWords is computed based on searchQuery and selectedTypes.
+
+- Multiple types can be selected using checkboxes in the UI, bound to selectedTypes state.
+
+**Debug Log References:**
+
+- None
+
+**Completion Notes List:**
+
+- Filtering logic was already implemented in story 3-2. No additional changes required.
+
+#### File List
+
+- No new files modified for this story.
+
+#### Change Log
+
+- Added Tasks, Dev Agent Record, File List, Change Log sections.
+
+#### Status
+
+Ready for Review
 
 - **Integration Approach:** Reactive filtering in component
 - **Existing Pattern Reference:** Svelte state management
