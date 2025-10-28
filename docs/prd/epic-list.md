@@ -17,3 +17,12 @@ Goal: Generate a second example word data .json file and implement a data source
 
 Epic 6: Lithuanian Localization  
 Goal: Translate all website text to Lithuanian and adapt the UI for full Lithuanian language support.
+
+Epic 7: Add Clear Filters Button  
+Goal: Add a "Išvalyti filtrus" button to clear all applied filters with a single click.
+
+Epic 8: Default Descending Sort for Frequency  
+Goal: Set the default sort for the "Dažnumas" column to descending on load, showing highest frequency first.
+
+Epic 9: Adopt Base CSS Styles  
+Goal: Integrate the provided CSS base, adapt and expand it to fit the site's design needs for consistency.
