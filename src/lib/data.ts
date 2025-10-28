@@ -22,7 +22,7 @@ export interface Dataset {
  */
 export async function loadDataset(filename: string): Promise<Dataset> {
   try {
-    const response = await fetch(`/data/${filename}`);
+    const response = await fetch(`data/${filename}`);
 
     if (!response.ok) {
       throw new Error(`Failed to load dataset: ${filename} (${response.status})`);

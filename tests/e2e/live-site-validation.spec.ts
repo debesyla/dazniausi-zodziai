@@ -34,8 +34,8 @@ test.describe('Live Site Validation', () => {
 	test('data loads and displays correctly', async ({ page }) => {
 		await page.goto(BASE_URL);
 		
-		// Wait for data to load
-		await page.waitForSelector('[data-testid="word-card"], .word-card, text=/lietuvių/', { timeout: 10000 });
+		// Wait for data to load - look for content that indicates data loaded
+		await page.waitForSelector('text=lietuvių', { timeout: 10000 });
 		
 		// Check if content is displayed
 		const content = await page.textContent('body');
