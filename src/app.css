@@ -171,3 +171,8 @@ details {
     }
   }
 }
+
+footer {
+  margin-top: var(--3xl);
+  text-align: center;
+}

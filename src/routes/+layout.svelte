@@ -10,3 +10,7 @@
 </svelte:head>
 
 {@render children?.()}
+
+<footer>
+	<p>Turi pasiūlymų? Parašyk! <a href="mailto:labas@dago.lt">labas@dago.lt</a></p>
+</footer>
