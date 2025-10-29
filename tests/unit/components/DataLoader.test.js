@@ -100,4 +100,56 @@ describe('DataLoader', () => {
     // Check that filterWords was called with empty filters
     expect(filterWords).toHaveBeenCalledWith(mockDataset.words, '', []);
   });
+
+  it('shows load all button when more than 10 words', async () => {
+    const largeDataset = {
+      author: 'Test Author',
+      year: 2023,
+      words: Array.from({ length: 12 }, (_, i) => ({ word: `word${i}`, frequency: 100 - i }))
+    };
+    loadDataset.mockResolvedValue(largeDataset);
+
+    const { getByText, queryByText } = render(DataLoader, { filename: 'test.json' });
+
+    await waitFor(() => {
+      expect(queryByText('loading')).not.toBeInTheDocument();
+    });
+
+    expect(getByText('loadAll')).toBeInTheDocument();
+  });
+
+  it('does not show load all button when 10 or fewer words', async () => {
+    loadDataset.mockResolvedValue(mockDataset); // 2 words
+
+    const { queryByText } = render(DataLoader, { filename: 'test.json' });
+
+    await waitFor(() => {
+      expect(queryByText('loading')).not.toBeInTheDocument();
+    });
+
+    expect(queryByText('loadAll')).not.toBeInTheDocument();
+  });
+
+  it('loads all words when load all button is clicked', async () => {
+    const largeDataset = {
+      author: 'Test Author',
+      year: 2023,
+      words: Array.from({ length: 12 }, (_, i) => ({ word: `word${i}`, frequency: 100 - i }))
+    };
+    loadDataset.mockResolvedValue(largeDataset);
+
+    const { getByText, queryByText } = render(DataLoader, { filename: 'test.json' });
+
+    await waitFor(() => {
+      expect(queryByText('loading')).not.toBeInTheDocument();
+    });
+
+    const loadButton = getByText('loadAll');
+    loadButton.click();
+
+    // After click, button should be hidden
+    await waitFor(() => {
+      expect(queryByText('loadAll')).not.toBeInTheDocument();
+    });
+  });
 });

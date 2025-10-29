@@ -36,11 +36,43 @@ So that I can view the full dataset when it exceeds the top 10 words.
 
 #### Tasks
 
-- [ ] Implement logic to detect dataset size
-- [ ] Add button to UI conditionally
-- [ ] Handle click to load and display all data
-- [ ] Update table rendering for full data
-- [ ] Test with sample-dataset-2.json (60 items)
+- [x] Implement logic to detect dataset size
+- [x] Add button to UI conditionally
+- [x] Handle click to load and display all data
+- [x] Update table rendering for full data
+- [x] Test with sample-dataset-2.json (60 items)
+
+#### Dev Agent Record
+
+##### Agent Model Used
+
+James - Full Stack Developer
+
+##### Debug Log References
+
+- Initial implementation completed without issues.
+
+##### Completion Notes
+
+- Implemented load all button that appears when filtered words > 10, shows top 10 initially, loads all on click.
+- Added tests covering the functionality.
+- UI indicates count as 10 / 60 when not loaded all.
+
+##### Change Log
+
+- Added loadAll key to translations
+- Modified DataLoader to limit display to 10 initially, add button and logic
+- Added unit tests for the new feature
+
+#### File List
+
+- src/lib/translations.ts
+- src/components/DataLoader.svelte
+- tests/unit/components/DataLoader.test.js
+
+#### Status
+
+Ready for Review
 
 #### Technical Notes
 

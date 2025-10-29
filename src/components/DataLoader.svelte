@@ -25,10 +25,15 @@
   let error = $state<string | null>(null);
   let searchQuery = $state('');
   let selectedTypes = $state<string[]>([]);
+  let loadedAll = $state(false);
 
   let uniqueTypes = $derived(dataset ? [...new Set(dataset.words.map(w => w.type).filter(Boolean))] : []);
 
   let filteredWords = $derived(dataset?.words ? filterWords(dataset.words, searchQuery, selectedTypes) : []);
+
+  let sortedFilteredWords = $derived(filteredWords.slice().sort((a, b) => b.frequency - a.frequency));
+
+  let displayedWords = $derived(loadedAll ? sortedFilteredWords : sortedFilteredWords.slice(0, 10));
 
   function clearFilters() {
     searchQuery = '';
@@ -47,6 +52,12 @@
       loading = false;
     });
   });
+
+  $effect(() => {
+    searchQuery;
+    selectedTypes;
+    loadedAll = false;
+  });
 </script>
 
 {#if loading}
@@ -62,7 +73,7 @@
     <p><strong>{t('author')}:</strong> {dataset.author}</p>
     <p><strong>{t('year')}:</strong> {dataset.year}</p>
     
-    <h3>{t('words')} ({filteredWords.length})</h3>
+    <h3>{t('words')} ({displayedWords.length}{#if sortedFilteredWords.length > 10 && !loadedAll} / {sortedFilteredWords.length}{/if})</h3>
     <div class="search-and-clear">
       <SearchBar bind:value={searchQuery} />
       {#if searchQuery || selectedTypes.length > 0}
@@ -81,7 +92,12 @@
       </div>
     {/if}
     <DownloadButton words={filteredWords} metadata={{author: dataset.author, year: dataset.year}} />
-    <DataTable words={filteredWords} />
+    <div class="table-container">
+      <DataTable words={displayedWords} />
+      {#if sortedFilteredWords.length > 10 && !loadedAll}
+        <button onclick={() => loadedAll = true} class="load-all">{t('loadAll')}</button>
+      {/if}
+    </div>
   </div>
 {/if}
 
@@ -141,6 +157,26 @@
   .clear-filters:hover {
     background: #FFBF00;
     color: #222;
+  }
+
+  .load-all {
+    background: transparent;
+    border: 1px solid #FFBF00;
+    color: #FFBF00;
+    padding: var(--xs) var(--sm);
+    cursor: pointer;
+    user-select: none;
+    margin: var(--sm) 0;
+  }
+
+  .load-all:hover {
+    background: #FFBF00;
+    color: #222;
+  }
+
+  .table-container {
+    margin-top: var(--sm);
+    text-align: center;
   }
 
   .search-and-clear {
