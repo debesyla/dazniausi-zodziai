@@ -26,7 +26,6 @@ describe('Page', () => {
     const { getByText, getByRole } = render(Page);
 
     expect(getByText('pageTitle')).toBeInTheDocument();
-    expect(getByText('description')).toBeInTheDocument();
 
     const select = getByRole('combobox');
     expect(select).toBeInTheDocument();

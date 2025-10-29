@@ -16,7 +16,6 @@
 </svelte:head>
 
 <h1>{t('pageTitle')}</h1>
-<p>{t('description')}</p>
 
 <div class="dataset-selector">
   <label for="dataset-select">{t('selectDataset')}:</label>
@@ -32,10 +31,6 @@
 <style>
   h1 {
     margin-bottom: var(--lg);
-  }
-
-  p {
-    margin-bottom: var(--md);
   }
 
   .dataset-selector {

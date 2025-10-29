@@ -21,53 +21,43 @@ export interface Dataset {
  * @throws Error If file not found or JSON is invalid
  */
 export async function loadDataset(filename: string): Promise<Dataset> {
-  try {
-    const response = await fetch(`data/${filename}`);
-
-    if (!response.ok) {
-      throw new Error(`Failed to load dataset: ${filename} (${response.status})`);
-    }
-
-    const data = await response.json();
-
-    // Validate required fields
-    if (!data.author || typeof data.author !== 'string') {
-      throw new Error('Invalid dataset: missing or invalid "author" field');
-    }
-
-    if (!data.year || typeof data.year !== 'number') {
-      throw new Error('Invalid dataset: missing or invalid "year" field');
-    }
-
-    if (!Array.isArray(data.words)) {
-      throw new Error('Invalid dataset: "words" must be an array');
-    }
-
-    // Validate word structure
-    for (const word of data.words) {
-      if (!word.word || typeof word.word !== 'string') {
-        throw new Error('Invalid word entry: missing or invalid "word" field');
-      }
-      if (typeof word.frequency !== 'number') {
-        throw new Error('Invalid word entry: missing or invalid "frequency" field');
-      }
-    }
-
-    return data as Dataset;
-  } catch (error) {
-    if (error instanceof SyntaxError) {
-      throw new Error(`Invalid JSON in dataset: ${filename}`);
-    }
-    throw error;
+  const modules = import.meta.glob('/src/data/*.json', { import: 'default', eager: true });
+  const path = Object.keys(modules).find(p => p.endsWith(`/${filename}`));
+  if (!path) {
+    throw new Error(`Dataset not found: ${filename}`);
   }
-}
+  const data = modules[path] as Dataset;
 
-/**
+  // Validate required fields
+  if (!data.author || typeof data.author !== 'string') {
+    throw new Error('Invalid dataset: missing or invalid "author" field');
+  }
+
+  if (!data.year || typeof data.year !== 'number') {
+    throw new Error('Invalid dataset: missing or invalid "year" field');
+  }
+
+  if (!Array.isArray(data.words)) {
+    throw new Error('Invalid dataset: "words" must be an array');
+  }
+
+  // Validate word structure
+  for (const word of data.words) {
+    if (!word.word || typeof word.word !== 'string') {
+      throw new Error('Invalid word entry: missing or invalid "word" field');
+    }
+    if (typeof word.frequency !== 'number') {
+      throw new Error('Invalid word entry: missing or invalid "frequency" field');
+    }
+  }
+
+  return data;
+}/**
  * Gets the list of available JSON dataset filenames with their authors
  * @returns Array of objects with filename and author
  */
 export function getAvailableDatasets(): { filename: string; author: string }[] {
-  const modules = import.meta.glob('/static/data/*.json', { import: 'default', eager: true });
+  const modules = import.meta.glob('/src/data/*.json', { import: 'default', eager: true });
   return Object.entries(modules)
     .map(([path, data]: [string, any]) => ({
       filename: path.split('/').pop()!,

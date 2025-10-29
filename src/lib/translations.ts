@@ -25,7 +25,6 @@ export const translations = {
     
     // Main page
     pageTitle: 'Dažniausi lietuviški žodžiai',
-    description: 'Kokius žodžius sakome dažniausiai?',
     selectDataset: 'Pasirinkite duomenis',
   }
 };

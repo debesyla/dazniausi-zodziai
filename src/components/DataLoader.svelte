@@ -99,10 +99,6 @@
     color: #FFBF00;
   }
 
-  .dataset {
-    padding: var(--md);
-  }
-
   .dataset h2 {
     margin: 0 0 var(--lg) 0;
     color: #FFBF00;
