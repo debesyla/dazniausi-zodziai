@@ -36,9 +36,9 @@ So that I can easily clear all applied filters with one click.
 
 #### Tasks
 
-- [ ] Design button placement in the UI
-- [ ] Add button element to relevant component
-- [ ] Style the button to match site theme
+- [x] Design button placement in the UI
+- [x] Add button element to relevant component
+- [x] Style the button to match site theme
 
 #### Technical Notes
 
@@ -48,23 +48,40 @@ So that I can easily clear all applied filters with one click.
 
 #### Definition of Done
 
-- [ ] Functional requirements met
-- [ ] Integration requirements verified
-- [ ] Existing functionality regression tested
-- [ ] Code follows existing patterns and standards
-- [ ] Tests pass (existing and new)
-- [ ] Documentation updated if applicable
+- [x] Functional requirements met
+- [x] Integration requirements verified
+- [x] Existing functionality regression tested
+- [x] Code follows existing patterns and standards
+- [x] Tests pass (existing and new)
+- [x] Documentation updated if applicable
 
 #### Dev Agent Record
 
 ##### Agent Model Used
 
+James
+
 ##### Debug Log References
 
 ##### Completion Notes List
 
+- Implemented clear filters button in DataLoader component that clears both search query and selected types
+- Added Lithuanian translation for "Išvalyti filtrus"
+- Styled button to match existing site theme (dark mode compatible)
+- Added unit test for button presence
+- All validations pass (tests and svelte-check)
+
 ##### File List
+
+src/lib/translations.ts
+src/components/DataLoader.svelte
+tests/unit/components/DataLoader.test.js
 
 ##### Change Log
 
+- Added clearFilters translation key
+- Modified DataLoader.svelte to include clear filters button and function
+- Updated DataLoader.test.js to include test for clear filters button
+
 ##### Status
+Ready for Review

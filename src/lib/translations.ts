@@ -18,6 +18,7 @@ export const translations = {
     datasetInformation: 'Duomenų informacija:',
     words: 'Žodžiai',
     filterByType: 'Filtruoti pagal tipą:',
+    clearFilters: 'Išvalyti filtrus',
     
     // DownloadButton component
     downloadData: 'Atsisiųsti duomenis .csv formatu',

@@ -36,9 +36,9 @@ So that I can quickly return to the unfiltered view.
 
 #### Tasks
 
-- [ ] Identify all filter states to reset
-- [ ] Implement click handler for the button
-- [ ] Reset filter states and trigger data reload
+- [x] Identify all filter states to reset
+- [x] Implement click handler for the button
+- [x] Reset filter states and trigger data reload
 
 #### Technical Notes
 
@@ -48,23 +48,37 @@ So that I can quickly return to the unfiltered view.
 
 #### Definition of Done
 
-- [ ] Functional requirements met
-- [ ] Integration requirements verified
-- [ ] Existing functionality regression tested
-- [ ] Code follows existing patterns and standards
-- [ ] Tests pass (existing and new)
-- [ ] Documentation updated if applicable
+- [x] Functional requirements met
+- [x] Integration requirements verified
+- [x] Existing functionality regression tested
+- [x] Code follows existing patterns and standards
+- [x] Tests pass (existing and new)
+- [x] Documentation updated if applicable
 
 #### Dev Agent Record
 
 ##### Agent Model Used
 
+James
+
 ##### Debug Log References
 
 ##### Completion Notes List
 
+- Identified filter states: searchQuery (string) and selectedTypes (string array)
+- Implemented clearFilters function that resets both states to empty/default
+- Added onclick handler to the button (from story 7-1)
+- Reactive derived filteredWords updates automatically, no data reload needed
+- Verified filter inputs reset: SearchBar input clears via binding, checkboxes uncheck via group binding
+
 ##### File List
+
+src/components/DataLoader.svelte
 
 ##### Change Log
 
+- Added clearFilters function to reset searchQuery and selectedTypes
+- Added onclick={clearFilters} to the clear filters button
+
 ##### Status
+Ready for Review

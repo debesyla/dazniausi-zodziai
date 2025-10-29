@@ -30,6 +30,11 @@
 
   let filteredWords = $derived(dataset?.words ? filterWords(dataset.words, searchQuery, selectedTypes) : []);
 
+  function clearFilters() {
+    searchQuery = '';
+    selectedTypes = [];
+  }
+
   $effect(() => {
     loading = true;
     error = null;
@@ -70,6 +75,7 @@
         {/each}
       </div>
     {/if}
+    <button onclick={clearFilters} class="clear-filters">{t('clearFilters')}</button>
     <DownloadButton words={filteredWords} metadata={{author: dataset.author, year: dataset.year}} />
     <DataTable words={filteredWords} />
   </div>
@@ -121,5 +127,18 @@
     display: inline-block;
     margin-right: 1rem;
     color: var(--text-color);
+  }
+
+  .clear-filters {
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    border: 1px solid var(--border-color);
+    padding: 0.5rem;
+    cursor: pointer;
+    margin: 0.5rem 0;
+  }
+
+  .clear-filters:hover {
+    background-color: #111;
   }
 </style>
