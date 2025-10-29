@@ -79,10 +79,19 @@ describe('DataLoader', () => {
   it('clears filters when clear button is clicked', async () => {
     loadDataset.mockResolvedValue(mockDataset);
 
-    const { getByText, queryByText } = render(DataLoader, { filename: 'test.json' });
+    const { getByText, getByLabelText, queryByText } = render(DataLoader, { filename: 'test.json' });
 
     await waitFor(() => {
       expect(queryByText('loading')).not.toBeInTheDocument();
+    });
+
+    // Set a filter by checking the type checkbox
+    const nounCheckbox = getByLabelText('noun');
+    nounCheckbox.click();
+
+    // Wait for the clear button to appear
+    await waitFor(() => {
+      expect(getByText('clearFilters')).toBeInTheDocument();
     });
 
     const clearButton = getByText('clearFilters');

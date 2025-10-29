@@ -63,7 +63,12 @@
     <p><strong>{t('year')}:</strong> {dataset.year}</p>
     
     <h3>{t('words')} ({filteredWords.length})</h3>
-    <SearchBar bind:value={searchQuery} />
+    <div class="search-and-clear">
+      <SearchBar bind:value={searchQuery} />
+      {#if searchQuery || selectedTypes.length > 0}
+        <button onclick={clearFilters} class="clear-filters">{t('clearFilters')}</button>
+      {/if}
+    </div>
     {#if uniqueTypes.length > 0}
       <div class="type-filter">
         <h4>{t('filterByType')}</h4>
@@ -75,7 +80,6 @@
         {/each}
       </div>
     {/if}
-    <button onclick={clearFilters} class="clear-filters">{t('clearFilters')}</button>
     <DownloadButton words={filteredWords} metadata={{author: dataset.author, year: dataset.year}} />
     <DataTable words={filteredWords} />
   </div>
@@ -131,11 +135,27 @@
     padding: var(--xs) var(--sm);
     cursor: pointer;
     user-select: none;
-    margin: var(--sm) 0;
+    margin: 0;
   }
 
   .clear-filters:hover {
     background: #FFBF00;
     color: #222;
+  }
+
+  .search-and-clear {
+    display: flex;
+    gap: var(--sm);
+    align-items: center;
+  }
+
+  @media (max-width: 767px) {
+    .search-and-clear {
+      flex-direction: column;
+      align-items: stretch;
+    }
+    .clear-filters {
+      align-self: flex-end;
+    }
   }
 </style>
