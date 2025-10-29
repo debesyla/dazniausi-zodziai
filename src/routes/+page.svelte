@@ -30,18 +30,27 @@
 <DataLoader filename={selectedFilename} />
 
 <style>
+  h1 {
+    margin-bottom: var(--lg);
+  }
+
+  p {
+    margin-bottom: var(--md);
+  }
+
   .dataset-selector {
-    margin-bottom: 1rem;
+    margin-bottom: var(--md);
   }
 
   .dataset-selector label {
-    margin-right: 0.5rem;
+    margin-right: var(--sm);
     font-weight: bold;
   }
 
   .dataset-selector select {
-    padding: 0.5rem;
-    border: 1px solid #ccc;
-    border-radius: 4px;
+    background: #222;
+    color: #FFBF00;
+    border: 1px solid #FFBF00;
+    padding: var(--xs) var(--sm);
   }
 </style>

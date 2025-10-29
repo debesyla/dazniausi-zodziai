@@ -60,21 +60,21 @@
   table {
     width: 100%;
     border-collapse: collapse;
-    background-color: var(--bg-color);
-    color: var(--text-color);
+    background-color: #222;
+    color: #FFBF00;
   }
   th, td {
-    padding: 0.5rem;
-    border: 1px solid var(--border-color);
+    padding: var(--sm);
+    border: 1px solid #FFBF00;
     text-align: left;
-    color: var(--text-color);
+    color: #FFBF00;
   }
   th.sortable {
     cursor: pointer;
-    background-color: #111111;
+    background-color: #333;
   }
   th.sortable:hover {
-    background-color: #222222;
+    background-color: #444;
   }
 
   @media (max-width: 767px) {
@@ -84,7 +84,7 @@
       white-space: nowrap;
     }
     th, td {
-      padding: 0.25rem;
+      padding: var(--xs);
     }
   }
 </style>

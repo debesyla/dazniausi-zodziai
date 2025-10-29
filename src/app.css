@@ -1,11 +1,173 @@
 :root {
-  --bg-color: #000000;
+  --bg-color: #222;
   --text-color: #FFBF00;
   --border-color: #333333;
+  --xs: 0.25em;
+  --sm: 0.5em;
+  --md: 1em;
+  --lg: 1.5em;
+  --xl: 2em;
+  --2xl: 3em;
+  --3xl: 4em;
+}
+
+*,*::before,*::after {
+  box-sizing: border-box;
+}
+
+* {
+  margin: 0;
+}
+
+@media(prefers-reduced-motion: no-preference) {
+  html {
+    interpolate-size: allow-keywords;
+  }
 }
 
 body {
-  background-color: var(--bg-color);
-  color: var(--text-color);
-  font-family: 'Courier New', monospace;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  background: #222;
+  color: #FFBF00;
+  margin: 0 auto;
+  padding: var(--2xl) var(--lg) var(--3xl);
+  font-family: monospace,"Courier New",Courier,sans-serif;
+  max-width: 75ch;
+}
+
+img,picture,video,canvas,svg {
+  display: block;
+  max-width: 100%;
+}
+
+input,button,textarea,select {
+  font: inherit;
+}
+
+p,h1,h2,h3,h4,h5,h6 {
+  overflow-wrap: break-word;
+}
+
+p {
+  text-wrap: pretty;
+}
+
+h1,h2,h3,h4,h5,h6 {
+  text-wrap: balance;
+}
+
+#root, #__next {
+  isolation: isolate;
+}
+
+a, * {
+  color: inherit;
+}
+
+a {
+  text-underline-offset: var(--xs);
+}
+
+a:hover,a:focus {
+  text-decoration-style: dashed;
+}
+
+ul,ol {
+  padding-left: var(--lg);
+}
+
+ul li::marker, ol li::marker {
+  color: rgba(255,191,0,.325);
+}
+
+ol li::marker {
+  font-size: .75em;
+}
+
+li + li {
+  margin-top: var(--sm);
+}
+
+::selection {
+  background: #FFBF00;
+  color: #222;
+}
+
+button {
+  background: transparent;
+  border: 1px solid #FFBF00;
+  color: #FFBF00;
+  padding: var(--xs) var(--sm);
+  cursor: pointer;
+  user-select: none;
+
+  @media (hover: hover) {
+    &:hover {
+      background: #FFBF00;
+      color: #222;
+    }
+  }
+
+  .active &, &[aria-pressed="true"] {
+    background: #FFBF00;
+    color: #222;
+  }
+}
+
+details {
+  border: 1px solid #FFBF00;
+  padding: var(--md) var(--lg);
+  margin: var(--md) 0;
+
+  &[open] > main {
+    margin-top: var(--md);
+    margin-bottom: var(--sm);
+  }
+
+  @media (max-width: 639.9px) {
+    padding: var(--md) var(--md);
+
+    main {
+      font-size: 0.875em;
+      line-height: 1.5;
+
+      ul, ol {
+        list-style: none;
+        padding-left: 0;
+
+        li + li {
+          margin-top: var(--md);
+        }
+      }
+    }
+  }
+
+  summary {
+    list-style-type: none;
+
+    &:focus-visible {
+      text-decoration: underline dashed;
+      text-underline-offset: var(--xs);
+      cursor: pointer;
+    }
+
+    @media (hover: hover) {
+      &:hover {
+        text-decoration: underline dashed;
+        text-underline-offset: var(--xs);
+        cursor: pointer;
+      }
+    }
+
+    & > * {
+      display: inline;
+    }
+
+    @media (max-width: 639.9px) {
+      h2 {
+        font-size: 1.25em;
+      }
+    }
+  }
 }

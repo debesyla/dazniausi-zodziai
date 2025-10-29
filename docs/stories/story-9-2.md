@@ -36,9 +36,9 @@ So that the site uses consistent colors, fonts, and spacing.
 
 #### Tasks
 
-- [ ] Add base CSS to app.css
-- [ ] Adapt colors, fonts, spacing
-- [ ] Update component styles to use base
+- [x] Add base CSS to app.css
+- [x] Adapt colors, fonts, spacing
+- [x] Update component styles to use base
 
 #### Technical Notes
 
@@ -59,12 +59,29 @@ So that the site uses consistent colors, fonts, and spacing.
 
 ##### Agent Model Used
 
+dev
+
 ##### Debug Log References
+
+None
 
 ##### Completion Notes List
 
+- Added base CSS to app.css: Included spacing vars (--xs to --3xl), updated :root bg-color to #222, merged base styles (resets, body with padding/margin/max-width, fonts monospace family, button/details styles).
+- Adapted colors: Background #222, text #FFBF00, borders #FFBF00 for consistency.
+- Adapted fonts: Changed to monospace,"Courier New",Courier,sans-serif.
+- Adapted spacing: Added CSS vars for consistent spacing.
+- Updated component styles: DownloadButton and SearchBar buttons to base style (transparent bg, amber border/color, hover invert colors). SearchBar input/button padding adjusted. +page select styled to match (dark bg, amber border/color).
+- No breaking changes: Layout includes padding, maintains responsiveness. Styles consistent across components.
+
 ##### File List
+
+Modified: src/app.css, src/components/DownloadButton.svelte, src/components/SearchBar.svelte, src/routes/+page.svelte
 
 ##### Change Log
 
+- 2025-10-29: Integrated base CSS into app.css, adapted colors/fonts/spacing, updated component styles for consistency. Build/tests/check pass.
+
 ##### Status
+
+Ready for Review

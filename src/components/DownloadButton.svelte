@@ -29,13 +29,15 @@
 
 <style>
   button {
-    background-color: var(--bg-color);
-    color: var(--text-color);
-    border: 1px solid var(--border-color);
-    padding: 0.5rem;
+    background: transparent;
+    border: 1px solid #FFBF00;
+    color: #FFBF00;
+    padding: var(--xs) var(--sm);
     cursor: pointer;
+    user-select: none;
   }
   button:hover {
-    background-color: #111;
+    background: #FFBF00;
+    color: #222;
   }
 </style>

@@ -13,24 +13,26 @@
 <style>
   .search-bar {
     display: flex;
-    gap: 0.5rem;
+    gap: var(--sm);
     align-items: center;
   }
   input {
-    background-color: var(--bg-color);
-    color: var(--text-color);
-    border: 1px solid var(--border-color);
-    padding: 0.5rem;
+    background: #222;
+    color: #FFBF00;
+    border: 1px solid #FFBF00;
+    padding: var(--xs) var(--sm);
   }
   button {
-    background-color: var(--bg-color);
-    color: var(--text-color);
-    border: 1px solid var(--border-color);
-    padding: 0.5rem;
+    background: transparent;
+    border: 1px solid #FFBF00;
+    color: #FFBF00;
+    padding: var(--xs) var(--sm);
     cursor: pointer;
+    user-select: none;
   }
   button:hover {
-    background-color: #111;
+    background: #FFBF00;
+    color: #222;
   }
 
   @media (max-width: 767px) {

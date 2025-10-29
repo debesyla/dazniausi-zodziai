@@ -83,62 +83,63 @@
 
 <style>
   .loading {
-    padding: 1rem;
+    padding: var(--md);
     text-align: center;
-    color: var(--text-color);
+    color: #FFBF00;
   }
 
   .error {
-    padding: 1rem;
-    background-color: #200000;
-    border: 1px solid #800000;
-    border-radius: 4px;
+    padding: var(--md);
+    background-color: #111;
+    border: 1px solid #FFBF00;
   }
 
   .error h3 {
-    margin: 0 0 0.5rem 0;
+    margin: 0 0 var(--sm) 0;
     color: #FFBF00;
   }
 
   .dataset {
-    padding: 1rem;
+    padding: var(--md);
   }
 
   .dataset h2 {
-    margin: 0 0 1rem 0;
-    color: var(--text-color);
+    margin: 0 0 var(--lg) 0;
+    color: #FFBF00;
   }
 
   .dataset h3 {
-    margin: 1.5rem 0 0.5rem 0;
-    color: var(--text-color);
+    margin: var(--lg) 0 var(--sm) 0;
+    color: #FFBF00;
   }
 
   .type-filter {
-    margin: 0.5rem 0;
+    margin: var(--sm) 0;
   }
 
   .type-filter h4 {
-    margin: 0 0 0.5rem 0;
-    color: var(--text-color);
+    margin: 0 0 var(--sm) 0;
+    color: #FFBF00;
   }
 
   .type-filter label {
     display: inline-block;
-    margin-right: 1rem;
-    color: var(--text-color);
+    margin-right: var(--lg);
+    color: #FFBF00;
   }
 
   .clear-filters {
-    background-color: var(--bg-color);
-    color: var(--text-color);
-    border: 1px solid var(--border-color);
-    padding: 0.5rem;
+    background: transparent;
+    border: 1px solid #FFBF00;
+    color: #FFBF00;
+    padding: var(--xs) var(--sm);
     cursor: pointer;
-    margin: 0.5rem 0;
+    user-select: none;
+    margin: var(--sm) 0;
   }
 
   .clear-filters:hover {
-    background-color: #111;
+    background: #FFBF00;
+    color: #222;
   }
 </style>
