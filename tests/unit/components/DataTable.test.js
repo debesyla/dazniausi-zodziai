@@ -3,7 +3,7 @@ import userEvent from '@testing-library/user-event';
 import DataTable from '../../../src/components/DataTable.svelte';
 
 const mockWords = [
-  { word: 'test', type: 'noun', frequency: 10 },
+  { word: 'test', type: 'verb', frequency: 10 },
   { word: 'word', type: 'noun', frequency: 5 }
 ];
 
@@ -26,7 +26,8 @@ test('DataTable renders table with words', () => {
   const headers = getAllByRole('columnheader');
   expect(headers).toHaveLength(3);
   expect(headers[0]).toHaveTextContent('Žodis');
-  expect(headers[2]).toHaveTextContent('Dažnumas ↓');
+  expect(headers[1]).toHaveTextContent('Dažnumas ↓');
+  expect(headers[2]).toHaveTextContent('Tipas');
 });
 
 test('DataTable sortable headers have correct class', () => {
@@ -37,6 +38,9 @@ test('DataTable sortable headers have correct class', () => {
 
   const freqHeader = getByText('Dažnumas ↓');
   expect(freqHeader).toHaveClass('sortable');
+
+  const typeHeader = getByText('Tipas');
+  expect(typeHeader).toHaveClass('sortable');
 });
 
 test('DataTable sorts by frequency descending by default', () => {
@@ -95,4 +99,27 @@ test('DataTable allows manual sorting by word', async () => {
   rows = getAllByRole('row');
   expect(rows[1]).toHaveTextContent('word');
   expect(rows[2]).toHaveTextContent('test');
+});
+
+test('DataTable allows manual sorting by type', async () => {
+  const user = userEvent.setup();
+  const { getByText, getAllByRole } = render(DataTable, { words: mockWords });
+
+  const typeHeader = getByText('Tipas');
+  await user.click(typeHeader);
+
+  // First click, ascending
+  expect(getByText('Tipas ↑')).toBeInTheDocument();
+
+  let rows = getAllByRole('row');
+  expect(rows[1]).toHaveTextContent('word'); // noun first
+  expect(rows[2]).toHaveTextContent('test');
+
+  // Second click, descending
+  await user.click(typeHeader);
+  expect(getByText('Tipas ↓')).toBeInTheDocument();
+
+  rows = getAllByRole('row');
+  expect(rows[1]).toHaveTextContent('test'); // verb first
+  expect(rows[2]).toHaveTextContent('word');
 });

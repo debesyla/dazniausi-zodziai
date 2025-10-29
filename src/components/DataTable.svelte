@@ -8,10 +8,10 @@
 
   let { words = [] } = $props<{ words?: Word[] }>();
 
-  let sortKey = $state<'word' | 'frequency'>('frequency');
+  let sortKey = $state<'word' | 'frequency' | 'type'>('frequency');
   let sortAsc = $state(false);
 
-  function sortBy(key: 'word' | 'frequency') {
+  function sortBy(key: 'word' | 'frequency' | 'type') {
     if (sortKey === key) {
       sortAsc = !sortAsc;
     } else {
@@ -29,10 +29,14 @@
       const aStr = aVal as string;
       const bStr = bVal as string;
       return sortAsc ? aStr.localeCompare(bStr) : bStr.localeCompare(aStr);
-    } else {
+    } else if (sortKey === 'frequency') {
       const aNum = aVal as number;
       const bNum = bVal as number;
       return sortAsc ? aNum - bNum : bNum - aNum;
+    } else {
+      const aStr = (aVal as string) || '';
+      const bStr = (bVal as string) || '';
+      return sortAsc ? aStr.localeCompare(bStr) : bStr.localeCompare(aStr);
     }
   }));
 </script>
@@ -41,16 +45,16 @@
   <thead>
     <tr>
       <th onclick={() => sortBy('word')} class="sortable">{t('word')} {sortKey === 'word' ? (sortAsc ? '↑' : '↓') : ''}</th>
-      <th>{t('type')}</th>
       <th onclick={() => sortBy('frequency')} class="sortable">{t('frequency')} {sortKey === 'frequency' ? (sortAsc ? '↑' : '↓') : ''}</th>
+      <th onclick={() => sortBy('type')} class="sortable">{t('type')} {sortKey === 'type' ? (sortAsc ? '↑' : '↓') : ''}</th>
     </tr>
   </thead>
   <tbody>
     {#each sortedWords as word}
       <tr>
         <td>{word.word}</td>
-        <td>{word.type || ''}</td>
         <td>{word.frequency.toLocaleString()}</td>
+        <td>{word.type || ''}</td>
       </tr>
     {/each}
   </tbody>

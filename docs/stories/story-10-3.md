@@ -36,10 +36,43 @@ So that the table presents information in a more logical order.
 
 #### Tasks
 
-- [ ] Review current column order in DataTable
-- [ ] Modify column rendering order
-- [ ] Update headers accordingly
-- [ ] Test table functionality with new order
+- [x] Review current column order in DataTable
+- [x] Modify column rendering order
+- [x] Update headers accordingly
+- [x] Test table functionality with new order
+
+#### Dev Agent Record
+
+**Debug Log**
+
+- Reviewed DataTable.svelte, current order: word, type, frequency
+- Modified to: word, frequency, type
+- Added sorting for type column
+- Updated tests accordingly
+
+**Completion Notes**
+
+- All changes implemented successfully
+- Tests pass
+- No linting errors
+
+**Change Log**
+
+- Modified src/components/DataTable.svelte: reordered columns, added type sorting
+- Modified tests/unit/components/DataTable.test.js: updated expectations, added type sorting test
+
+**File List**
+
+- src/components/DataTable.svelte
+- tests/unit/components/DataTable.test.js
+
+**Agent Model Used**
+
+- James (Dev)
+
+#### Status
+
+Ready for Review
 
 #### Technical Notes
 
