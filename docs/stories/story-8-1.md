@@ -36,9 +36,9 @@ So that I see the most frequent words first without manual sorting.
 
 #### Tasks
 
-- [ ] Locate the default sort configuration
-- [ ] Set frequency column to descending by default
-- [ ] Verify sort applies on load
+- [x] Locate the default sort configuration
+- [x] Set frequency column to descending by default
+- [x] Verify sort applies on load
 
 #### Technical Notes
 
@@ -59,12 +59,26 @@ So that I see the most frequent words first without manual sorting.
 
 ##### Agent Model Used
 
+James
+
 ##### Debug Log References
 
 ##### Completion Notes List
 
+- Implemented default descending sort for frequency column by setting sortAsc to false in DataTable.svelte.
+- Updated tests in DataTable.test.js to expect descending indicator and verify default sort order.
+- Fixed props declaration to use Svelte 5 syntax with Word interface for type safety.
+- All tests pass, no lint errors, functionality verified.
+
 ##### File List
+
+- src/components/DataTable.svelte
+- tests/unit/components/DataTable.test.js
 
 ##### Change Log
 
+- Modified DataTable.svelte: Changed initial sortAsc from true to false for descending frequency sort. Added Word interface for type safety.
+- Updated DataTable.test.js: Changed expected header text from '↑' to '↓'. Added test for default sort order.
+
 ##### Status
+Ready for Review

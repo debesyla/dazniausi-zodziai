@@ -1,9 +1,15 @@
 <script lang="ts">
   import { t } from '$lib/translations';
-  let { words = [] }: { words?: { word: string; type?: string; frequency: number }[] } = $props();
+  interface Word {
+    word: string;
+    type?: string;
+    frequency: number;
+  }
+
+  let { words = [] } = $props<{ words?: Word[] }>();
 
   let sortKey = $state<'word' | 'frequency'>('frequency');
-  let sortAsc = $state(true);
+  let sortAsc = $state(false);
 
   function sortBy(key: 'word' | 'frequency') {
     if (sortKey === key) {
