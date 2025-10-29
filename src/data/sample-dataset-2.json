@@ -2,55 +2,66 @@
   "author": "Vilnius University Linguistics",
   "year": 2024,
   "words": [
-    {
-      "word": "labas",
-      "type": "greeting",
-      "frequency": 7500
-    },
-    {
-      "word": "ačiū",
-      "type": "expression",
-      "frequency": 6200
-    },
-    {
-      "word": "taip",
-      "type": "adverb",
-      "frequency": 5400
-    },
-    {
-      "word": "ne",
-      "type": "adverb",
-      "frequency": 5100
-    },
-    {
-      "word": "ką",
-      "type": "pronoun",
-      "frequency": 4800
-    },
-    {
-      "word": "kur",
-      "type": "adverb",
-      "frequency": 4500
-    },
-    {
-      "word": "kodėl",
-      "type": "adverb",
-      "frequency": 4200
-    },
-    {
-      "word": "gerai",
-      "type": "adverb",
-      "frequency": 3900
-    },
-    {
-      "word": "blogai",
-      "type": "adverb",
-      "frequency": 3600
-    },
-    {
-      "word": "namas",
-      "type": "noun",
-      "frequency": 3300
-    }
+    { "word": "labas", "type": "greeting", "frequency": 7500 },
+    { "word": "ačiū", "type": "expression", "frequency": 6200 },
+    { "word": "taip", "type": "adverb", "frequency": 5400 },
+    { "word": "ne", "type": "adverb", "frequency": 5100 },
+    { "word": "ką", "type": "pronoun", "frequency": 4800 },
+    { "word": "kur", "type": "adverb", "frequency": 4500 },
+    { "word": "kodėl", "type": "adverb", "frequency": 4200 },
+    { "word": "gerai", "type": "adverb", "frequency": 3900 },
+    { "word": "blogai", "type": "adverb", "frequency": 3600 },
+    { "word": "namas", "type": "noun", "frequency": 3300 },
+    { "word": "žmogus", "type": "noun", "frequency": 3200 },
+    { "word": "moteris", "type": "noun", "frequency": 3100 },
+    { "word": "vaikas", "type": "noun", "frequency": 3050 },
+    { "word": "darbas", "type": "noun", "frequency": 3000 },
+    { "word": "mokykla", "type": "noun", "frequency": 2950 },
+    { "word": "miestas", "type": "noun", "frequency": 2900 },
+    { "word": "diena", "type": "noun", "frequency": 2850 },
+    { "word": "vakaras", "type": "noun", "frequency": 2800 },
+    { "word": "rytas", "type": "noun", "frequency": 2750 },
+    { "word": "metai", "type": "noun", "frequency": 2700 },
+    { "word": "laikas", "type": "noun", "frequency": 2650 },
+    { "word": "gyvenimas", "type": "noun", "frequency": 2600 },
+    { "word": "žodis", "type": "noun", "frequency": 2550 },
+    { "word": "knyga", "type": "noun", "frequency": 2500 },
+    { "word": "pasaulis", "type": "noun", "frequency": 2450 },
+    { "word": "dabar", "type": "adverb", "frequency": 2400 },
+    { "word": "visada", "type": "adverb", "frequency": 2350 },
+    { "word": "niekada", "type": "adverb", "frequency": 2300 },
+    { "word": "dažnai", "type": "adverb", "frequency": 2250 },
+    { "word": "retai", "type": "adverb", "frequency": 2200 },
+    { "word": "vienas", "type": "numeral", "frequency": 2150 },
+    { "word": "du", "type": "numeral", "frequency": 2100 },
+    { "word": "trys", "type": "numeral", "frequency": 2050 },
+    { "word": "keturi", "type": "numeral", "frequency": 2000 },
+    { "word": "penki", "type": "numeral", "frequency": 1950 },
+    { "word": "didelis", "type": "adjective", "frequency": 1900 },
+    { "word": "mažas", "type": "adjective", "frequency": 1850 },
+    { "word": "gražus", "type": "adjective", "frequency": 1800 },
+    { "word": "senas", "type": "adjective", "frequency": 1750 },
+    { "word": "jaunas", "type": "adjective", "frequency": 1700 },
+    { "word": "naujas", "type": "adjective", "frequency": 1650 },
+    { "word": "pirmas", "type": "adjective", "frequency": 1600 },
+    { "word": "paskutinis", "type": "adjective", "frequency": 1550 },
+    { "word": "mano", "type": "pronoun", "frequency": 1500 },
+    { "word": "tavo", "type": "pronoun", "frequency": 1450 },
+    { "word": "jo", "type": "pronoun", "frequency": 1400 },
+    { "word": "jos", "type": "pronoun", "frequency": 1350 },
+    { "word": "mūsų", "type": "pronoun", "frequency": 1300 },
+    { "word": "jų", "type": "pronoun", "frequency": 1250 },
+    { "word": "su", "type": "preposition", "frequency": 1200 },
+    { "word": "be", "type": "preposition", "frequency": 1150 },
+    { "word": "po", "type": "preposition", "frequency": 1100 },
+    { "word": "prie", "type": "preposition", "frequency": 1050 },
+    { "word": "už", "type": "preposition", "frequency": 1000 },
+    { "word": "apie", "type": "preposition", "frequency": 950 },
+    { "word": "tarp", "type": "preposition", "frequency": 900 },
+    { "word": "kai", "type": "conjunction", "frequency": 850 },
+    { "word": "nes", "type": "conjunction", "frequency": 800 },
+    { "word": "kad", "type": "conjunction", "frequency": 750 },
+    { "word": "jei", "type": "conjunction", "frequency": 700 },
+    { "word": "nors", "type": "conjunction", "frequency": 650 }
   ]
 }
