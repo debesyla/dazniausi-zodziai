@@ -1,6 +1,7 @@
 <script lang="ts">
 	import favicon from '$lib/assets/favicon.svg';
 	import '../app.css';
+	import { t } from '$lib/translations';
 
 	let { children } = $props();
 </script>
@@ -12,5 +13,5 @@
 {@render children?.()}
 
 <footer>
-	<p>Turi pasiūlymų? Parašyk! <a href="mailto:labas@dago.lt">labas@dago.lt</a></p>
+	<p>{t('footerText')}<a href="mailto:{t('footerEmail')}">{t('footerEmail')}</a></p>
 </footer>

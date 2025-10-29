@@ -26,6 +26,8 @@ export const translations = {
     // Main page
     pageTitle: 'Dažniausi lietuviški žodžiai',
     selectDataset: 'Pasirinkite duomenis',
+    footerText: 'Turi pasiūlymų? Parašyk! ',
+    footerEmail: 'labas@dago.lt',
   }
 };
 
