@@ -20,6 +20,7 @@ export const translations = {
     filterByType: 'Filtruoti pagal tipą:',
     clearFilters: 'Išvalyti filtrus',
     loadAll: 'Rodyti visus',
+    noMatchingWords: 'Nerasta atitinkančių žodžių.',
     
     // DownloadButton component
     downloadData: 'Atsisiųsti duomenis .csv formatu',
