@@ -101,6 +101,36 @@ describe('DataLoader', () => {
     expect(filterWords).toHaveBeenCalledWith(mockDataset.words, '', []);
   });
 
+  it('resets dataset-specific filters when the filename changes', async () => {
+    const secondDataset = {
+      author: 'Second Author',
+      year: 2024,
+      words: [{ word: 'other', type: 'verb', frequency: 20 }]
+    };
+    loadDataset.mockImplementation((filename) => Promise.resolve(
+      filename === 'second.json' ? secondDataset : mockDataset
+    ));
+
+    const { getByLabelText, getByText, queryByText, rerender } = render(DataLoader, { filename: 'first.json' });
+
+    await waitFor(() => {
+      expect(queryByText('loading')).not.toBeInTheDocument();
+    });
+
+    getByLabelText('noun').click();
+    await waitFor(() => {
+      expect(getByText('clearFilters')).toBeInTheDocument();
+    });
+
+    await rerender({ filename: 'second.json' });
+
+    await waitFor(() => {
+      expect(loadDataset).toHaveBeenCalledWith('second.json');
+      expect(filterWords).toHaveBeenCalledWith(secondDataset.words, '', []);
+    });
+    expect(queryByText('clearFilters')).not.toBeInTheDocument();
+  });
+
   it('shows load all button when more than 10 words', async () => {
     const largeDataset = {
       author: 'Test Author',
