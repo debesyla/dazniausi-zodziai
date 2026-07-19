@@ -90,6 +90,10 @@ Run tests in watch mode:
 npm run test:watch
 ```
 
+## 🗂️ Dataset preparation
+
+Datasets are prepared by maintainers before publication; visitors do not upload files in the browser. See [the dataset preparation guide](docs/data-preparation.md) for the validated CSV/TSV conversion command and dataset configuration format.
+
 ## 🚢 Deployment
 
 The application is automatically deployed to GitHub Pages on every push to the main branch via GitHub Actions.
