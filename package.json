@@ -14,6 +14,8 @@
 		"data:build": "node scripts/prepare-dataset.mjs",
 		"data:verify": "node scripts/verify-datasets.mjs",
 		"source:verify": "node scripts/verify-source-contracts.mjs",
+		"products:build": "node scripts/prepare-data-products.mjs",
+		"products:verify": "node scripts/verify-data-products.mjs",
 		"test": "vitest run",
 		"test:watch": "vitest"
 	},

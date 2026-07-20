@@ -23,9 +23,10 @@ This strategy keeps the rendered DOM constant for a list such as CCLL (over
 1.7 million rows): a page remains 50 rows, not 1.7 million table rows. The
 catalog-first loader also ensures such a dataset is fetched only when selected.
 
-The current static delivery model still keeps the selected file in browser
-memory. Before publishing a CCLL-sized file, use the preparation pipeline to
-produce a compact, pre-indexed delivery format and move filtering/sorting to a
-web worker or server-side page endpoint. Pagination, rank semantics, result
-counts, and CSV export are deliberately independent of that future transport,
-so the UI contract does not need to change.
+The current generic explorer still keeps the selected file in browser memory.
+CCLL is already published separately as compact, pre-indexed JSON chunks; it
+is intentionally not selectable in that explorer. Before adding a CCLL-sized
+file to the explorer, move filtering and sorting to a web worker or server-side
+page endpoint. Pagination, rank semantics, result counts, and CSV export are
+deliberately independent of that future transport, so the UI contract does not
+need to change.

@@ -1,0 +1,213 @@
+{
+  "schemaVersion": 1,
+  "title": "Dažniausi lietuviški žodžiai public data products",
+  "genericProducts": [
+    {
+      "datasetFile": "datasets/utka-2018-lemmatized-totals.json",
+      "description": "The reviewed lemma and part-of-speech frequency dataset already used by the browser explorer."
+    },
+    {
+      "datasetFile": "datasets/dadurkevicius-2020-jcl-lemmas.json",
+      "description": "The reviewed JCL lemma and part-of-speech frequency dataset already used by the browser explorer."
+    }
+  ],
+  "contractProducts": [
+    {
+      "contractId": "utka-ccll-wordforms",
+      "productType": "chunked-wordform-list",
+      "publication": {
+        "status": "published",
+        "scope": "Every row from the reviewed aggregate and named CCLL wordform lists.",
+        "access": "Static JSON chunks. Consumers request a manifest and one view index before requesting only the chunks they need."
+      },
+      "views": [
+        {
+          "id": "all-by-frequency",
+          "sourceRole": "aggregate",
+          "title": "All CCLL word forms, frequency order",
+          "description": "The complete corpus wordform list, ordered by descending raw token count.",
+          "ordering": { "field": "count", "direction": "descending" },
+          "chunkBytes": 65536,
+          "fields": [
+            { "id": "word", "label": "Word form", "type": "string", "sourceColumn": 0 },
+            { "id": "count", "label": "Token count", "type": "raw-token-count", "unit": "tokens", "sourceColumn": 1 }
+          ]
+        },
+        {
+          "id": "all-alphabetical",
+          "sourceRole": "aggregate-alphabetical-index",
+          "title": "All CCLL word forms, alphabetical order",
+          "description": "The same complete corpus wordform list, ordered alphabetically by the source.",
+          "ordering": { "field": "word", "direction": "ascending" },
+          "chunkBytes": 65536,
+          "fields": [
+            { "id": "word", "label": "Word form", "type": "string", "sourceColumn": 0 },
+            { "id": "count", "label": "Token count", "type": "raw-token-count", "unit": "tokens", "sourceColumn": 1 }
+          ]
+        },
+        {
+          "id": "fiction-by-frequency",
+          "sourceRole": "subcorpus-fiction",
+          "title": "CCLL fiction word forms",
+          "description": "Word forms in the fiction subcorpus, ordered by descending raw token count.",
+          "ordering": { "field": "count", "direction": "descending" },
+          "chunkBytes": 65536,
+          "fields": [
+            { "id": "word", "label": "Word form", "type": "string", "sourceColumn": 0 },
+            { "id": "count", "label": "Token count", "type": "raw-token-count", "unit": "tokens", "sourceColumn": 1 }
+          ]
+        },
+        {
+          "id": "non-fiction-by-frequency",
+          "sourceRole": "subcorpus-non-fiction",
+          "title": "CCLL non-fiction word forms",
+          "description": "Word forms in the non-fiction subcorpus, ordered by descending raw token count.",
+          "ordering": { "field": "count", "direction": "descending" },
+          "chunkBytes": 65536,
+          "fields": [
+            { "id": "word", "label": "Word form", "type": "string", "sourceColumn": 0 },
+            { "id": "count", "label": "Token count", "type": "raw-token-count", "unit": "tokens", "sourceColumn": 1 }
+          ]
+        },
+        {
+          "id": "administrative-by-frequency",
+          "sourceRole": "subcorpus-administrative",
+          "title": "CCLL administrative word forms",
+          "description": "Word forms in the administrative subcorpus, ordered by descending raw token count.",
+          "ordering": { "field": "count", "direction": "descending" },
+          "chunkBytes": 65536,
+          "fields": [
+            { "id": "word", "label": "Word form", "type": "string", "sourceColumn": 0 },
+            { "id": "count", "label": "Token count", "type": "raw-token-count", "unit": "tokens", "sourceColumn": 1 }
+          ]
+        },
+        {
+          "id": "periodicals-by-frequency",
+          "sourceRole": "subcorpus-periodicals",
+          "title": "CCLL periodicals word forms",
+          "description": "Word forms in the periodicals subcorpus, ordered by descending raw token count.",
+          "ordering": { "field": "count", "direction": "descending" },
+          "chunkBytes": 65536,
+          "fields": [
+            { "id": "word", "label": "Word form", "type": "string", "sourceColumn": 0 },
+            { "id": "count", "label": "Token count", "type": "raw-token-count", "unit": "tokens", "sourceColumn": 1 }
+          ]
+        },
+        {
+          "id": "speech-by-frequency",
+          "sourceRole": "subcorpus-speech",
+          "title": "CCLL spoken word forms",
+          "description": "Word forms in the spoken subcorpus, ordered by descending raw token count.",
+          "ordering": { "field": "count", "direction": "descending" },
+          "chunkBytes": 65536,
+          "fields": [
+            { "id": "word", "label": "Word form", "type": "string", "sourceColumn": 0 },
+            { "id": "count", "label": "Token count", "type": "raw-token-count", "unit": "tokens", "sourceColumn": 1 }
+          ]
+        }
+      ]
+    },
+    {
+      "contractId": "dadurkevicius-dml6-vs-jcl-comparison",
+      "productType": "chunked-comparison",
+      "publication": {
+        "status": "published",
+        "scope": "Every row from the reviewed DML6 and JCL comparison files.",
+        "access": "Static JSON chunks with separate views for coverage, lemma occurrences, and missing types."
+      },
+      "views": [
+        {
+          "id": "jcl-types-dml6-coverage",
+          "sourceRole": "types-coverage",
+          "title": "JCL types and DML6 coverage",
+          "description": "A raw JCL token count paired with a categorical DML6 coverage code. The code is not a frequency.",
+          "ordering": { "field": "jclTokenCount", "direction": "descending" },
+          "chunkBytes": 262144,
+          "fields": [
+            { "id": "word", "label": "Word form", "type": "string", "sourceColumn": 0 },
+            { "id": "jclTokenCount", "label": "JCL token count", "type": "raw-token-count", "unit": "tokens", "sourceColumn": 1 },
+            {
+              "id": "dml6CoverageCode",
+              "label": "DML6 coverage",
+              "type": "coverage-code",
+              "unit": "category",
+              "sourceColumn": 2,
+              "values": {
+                "0": "not in DML6",
+                "1": "main entry",
+                "2": "geographic name",
+                "3": "abbreviation"
+              }
+            }
+          ]
+        },
+        {
+          "id": "dml6-lemmas-jcl-occurrences",
+          "sourceRole": "lemma-occurrences",
+          "title": "DML6 lemmas and JCL occurrences",
+          "description": "JCL occurrences for a DML6 lemma and source part-of-speech code.",
+          "ordering": { "field": "jclLemmaOccurrenceCount", "direction": "descending" },
+          "chunkBytes": 262144,
+          "fields": [
+            { "id": "lemma", "label": "Lemma", "type": "string", "sourceColumn": 0 },
+            { "id": "partOfSpeechCode", "label": "Source part-of-speech code", "type": "source-pos-code", "sourceColumn": 1 },
+            { "id": "jclLemmaOccurrenceCount", "label": "JCL occurrence count", "type": "raw-token-count", "unit": "tokens", "sourceColumn": 2 }
+          ]
+        },
+        {
+          "id": "jcl-types-missing-in-dml6",
+          "sourceRole": "missing-types",
+          "title": "JCL types missing from DML6",
+          "description": "The source's filtered list of types not found in DML6, with their raw JCL token counts.",
+          "ordering": { "field": "jclTokenCount", "direction": "descending" },
+          "chunkBytes": 262144,
+          "fields": [
+            { "id": "word", "label": "Word form", "type": "string", "sourceColumn": 0 },
+            { "id": "jclTokenCount", "label": "JCL token count", "type": "raw-token-count", "unit": "tokens", "sourceColumn": 1 }
+          ]
+        }
+      ]
+    },
+    {
+      "contractId": "utka-ccll2-war-ukraine-comparison",
+      "productType": "chunked-comparison",
+      "publication": {
+        "status": "published",
+        "scope": "Every row from the reviewed CCLL2, wartime media, and social-network comparison file.",
+        "access": "Static JSON chunks. A null metric means the word is absent from that source, not that its count is zero."
+      },
+      "views": [
+        {
+          "id": "ccll2-war-ukraine-normalized-metrics",
+          "sourceRole": "normalized-comparison",
+          "title": "CCLL2, wartime media, and social-network metrics",
+          "description": "Token and document counts normalized by the source to 100 million source words. Metrics remain separate and nullable.",
+          "ordering": { "field": "word", "direction": "ascending" },
+          "chunkBytes": 262144,
+          "fields": [
+            { "id": "word", "label": "Word form", "type": "string", "sourceColumn": 0 },
+            { "id": "ccll2TokenCount", "label": "CCLL2 normalized token count", "type": "normalized-token-count", "unit": "tokens per 100 million source words", "sourceColumn": 1, "nullable": true, "normalization": { "sourceTokens": 162000000, "targetTokens": 100000000 } },
+            { "id": "ccll2DocumentCount", "label": "CCLL2 normalized document count", "type": "normalized-document-count", "unit": "documents per 100 million source words", "sourceColumn": 2, "nullable": true, "normalization": { "sourceTokens": 162000000, "targetTokens": 100000000 } },
+            { "id": "mediaTokenCount", "label": "Wartime media normalized token count", "type": "normalized-token-count", "unit": "tokens per 100 million source words", "sourceColumn": 3, "nullable": true, "normalization": { "sourceTokens": 36000000, "targetTokens": 100000000 } },
+            { "id": "mediaDocumentCount", "label": "Wartime media normalized document count", "type": "normalized-document-count", "unit": "documents per 100 million source words", "sourceColumn": 4, "nullable": true, "normalization": { "sourceTokens": 36000000, "targetTokens": 100000000 } },
+            { "id": "socialTokenCount", "label": "Wartime social-network normalized token count", "type": "normalized-token-count", "unit": "tokens per 100 million source words", "sourceColumn": 5, "nullable": true, "normalization": { "sourceTokens": 2000000, "targetTokens": 100000000 } },
+            { "id": "socialDocumentCount", "label": "Wartime social-network normalized document count", "type": "normalized-document-count", "unit": "documents per 100 million source words", "sourceColumn": 6, "nullable": true, "normalization": { "sourceTokens": 2000000, "targetTokens": 100000000 } }
+          ]
+        }
+      ]
+    },
+    {
+      "contractId": "rimkute-morphemic-dictionary",
+      "productType": "metadata-only",
+      "publication": {
+        "status": "metadata-only",
+        "scope": "Citation, source-file inventory, and the publication decision only; no dictionary entries or PDF pages are included.",
+        "access": "A JSON manifest documents the blocked collection without redistributing or extracting the source PDFs.",
+        "reason": "The available input is PDF-only and its machine-readable reuse terms have not been resolved."
+      },
+      "blockedBy": [
+        "https://github.com/debesyla/dazniausi-zodziai/issues/41"
+      ]
+    }
+  ]
+}
