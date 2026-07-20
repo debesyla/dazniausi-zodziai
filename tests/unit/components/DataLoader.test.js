@@ -1,16 +1,11 @@
 import { render, waitFor } from '@testing-library/svelte/svelte5';
 import { vi } from 'vitest';
 import { loadDataset } from '../../../src/lib/data';
-import { filterWords } from '../../../src/lib/utils';
 import DataLoader from '../../../src/components/DataLoader.svelte';
 
 // Mock dependencies
 vi.mock('../../../src/lib/data', () => ({
   loadDataset: vi.fn()
-}));
-
-vi.mock('../../../src/lib/utils', () => ({
-  filterWords: vi.fn((words, query, types) => words.filter(w => w.word.includes(query) && (!types.length || types.includes(w.type))))
 }));
 
 vi.mock('../../../src/lib/translations', () => ({
@@ -124,8 +119,10 @@ describe('DataLoader', () => {
     const clearButton = getByText('clearFilters');
     clearButton.click();
 
-    // Check that filterWords was called with empty filters
-    expect(filterWords).toHaveBeenCalledWith(mockDataset.words, '', []);
+    await waitFor(() => {
+      expect(nounCheckbox).not.toBeChecked();
+      expect(queryByText('clearFilters')).not.toBeInTheDocument();
+    });
   });
 
   it('shows load all button when more than 10 words', async () => {

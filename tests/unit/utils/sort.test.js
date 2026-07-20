@@ -44,6 +44,21 @@ describe('sortWords', () => {
     ]);
   });
 
+  it('sorts by optional type without changing the source array', () => {
+    const typedWords = [
+      { word: 'žodis', type: 'vksm', frequency: 10 },
+      { word: 'ir', type: 'jng', frequency: 20 },
+      { word: 'be tipo', frequency: 5 }
+    ];
+
+    expect(sortWords(typedWords, 'type')).toEqual([
+      { word: 'be tipo', frequency: 5 },
+      { word: 'ir', type: 'jng', frequency: 20 },
+      { word: 'žodis', type: 'vksm', frequency: 10 }
+    ]);
+    expect(typedWords[0]).toEqual({ word: 'žodis', type: 'vksm', frequency: 10 });
+  });
+
   it('returns a new array without modifying original', () => {
     const original = [...words];
     sortWords(words, 'word');
