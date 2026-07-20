@@ -90,6 +90,18 @@ Run tests in watch mode:
 npm run test:watch
 ```
 
+### Pull-request checks
+
+Every pull request runs the type checker, the full test suite (including the
+catalog-to-table integration workflow and dataset-preparation fixtures), and a
+production build. Run the same checks before requesting review:
+
+```bash
+npm run check
+npm test
+npm run build
+```
+
 ## 🗂️ Dataset preparation
 
 Datasets are prepared by maintainers before publication; visitors do not upload files in the browser. See [the dataset preparation guide](docs/data-preparation.md) for the validated CSV/TSV conversion command and dataset configuration format.
