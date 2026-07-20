@@ -61,13 +61,19 @@
 
   function logTicks(maximum: number, minimum = 1) {
     if (maximum <= 1) return [1];
+    if (maximum === minimum) return [maximum];
     const start = Math.floor(Math.log10(Math.max(1, minimum)));
     const end = Math.ceil(Math.log10(maximum));
-    return Array.from({ length: end - start + 1 }, (_, index) => 10 ** (start + index)).filter((tick) => tick >= minimum && tick <= maximum);
+    const ticks = Array.from({ length: end - start + 1 }, (_, index) => 10 ** (start + index)).filter((tick) => tick >= minimum && tick <= maximum);
+    return ticks.length > 0 ? ticks : [minimum, maximum];
   }
 
   function barWidth(frequency: number) {
     return `${(frequency / maximumFrequency) * 100}%`;
+  }
+
+  function percentWidth(value: number) {
+    return `${value * 100}%`;
   }
 
   function selectTopN(event: Event) {
@@ -212,7 +218,7 @@
           {#each analysis.partOfSpeech as part}
             <div class="bar-row">
               <span class="bar-label">{displayType(part.type)}</span>
-              <div class="bar-track" aria-hidden="true"><div class="bar-fill" style={`width: ${formatPercent(part.share)}`}></div></div>
+              <div class="bar-track" aria-hidden="true"><div class="bar-fill" style={`width: ${percentWidth(part.share)}`}></div></div>
               <span class="bar-value">{formatPercent(part.share)}</span>
             </div>
           {/each}
