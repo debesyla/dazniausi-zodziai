@@ -5,11 +5,11 @@ published at `data-products/catalog.json` on the site. It points to one
 `manifest.json` per collection; a manifest then either points to the existing
 generic dataset JSON or to a set of independently fetchable chunk indexes.
 
-The generated files live under `static/data-products/`. They are deliberately
-not committed: rebuilding them from the reviewed raw-source revision is more
-auditable than carrying hundreds of megabytes of generated files in Git. The
-GitHub Pages and pull-request workflows check out that exact revision and
-generate the files before the site build.
+The generated files live under `static/data-products/` and are checked in with
+the application. This keeps the GitHub Pages deployment self-contained: the
+site publishes the exact reviewed JSON artifacts without requiring the raw
+source at deploy time. The public manifests still preserve the reviewed raw
+source revision, paths, checksums, source URL, licence, and citation.
 
 ## Build and verify
 
@@ -21,10 +21,11 @@ npm run products:verify
 `products:build` first runs the byte-level source-contract verifier. It then
 replaces only `static/data-products/`, creates all manifests, view indexes, and
 chunks, and keeps the raw source paths, checksums, source URL, licence, and
-citation in public provenance. `products:verify` re-reads every generated JSON
-file, checks every chunk checksum and byte size, validates every record shape,
-recomputes totals and null counts, and confirms that metadata-only products do
-not contain rows.
+citation in public provenance. Stage the regenerated files when the reviewed
+source changes. `products:verify` re-reads every generated JSON file, checks
+every chunk checksum and byte size, validates every record shape, recomputes
+totals and null counts, and confirms that metadata-only products do not contain
+rows.
 
 Use `--output`, `--static-root`, `--plan`, or `--contract` only for an isolated
 review or test build. The normal command has no hard-coded local source path.
