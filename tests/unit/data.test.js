@@ -65,9 +65,13 @@ describe('validateCatalog', () => {
     expect(validateCatalog(validCatalog)).toEqual(validCatalog);
   });
 
-  it('rejects unsafe or incomplete dataset files', () => {
+  it('rejects unsafe files and malformed metadata', () => {
     const catalog = structuredClone(validCatalog);
     catalog.datasets[0].file = '../private.json';
+    expect(() => validateCatalog(catalog)).toThrow('Invalid dataset catalog entry');
+
+    catalog.datasets[0].file = 'test-dataset.json';
+    catalog.datasets[0].licence = 42;
     expect(() => validateCatalog(catalog)).toThrow('Invalid dataset catalog entry');
   });
 });
