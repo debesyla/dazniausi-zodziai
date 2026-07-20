@@ -39,6 +39,8 @@
 
   function clearFilters() {
     searchQuery = '';
+    appliedSearchQuery = '';
+    searchPending = false;
     selectedTypes = [];
   }
 
@@ -156,14 +158,14 @@
     <DownloadButton
       words={sortedFilteredWords}
       metadata={{ id: dataset.id, title: dataset.title, author: dataset.author, year: dataset.year }}
-      exploration={{ query: searchQuery, types: selectedTypes, sortKey, sortAsc }}
+      exploration={{ query: appliedSearchQuery, types: selectedTypes, sortKey, sortAsc }}
     />
     <div class="table-container">
       {#if sortedFilteredWords.length === 0}
         <p class="empty-state" role="status" aria-live="polite">{t('noMatchingWords')}</p>
       {:else}
-        <p class="result-count" role="status" aria-live="polite">{t('showingResults', { start: resultPage.start, end: resultPage.end, total: sortedFilteredWords.length })}</p>
         {#key filename}
+          <p class="result-count" role="status" aria-live="polite">{t('showingResults', { start: resultPage.start, end: resultPage.end, total: sortedFilteredWords.length })}</p>
           <DataTable words={resultPage.items} typeLabels={typeLabels} bind:sortKey bind:sortAsc />
         {/key}
         {#if resultPage.totalPages > 1}

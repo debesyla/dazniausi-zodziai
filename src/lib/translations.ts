@@ -42,6 +42,7 @@ export const translations = {
     descending: 'mažėjančia tvarka',
     exported: 'Eksportuota',
     query: 'Paieška',
+    types: 'Tipai',
     all: 'visi',
     sortOrder: 'Rikiavimas',
 
