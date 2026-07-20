@@ -31,6 +31,13 @@ export const translations = {
     
     // DownloadButton component
     downloadData: 'Atsisiųsti duomenis .csv formatu',
+    ascending: 'didėjančia tvarka',
+    descending: 'mažėjančia tvarka',
+    exported: 'Eksportuota',
+    query: 'Paieška',
+    types: 'Tipai',
+    all: 'visi',
+    sortOrder: 'Rikiavimas',
     
     // Main page
     pageTitle: 'Dažniausi lietuviški žodžiai',
