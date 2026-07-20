@@ -31,8 +31,14 @@ vi.mock('../../../src/components/DownloadButton.svelte', () => ({
 
 describe('DataLoader', () => {
   const mockDataset = {
+    schemaVersion: 1,
+    id: 'test-dataset',
+    title: 'Test dataset',
     author: 'Test Author',
     year: 2023,
+    entryKind: 'lemma',
+    provenance: {},
+    summary: { sourceRows: 2, entryCount: 2, totalFrequency: 15, duplicateEntries: 0 },
     words: [
       { word: 'test', type: 'noun', frequency: 10 },
       { word: 'word', frequency: 5 }
@@ -124,8 +130,7 @@ describe('DataLoader', () => {
 
   it('shows load all button when more than 10 words', async () => {
     const largeDataset = {
-      author: 'Test Author',
-      year: 2023,
+      ...mockDataset,
       words: Array.from({ length: 12 }, (_, i) => ({ word: `word${i}`, frequency: 100 - i }))
     };
     loadDataset.mockResolvedValue(largeDataset);
@@ -153,8 +158,7 @@ describe('DataLoader', () => {
 
   it('loads all words when load all button is clicked', async () => {
     const largeDataset = {
-      author: 'Test Author',
-      year: 2023,
+      ...mockDataset,
       words: Array.from({ length: 12 }, (_, i) => ({ word: `word${i}`, frequency: 100 - i }))
     };
     loadDataset.mockResolvedValue(largeDataset);
