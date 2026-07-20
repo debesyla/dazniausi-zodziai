@@ -30,6 +30,17 @@
     }
   }
 
+  function sortState(key: WordSortKey) {
+    if (sortKey !== key) return 'none';
+    return sortAsc ? 'ascending' : 'descending';
+  }
+
+  function sortControlLabel(key: WordSortKey) {
+    const column = key === 'word' ? t('word') : key === 'frequency' ? t('frequency') : t('type');
+    const direction = sortKey === key ? (sortAsc ? t('ascending') : t('descending')) : t('unsorted');
+    return `${t('sortBy')} ${column}: ${direction}`;
+  }
+
   let sortedWords = $derived<Word[]>(sortWords(words, sortKey, sortAsc));
 
   function displayType(type?: string) {
@@ -38,28 +49,46 @@
   }
 </script>
 
-<table>
-  <thead>
-    <tr>
-      <th>{t('rank')}</th>
-      <th onclick={() => sortBy('word')} class="sortable">{t('word')} {sortKey === 'word' ? (sortAsc ? '↑' : '↓') : ''}</th>
-      <th onclick={() => sortBy('frequency')} class="sortable">{t('frequency')} {sortKey === 'frequency' ? (sortAsc ? '↑' : '↓') : ''}</th>
-      <th onclick={() => sortBy('type')} class="sortable">{t('type')} {sortKey === 'type' ? (sortAsc ? '↑' : '↓') : ''}</th>
-    </tr>
-  </thead>
-  <tbody>
-    {#each sortedWords as word}
+<div class="table-scroll">
+  <table>
+    <thead>
       <tr>
-        <td>{word.rank ?? ''}</td>
-        <td>{word.word}</td>
-        <td>{word.frequency.toLocaleString()}</td>
-        <td>{displayType(word.type)}</td>
+        <th scope="col">{t('rank')}</th>
+        <th scope="col" aria-sort={sortState('word')} class="sortable">
+          <button type="button" class="sort-button" onclick={() => sortBy('word')} aria-label={sortControlLabel('word')}>
+            {t('word')} {#if sortKey === 'word'}<span aria-hidden="true">{sortAsc ? '↑' : '↓'}</span>{/if}
+          </button>
+        </th>
+        <th scope="col" aria-sort={sortState('frequency')} class="sortable">
+          <button type="button" class="sort-button" onclick={() => sortBy('frequency')} aria-label={sortControlLabel('frequency')}>
+            {t('frequency')} {#if sortKey === 'frequency'}<span aria-hidden="true">{sortAsc ? '↑' : '↓'}</span>{/if}
+          </button>
+        </th>
+        <th scope="col" aria-sort={sortState('type')} class="sortable">
+          <button type="button" class="sort-button" onclick={() => sortBy('type')} aria-label={sortControlLabel('type')}>
+            {t('type')} {#if sortKey === 'type'}<span aria-hidden="true">{sortAsc ? '↑' : '↓'}</span>{/if}
+          </button>
+        </th>
       </tr>
-    {/each}
-  </tbody>
-</table>
+    </thead>
+    <tbody>
+      {#each sortedWords as word}
+        <tr>
+          <td>{word.rank ?? ''}</td>
+          <td>{word.word}</td>
+          <td>{word.frequency.toLocaleString()}</td>
+          <td>{displayType(word.type)}</td>
+        </tr>
+      {/each}
+    </tbody>
+  </table>
+</div>
 
 <style>
+  .table-scroll {
+    overflow-x: auto;
+  }
+
   table {
     width: 100%;
     border-collapse: collapse;
@@ -73,17 +102,28 @@
     color: #FFBF00;
   }
   th.sortable {
-    cursor: pointer;
     background-color: #333;
   }
-  th.sortable:hover {
+  .sort-button {
+    background: transparent;
+    border: 0;
+    color: inherit;
+    cursor: pointer;
+    padding: 0;
+    text-align: left;
+    width: 100%;
+  }
+  .sort-button:hover {
     background-color: #444;
+  }
+  .sort-button:focus-visible {
+    outline: 2px solid #FFBF00;
+    outline-offset: 2px;
   }
 
   @media (max-width: 767px) {
     table {
-      overflow-x: auto;
-      display: block;
+      min-width: 31rem;
       white-space: nowrap;
     }
     th, td {

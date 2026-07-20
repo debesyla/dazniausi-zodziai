@@ -39,31 +39,33 @@
   <title>{t('pageTitle')}</title>
 </svelte:head>
 
-<h1>{t('pageTitle')}</h1>
+<main>
+  <h1>{t('pageTitle')}</h1>
 
-{#if catalogLoading}
-  <div class="loading">{t('loadingCatalog')}</div>
-{:else if catalogError}
-  <div class="error">
-    <h2>{t('errorLoadingCatalog')}</h2>
-    <p>{catalogError}</p>
-  </div>
-{:else if catalog && catalog.datasets.length > 0}
-  <div class="dataset-selector">
-    <label for="dataset-select">{t('selectDataset')}:</label>
-    <select id="dataset-select" value={selectedDatasetId} onchange={selectDataset}>
-      {#each catalog.datasets as dataset}
-        <option value={dataset.id}>{dataset.title} ({dataset.year})</option>
-      {/each}
-    </select>
-  </div>
+  {#if catalogLoading}
+    <div class="loading" role="status" aria-live="polite">{t('loadingCatalog')}</div>
+  {:else if catalogError}
+    <div class="error" role="alert">
+      <h2>{t('errorLoadingCatalog')}</h2>
+      <p>{catalogError}</p>
+    </div>
+  {:else if catalog && catalog.datasets.length > 0}
+    <div class="dataset-selector">
+      <label for="dataset-select">{t('selectDataset')}:</label>
+      <select id="dataset-select" value={selectedDatasetId} onchange={selectDataset}>
+        {#each catalog.datasets as dataset}
+          <option value={dataset.id}>{dataset.title} ({dataset.year})</option>
+        {/each}
+      </select>
+    </div>
 
-  {#if selectedDataset}
-    <DataLoader filename={selectedDataset.file} />
+    {#if selectedDataset}
+      <DataLoader filename={selectedDataset.file} />
+    {/if}
+  {:else}
+    <p class="empty-catalog" role="status">{t('noDatasets')}</p>
   {/if}
-{:else}
-  <p class="empty-catalog" role="status">{t('noDatasets')}</p>
-{/if}
+</main>
 
 <style>
   h1 {

@@ -104,9 +104,9 @@
 </script>
 
 {#if loading}
-  <div class="loading">{t('loading')}</div>
+  <div class="loading" role="status" aria-live="polite">{t('loading')}</div>
 {:else if error}
-  <div class="error">
+  <div class="error" role="alert">
     <h3>{t('errorLoadingData')}</h3>
     <p>{error}</p>
   </div>
@@ -134,7 +134,7 @@
       {/if}
     </div>
     {#if searchPending}
-      <p class="updating-results" role="status">{t('updatingResults')}</p>
+      <p class="updating-results" role="status" aria-live="polite">{t('updatingResults')}</p>
     {/if}
     {#if uniqueTypes.length > 0}
       <div class="type-filter">
@@ -160,9 +160,9 @@
     />
     <div class="table-container">
       {#if sortedFilteredWords.length === 0}
-        <p class="empty-state" role="status">{t('noMatchingWords')}</p>
+        <p class="empty-state" role="status" aria-live="polite">{t('noMatchingWords')}</p>
       {:else}
-        <p class="result-count">{t('showingResults', { start: resultPage.start, end: resultPage.end, total: sortedFilteredWords.length })}</p>
+        <p class="result-count" role="status" aria-live="polite">{t('showingResults', { start: resultPage.start, end: resultPage.end, total: sortedFilteredWords.length })}</p>
         {#key filename}
           <DataTable words={resultPage.items} typeLabels={typeLabels} bind:sortKey bind:sortAsc />
         {/key}

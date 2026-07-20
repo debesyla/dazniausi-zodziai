@@ -1,4 +1,4 @@
-import { render, fireEvent } from '@testing-library/svelte/svelte5';
+import { render } from '@testing-library/svelte/svelte5';
 import userEvent from '@testing-library/user-event';
 import DataTable from '../../../src/components/DataTable.svelte';
 
@@ -48,17 +48,17 @@ test('DataTable displays the frequency rank supplied by the active result set', 
   expect(getByText('3')).toBeInTheDocument();
 });
 
-test('DataTable sortable headers have correct class', () => {
-  const { getByText } = render(DataTable, { words: mockWords });
+test('DataTable exposes sortable columns as labelled controls with aria-sort state', () => {
+  const { getByRole } = render(DataTable, { words: mockWords });
 
-  const wordHeader = getByText('Žodis');
-  expect(wordHeader).toHaveClass('sortable');
+  const wordControl = getByRole('button', { name: 'Rikiuoti pagal Žodis: nerikiuota' });
+  const frequencyControl = getByRole('button', { name: 'Rikiuoti pagal Dažnumas: mažėjančia tvarka' });
+  const typeControl = getByRole('button', { name: 'Rikiuoti pagal Tipas: nerikiuota' });
 
-  const freqHeader = getByText('Dažnumas ↓');
-  expect(freqHeader).toHaveClass('sortable');
-
-  const typeHeader = getByText('Tipas');
-  expect(typeHeader).toHaveClass('sortable');
+  expect(wordControl).toHaveClass('sort-button');
+  expect(wordControl.closest('th')).toHaveAttribute('aria-sort', 'none');
+  expect(frequencyControl.closest('th')).toHaveAttribute('aria-sort', 'descending');
+  expect(typeControl.closest('th')).toHaveAttribute('aria-sort', 'none');
 });
 
 test('DataTable sorts by frequency descending by default', () => {
@@ -83,13 +83,14 @@ test('DataTable sorts large data set by frequency descending by default', () => 
 
 test('DataTable allows manual sorting to ascending', async () => {
   const user = userEvent.setup();
-  const { getByText, getAllByRole } = render(DataTable, { words: mockWords });
+  const { getByRole, getAllByRole } = render(DataTable, { words: mockWords });
 
-  const freqHeader = getByText('Dažnumas ↓');
+  const freqHeader = getByRole('button', { name: 'Rikiuoti pagal Dažnumas: mažėjančia tvarka' });
   await user.click(freqHeader);
 
   // Now, should be ↑, and order reversed to ascending
-  expect(getByText('Dažnumas ↑')).toBeInTheDocument();
+  expect(freqHeader).toHaveTextContent('Dažnumas ↑');
+  expect(freqHeader.closest('th')).toHaveAttribute('aria-sort', 'ascending');
 
   const rows = getAllByRole('row');
   expect(rows[1]).toHaveTextContent('word'); // lower frequency first
@@ -98,13 +99,14 @@ test('DataTable allows manual sorting to ascending', async () => {
 
 test('DataTable allows manual sorting by word', async () => {
   const user = userEvent.setup();
-  const { getByText, getAllByRole } = render(DataTable, { words: mockWords });
+  const { getByRole, getAllByRole } = render(DataTable, { words: mockWords });
 
-  const wordHeader = getByText('Žodis');
+  const wordHeader = getByRole('button', { name: 'Rikiuoti pagal Žodis: nerikiuota' });
   await user.click(wordHeader);
 
   // First click, ascending
-  expect(getByText('Žodis ↑')).toBeInTheDocument();
+  expect(wordHeader).toHaveTextContent('Žodis ↑');
+  expect(wordHeader.closest('th')).toHaveAttribute('aria-sort', 'ascending');
 
   let rows = getAllByRole('row');
   expect(rows[1]).toHaveTextContent('test'); // alphabetical first
@@ -112,7 +114,8 @@ test('DataTable allows manual sorting by word', async () => {
 
   // Second click, descending
   await user.click(wordHeader);
-  expect(getByText('Žodis ↓')).toBeInTheDocument();
+  expect(wordHeader).toHaveTextContent('Žodis ↓');
+  expect(wordHeader.closest('th')).toHaveAttribute('aria-sort', 'descending');
 
   rows = getAllByRole('row');
   expect(rows[1]).toHaveTextContent('word');
@@ -121,13 +124,14 @@ test('DataTable allows manual sorting by word', async () => {
 
 test('DataTable allows manual sorting by type', async () => {
   const user = userEvent.setup();
-  const { getByText, getAllByRole } = render(DataTable, { words: mockWords });
+  const { getByRole, getAllByRole } = render(DataTable, { words: mockWords });
 
-  const typeHeader = getByText('Tipas');
+  const typeHeader = getByRole('button', { name: 'Rikiuoti pagal Tipas: nerikiuota' });
   await user.click(typeHeader);
 
   // First click, ascending
-  expect(getByText('Tipas ↑')).toBeInTheDocument();
+  expect(typeHeader).toHaveTextContent('Tipas ↑');
+  expect(typeHeader.closest('th')).toHaveAttribute('aria-sort', 'ascending');
 
   let rows = getAllByRole('row');
   expect(rows[1]).toHaveTextContent('word'); // noun first
@@ -135,9 +139,23 @@ test('DataTable allows manual sorting by type', async () => {
 
   // Second click, descending
   await user.click(typeHeader);
-  expect(getByText('Tipas ↓')).toBeInTheDocument();
+  expect(typeHeader).toHaveTextContent('Tipas ↓');
+  expect(typeHeader.closest('th')).toHaveAttribute('aria-sort', 'descending');
 
   rows = getAllByRole('row');
   expect(rows[1]).toHaveTextContent('test'); // verb first
   expect(rows[2]).toHaveTextContent('word');
+});
+
+test('DataTable sorting works with keyboard alone', async () => {
+  const user = userEvent.setup();
+  const { getByRole, getAllByRole } = render(DataTable, { words: mockWords });
+
+  await user.tab();
+  const wordControl = getByRole('button', { name: 'Rikiuoti pagal Žodis: nerikiuota' });
+  expect(wordControl).toHaveFocus();
+
+  await user.keyboard('{Enter}');
+  expect(wordControl.closest('th')).toHaveAttribute('aria-sort', 'ascending');
+  expect(getAllByRole('row')[1]).toHaveTextContent('test');
 });
