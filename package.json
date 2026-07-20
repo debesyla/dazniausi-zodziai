@@ -11,6 +11,7 @@
 		"prepare": "svelte-kit sync || echo ''",
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
 		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
+		"data:build": "node scripts/prepare-dataset.mjs",
 		"test": "vitest run",
 		"test:watch": "vitest"
 	},
