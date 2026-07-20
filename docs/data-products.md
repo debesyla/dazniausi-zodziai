@@ -34,8 +34,10 @@ review or test build. The normal command has no hard-coded local source path.
 
 | Product type | Data location | Row form | Meaning |
 | --- | --- | --- | --- |
-| `generic-frequency-dataset` | Existing `static/datasets/*.json` file | Objects with `word`, optional `type`, and `frequency` | The two launch-sized lemma/POS frequency datasets already used by the explorer. |
+| `generic-frequency-dataset` | Existing `static/datasets/*.json` file | Objects with `word`, optional `type`, and `frequency` | Browser-selectable reviewed frequency datasets. |
 | `chunked-wordform-list` | Manifest → view `index.json` → chunk files | Arrays; field order is declared in the index | Raw token counts for the CCLL aggregate or one named subcorpus. |
+| `chunked-frequency-list` | Manifest → view `index.json` → chunk files | Arrays; field order is declared in the index | A complete raw frequency list too large for the browser selector, such as the Delfi.lt one-gram list. |
+| `chunked-derived-frequency-list` | Manifest → view `index.json` → chunk files | Arrays; field order is declared in the index | A reproducible aggregation from an annotated source. Derived fields are explicitly marked in the index. |
 | `chunked-comparison` | Manifest → view `index.json` → chunk files | Arrays; field order is declared in the index | Comparison measures whose meaning cannot safely be represented by a generic frequency field. |
 | `metadata-only` | Manifest only | No rows | Source inventory and publication decision for a collection whose rows cannot yet be redistributed. |
 
@@ -58,8 +60,8 @@ assuming the second value is a generic frequency.
 
 ## Published collection coverage
 
-- `utka-2018-lemmatized-totals` and `dadurkevicius-2020-jcl-lemmas` remain
-  complete direct JSON datasets.
+- `utka-2018-lemmatized-totals`, `dadurkevicius-2020-jcl-lemmas`, and
+  `petkevicius-2025-ccll-lemmas` remain complete direct JSON datasets.
 - `utka-ccll-wordforms` has seven bounded JSON views: aggregate frequency and
   alphabetical orders plus five named subcorpora. The aggregate is never added
   to the subcorpora.
@@ -68,6 +70,11 @@ assuming the second value is a generic frequency.
   categories, not counts.
 - `utka-ccll2-war-ukraine-comparison` keeps all six normalized token/document
   metrics separate. Source absence is JSON `null`, not zero.
+- `bielinskiene-2019-delfi-1grams` publishes all 1,030,562 raw one-gram rows
+  in bounded chunks. Its counts are not lemma frequencies.
+- `rimkute-2024-matas-v3-frequencies` derives separate lemma/POS and
+  wordform/POS views from CoNLL-U. Punctuation is excluded and a missing
+  source POS is labelled `UNSPECIFIED`.
 - `rimkute-morphemic-dictionary` has a metadata-only manifest. It deliberately
   contains neither PDF content nor extracted dictionary rows while
   [issue #41](https://github.com/debesyla/dazniausi-zodziai/issues/41) seeks a
