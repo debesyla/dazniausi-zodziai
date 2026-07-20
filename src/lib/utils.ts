@@ -1,5 +1,7 @@
 import type { Word } from './data';
 
+export type WordSortKey = 'word' | 'frequency' | 'type';
+
 /**
  * Filters an array of words based on a search query and optional type filter.
  * Performs case-insensitive search on the word text.
@@ -29,22 +31,25 @@ export function filterWords(words: Word[], query: string, selectedTypes?: string
 /**
  * Sorts an array of words by a specified key.
  * @param words - Array of word objects
- * @param key - Key to sort by ('word' or 'frequency')
+ * @param key - Key to sort by ('word', 'frequency', or 'type')
  * @param asc - Sort ascending (true) or descending (false)
  * @returns Sorted array of words
  */
-export function sortWords(words: Word[], key: 'word' | 'frequency', asc: boolean = true): Word[] {
+export function sortWords(words: Word[], key: WordSortKey, asc: boolean = true): Word[] {
   return [...words].sort((a, b) => {
-    const aVal = a[key];
-    const bVal = b[key];
     if (key === 'word') {
-      const aStr = aVal as string;
-      const bStr = bVal as string;
+      const aStr = a.word;
+      const bStr = b.word;
       return asc ? aStr.localeCompare(bStr) : bStr.localeCompare(aStr);
-    } else {
-      const aNum = aVal as number;
-      const bNum = bVal as number;
+    }
+    if (key === 'frequency') {
+      const aNum = a.frequency;
+      const bNum = b.frequency;
       return asc ? aNum - bNum : bNum - aNum;
     }
+
+    const aType = a.type ?? '';
+    const bType = b.type ?? '';
+    return asc ? aType.localeCompare(bType) : bType.localeCompare(aType);
   });
 }

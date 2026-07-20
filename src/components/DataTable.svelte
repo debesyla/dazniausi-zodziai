@@ -1,17 +1,26 @@
 <script lang="ts">
   import { t } from '$lib/translations';
+  import { sortWords } from '$lib/utils';
+  import type { WordSortKey } from '$lib/utils';
   interface Word {
     word: string;
     type?: string;
     frequency: number;
   }
 
-  let { words = [], typeLabels = {} } = $props<{ words?: Word[]; typeLabels?: Record<string, string> }>();
+  let {
+    words = [],
+    typeLabels = {},
+    sortKey = $bindable<WordSortKey>('frequency'),
+    sortAsc = $bindable(false)
+  } = $props<{
+    words?: Word[];
+    typeLabels?: Record<string, string>;
+    sortKey?: WordSortKey;
+    sortAsc?: boolean;
+  }>();
 
-  let sortKey = $state<'word' | 'frequency' | 'type'>('frequency');
-  let sortAsc = $state(false);
-
-  function sortBy(key: 'word' | 'frequency' | 'type') {
+  function sortBy(key: WordSortKey) {
     if (sortKey === key) {
       sortAsc = !sortAsc;
     } else {
@@ -20,25 +29,7 @@
     }
   }
 
-  // For display, assume words are already sorted by parent
-  // Or sort here
-  let sortedWords = $derived([...words].sort((a, b) => {
-    const aVal = a[sortKey];
-    const bVal = b[sortKey];
-    if (sortKey === 'word') {
-      const aStr = aVal as string;
-      const bStr = bVal as string;
-      return sortAsc ? aStr.localeCompare(bStr) : bStr.localeCompare(aStr);
-    } else if (sortKey === 'frequency') {
-      const aNum = aVal as number;
-      const bNum = bVal as number;
-      return sortAsc ? aNum - bNum : bNum - aNum;
-    } else {
-      const aStr = (aVal as string) || '';
-      const bStr = (bVal as string) || '';
-      return sortAsc ? aStr.localeCompare(bStr) : bStr.localeCompare(aStr);
-    }
-  }));
+  let sortedWords = $derived(sortWords(words, sortKey, sortAsc));
 
   function displayType(type?: string) {
     if (!type) return '';
