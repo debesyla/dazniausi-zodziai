@@ -27,6 +27,7 @@ export const translations = {
     posScheme: 'Kalbos dalių žymėjimas',
     clearFilters: 'Išvalyti filtrus',
     loadAll: 'Rodyti visus',
+    noMatchingWords: 'Nerasta atitinkančių žodžių.',
     
     // DownloadButton component
     downloadData: 'Atsisiųsti duomenis .csv formatu',
