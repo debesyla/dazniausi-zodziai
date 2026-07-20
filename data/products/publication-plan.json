@@ -9,6 +9,10 @@
     {
       "datasetFile": "datasets/dadurkevicius-2020-jcl-lemmas.json",
       "description": "The reviewed JCL lemma and part-of-speech frequency dataset already used by the browser explorer."
+    },
+    {
+      "datasetFile": "datasets/petkevicius-2025-ccll-lemmas.json",
+      "description": "The current CCLL lemma-frequency view, published as a reviewed browser-selectable dataset."
     }
   ],
   "contractProducts": [
@@ -192,6 +196,80 @@
             { "id": "mediaDocumentCount", "label": "Wartime media normalized document count", "type": "normalized-document-count", "unit": "documents per 100 million source words", "sourceColumn": 4, "nullable": true, "normalization": { "sourceTokens": 36000000, "targetTokens": 100000000 } },
             { "id": "socialTokenCount", "label": "Wartime social-network normalized token count", "type": "normalized-token-count", "unit": "tokens per 100 million source words", "sourceColumn": 5, "nullable": true, "normalization": { "sourceTokens": 2000000, "targetTokens": 100000000 } },
             { "id": "socialDocumentCount", "label": "Wartime social-network normalized document count", "type": "normalized-document-count", "unit": "documents per 100 million source words", "sourceColumn": 6, "nullable": true, "normalization": { "sourceTokens": 2000000, "targetTokens": 100000000 } }
+          ]
+        }
+      ]
+    },
+    {
+      "contractId": "bielinskiene-2019-delfi-1grams",
+      "productType": "chunked-frequency-list",
+      "publication": {
+        "status": "published",
+        "scope": "Every row from the reviewed Lithuanian 1-gram source CSV.",
+        "access": "Static JSON chunks preserve all one-gram rows without requiring the browser explorer to load the full million-row list."
+      },
+      "views": [
+        {
+          "id": "all-by-frequency",
+          "sourceRole": "all-by-frequency",
+          "title": "Delfi.lt corpus one-grams",
+          "description": "Raw one-gram token frequencies from the source, ordered by descending count.",
+          "ordering": { "field": "count", "direction": "descending" },
+          "chunkBytes": 262144,
+          "fields": [
+            { "id": "word", "label": "One-gram", "type": "string", "sourceColumn": 0 },
+            { "id": "count", "label": "Token count", "type": "raw-token-count", "unit": "tokens", "sourceColumn": 1 }
+          ]
+        }
+      ]
+    },
+    {
+      "contractId": "rimkute-2024-matas-v3-frequencies",
+      "productType": "chunked-derived-frequency-list",
+      "publication": {
+        "status": "published",
+        "scope": "Frequency views derived reproducibly from every integer-ID MATAS v3.0 CoNLL-U token row except punctuation.",
+        "access": "Static JSON chunks with separate lemma/POS and wordform/POS views."
+      },
+      "views": [
+        {
+          "id": "lemmas-by-pos-frequency",
+          "sourceRole": "matas-conllu",
+          "title": "MATAS lemmas by Universal POS",
+          "description": "Non-punctuation MATAS tokens aggregated by source lemma and Universal POS, ordered by descending count.",
+          "ordering": { "field": "count", "direction": "descending" },
+          "chunkBytes": 65536,
+          "derivation": {
+            "type": "conllu-frequency",
+            "key": "lemma",
+            "excludeUniversalPos": ["PUNCT"],
+            "missingUniversalPos": "UNSPECIFIED",
+            "expectedSummary": { "sourceRows": 1694814, "recordCount": 56420, "totalFrequency": 1694814 }
+          },
+          "fields": [
+            { "id": "lemma", "label": "Lemma", "type": "string", "sourceColumn": 2 },
+            { "id": "universalPos", "label": "Universal POS", "type": "source-pos-code", "sourceColumn": 3 },
+            { "id": "count", "label": "Token count", "type": "raw-token-count", "unit": "tokens", "derived": true }
+          ]
+        },
+        {
+          "id": "wordforms-by-pos-frequency",
+          "sourceRole": "matas-conllu",
+          "title": "MATAS word forms by Universal POS",
+          "description": "Non-punctuation MATAS tokens aggregated by source form and Universal POS, ordered by descending count.",
+          "ordering": { "field": "count", "direction": "descending" },
+          "chunkBytes": 65536,
+          "derivation": {
+            "type": "conllu-frequency",
+            "key": "wordform",
+            "excludeUniversalPos": ["PUNCT"],
+            "missingUniversalPos": "UNSPECIFIED",
+            "expectedSummary": { "sourceRows": 1694814, "recordCount": 198062, "totalFrequency": 1694814 }
+          },
+          "fields": [
+            { "id": "word", "label": "Word form", "type": "string", "sourceColumn": 1 },
+            { "id": "universalPos", "label": "Universal POS", "type": "source-pos-code", "sourceColumn": 3 },
+            { "id": "count", "label": "Token count", "type": "raw-token-count", "unit": "tokens", "derived": true }
           ]
         }
       ]

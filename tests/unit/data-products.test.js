@@ -227,4 +227,80 @@ describe('public data-product preparation', () => {
     expect(manifest).not.toHaveProperty('views');
     expect(manifest).not.toHaveProperty('entries');
   });
+
+  it('publishes a headered CSV frequency list with integer-valued scientific notation', async () => {
+    const root = await makeDirectory();
+    const sourceRoot = path.join(root, 'sources');
+    const staticRoot = path.join(root, 'static');
+    const outputRoot = path.join(staticRoot, 'data-products');
+    const planPath = path.join(root, 'plan.json');
+    const contractPath = path.join(root, 'contract.json');
+    const source = '_id,frequency\n"ir,",2.5e1\nkad,5\n';
+    const contract = {
+      schemaVersion: 1,
+      sourceRepository: { repositoryUrl: 'https://example.test/source.git', revision: 'fixture-revision' },
+      contracts: [{
+        id: 'onegrams-fixture',
+        title: 'One-gram fixture',
+        source: {
+          sourceUrl: 'https://example.test/onegrams',
+          licence: 'CC BY 4.0',
+          citation: 'Fixture one-gram citation',
+          files: [{
+            path: 'onegrams.csv',
+            role: 'all-by-frequency',
+            bytes: Buffer.byteLength(source),
+            rows: 2,
+            sha256: checksum(source),
+            delimiter: ',',
+            hasHeader: true,
+            columns: 2,
+            numericColumns: [1],
+            numericTotals: { 1: 30 },
+            samples: ['"ir,",2.5e1', 'kad,5']
+          }]
+        },
+        delivery: { constraints: ['Keep raw counts separate from lemma frequencies.'] }
+      }]
+    };
+    const plan = {
+      schemaVersion: 1,
+      title: 'Fixture data products',
+      genericProducts: [],
+      contractProducts: [{
+        contractId: 'onegrams-fixture',
+        productType: 'chunked-frequency-list',
+        publication: { status: 'published', scope: 'Every fixture row.', access: 'Chunked JSON.' },
+        views: [{
+          id: 'all-by-frequency',
+          sourceRole: 'all-by-frequency',
+          title: 'Fixture one-grams',
+          description: 'Raw one-gram counts.',
+          ordering: { field: 'count', direction: 'descending' },
+          chunkBytes: 1024,
+          fields: [
+            { id: 'word', label: 'One-gram', type: 'string', sourceColumn: 0 },
+            { id: 'count', label: 'Token count', type: 'raw-token-count', unit: 'tokens', sourceColumn: 1 }
+          ]
+        }]
+      }]
+    };
+
+    await mkdir(sourceRoot, { recursive: true });
+    await Promise.all([
+      writeFile(path.join(sourceRoot, 'onegrams.csv'), source),
+      writeJson(planPath, plan),
+      writeJson(contractPath, contract)
+    ]);
+
+    await buildDataProducts({ sourceRoot, staticRoot, outputRoot, planPath, contractPath });
+    await expect(verifyDataProducts({ outputRoot, staticRoot })).resolves.toMatchObject({
+      products: 1,
+      chunkedViews: 1,
+      records: 2
+    });
+    const index = JSON.parse(await readFile(path.join(outputRoot, 'onegrams-fixture', 'views', 'all-by-frequency', 'index.json'), 'utf8'));
+    const chunk = JSON.parse(await readFile(path.join(outputRoot, 'onegrams-fixture', 'views', 'all-by-frequency', index.chunks[0].file), 'utf8'));
+    expect(chunk.records).toEqual([['ir,', 25], ['kad', 5]]);
+  });
 });

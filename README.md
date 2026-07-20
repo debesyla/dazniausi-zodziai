@@ -4,9 +4,9 @@ A static SvelteKit application for exploring Lithuanian word-frequency lists.
 It loads one catalog-selected dataset at a time, then offers filters, a
 frequency dashboard, a paginated table, and a faithful CSV export.
 
-The initial published dataset is Andrius Utka's 2018 lemmatised word list. Its
-source licence and citation are shown in the app and preserved in the dataset
-metadata.
+The browser catalog includes reviewed Lithuanian lemma-frequency datasets. Their
+source licences and citations are shown in the app and preserved in dataset
+metadata; larger products are available through the public JSON catalog.
 
 ## What the app does
 
@@ -70,7 +70,7 @@ Actions** as its source. Pull requests run the separate verification workflow
 in `.github/workflows/verify.yml`. The checked-in public data products are
 verified before each deployment and copied unchanged into the static site.
 Maintainers rebuild them locally from raw source revision
-`d1f4c06e93d4142ec3c42a3c1d02c06b6a301e13` before updating a product.
+`5aa69dd8df47c17b21e50ca4b41709159deb1bf0` before updating a product.
 
 ## Analytics and privacy
 

@@ -3,6 +3,19 @@
   "defaultDatasetId": "utka-2018-lemmatized-totals",
   "datasets": [
     {
+      "id": "petkevicius-2025-ccll-lemmas",
+      "title": "Dabartinės lietuvių kalbos tekstyno lemuotas dažninis sąrašas",
+      "author": "Mindaugas Petkevičius",
+      "year": 2025,
+      "entryKind": "lemma",
+      "file": "petkevicius-2025-ccll-lemmas.json",
+      "records": 142228,
+      "totalFrequency": 156125239,
+      "hasPartOfSpeech": false,
+      "licence": "CC BY 4.0",
+      "citation": "Petkevičius, Mindaugas. 2025. CCLL Lemmatised Frequency Lists. Institute of Digital Resources and Interdisciplinary Research (SITTI) at Vytautas Magnus University. CLARIN-LT Repository. https://hdl.handle.net/20.500.11821/77."
+    },
+    {
       "id": "dadurkevicius-2020-jcl-lemmas",
       "title": "Lemų sąrašas iš Jungtinio lietuvių kalbos tekstyno",
       "author": "Virginijus Dadurkevičius",

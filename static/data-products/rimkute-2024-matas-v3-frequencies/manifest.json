@@ -1,0 +1,73 @@
+{
+  "schemaVersion": 1,
+  "id": "rimkute-2024-matas-v3-frequencies",
+  "title": "MATAS v3.0 derived lemma and wordform frequencies",
+  "productType": "chunked-derived-frequency-list",
+  "publication": {
+    "status": "published",
+    "scope": "Frequency views derived reproducibly from every integer-ID MATAS v3.0 CoNLL-U token row except punctuation.",
+    "access": "Static JSON chunks with separate lemma/POS and wordform/POS views."
+  },
+  "provenance": {
+    "sourceRepository": {
+      "repositoryUrl": "https://github.com/debesyla/dazniausi-zodziai-sources.git",
+      "revision": "5aa69dd8df47c17b21e50ca4b41709159deb1bf0"
+    },
+    "sourceUrl": "https://clarin-repo.lt/items/298f8a26-20d6-44cf-ab33-e53538ec7df9",
+    "licence": "CC BY 4.0",
+    "citation": "Rimkutė, E., Bielinskienė, A., Dadurkevičius, V., Kovalevskaitė, J., Utka, A., Boizou, L. 2024. Lithuanian morphologically annotated corpus — MATAS v3.0. Institute of Digital Resources and Interdisciplinary Research (SITTI), Vytautas Magnus University. CLARIN-LT Repository. https://hdl.handle.net/20.500.11821/61.",
+    "files": [
+      {
+        "role": "matas-conllu",
+        "path": "rimkute-2024-12-19-MATAS-v3/original/MATAS3.conllu.zip",
+        "format": "zip-conllu",
+        "bytes": 24221501,
+        "sha256": "2fb910266fd6320c6f6ba615bf44c3dd9efd014f20b9bbc75ea202028479ee03",
+        "archiveMember": "MATAS3.conllu"
+      }
+    ]
+  },
+  "delivery": {
+    "mode": "static-chunked-json",
+    "constraints": [
+      "Do not conflate this derived corpus frequency with the source's generic token total.",
+      "Exclude UPOS=PUNCT from both frequency views.",
+      "Preserve the Universal POS value; use UNSPECIFIED only where the source field is empty.",
+      "Keep lemma and wordform frequencies as separate views."
+    ]
+  },
+  "views": [
+    {
+      "id": "lemmas-by-pos-frequency",
+      "title": "MATAS lemmas by Universal POS",
+      "description": "Non-punctuation MATAS tokens aggregated by source lemma and Universal POS, ordered by descending count.",
+      "index": "views/lemmas-by-pos-frequency/index.json",
+      "sourceRole": "matas-conllu",
+      "recordEncoding": "array",
+      "summary": {
+        "sourceRows": 1694814,
+        "recordCount": 56420,
+        "numericTotals": {
+          "count": 1694814
+        },
+        "nullCounts": {}
+      }
+    },
+    {
+      "id": "wordforms-by-pos-frequency",
+      "title": "MATAS word forms by Universal POS",
+      "description": "Non-punctuation MATAS tokens aggregated by source form and Universal POS, ordered by descending count.",
+      "index": "views/wordforms-by-pos-frequency/index.json",
+      "sourceRole": "matas-conllu",
+      "recordEncoding": "array",
+      "summary": {
+        "sourceRows": 1694814,
+        "recordCount": 198062,
+        "numericTotals": {
+          "count": 1694814
+        },
+        "nullCounts": {}
+      }
+    }
+  ]
+}

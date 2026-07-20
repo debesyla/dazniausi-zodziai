@@ -1,9 +1,11 @@
 import { createHash } from 'node:crypto';
+import { spawn } from 'node:child_process';
 import { createReadStream } from 'node:fs';
 import { mkdir, readFile, realpath, rm, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { createInterface } from 'node:readline';
 import { fileURLToPath } from 'node:url';
+import { parseDelimitedLine } from './prepare-dataset.mjs';
 import { verifySourceContracts } from './verify-source-contracts.mjs';
 
 const repositoryRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
@@ -30,6 +32,12 @@ const SUMMARIZED_FIELD_TYPES = new Set([
   'raw-token-count',
   'normalized-token-count',
   'normalized-document-count'
+]);
+const CHUNKED_PRODUCT_TYPES = new Set([
+  'chunked-wordform-list',
+  'chunked-comparison',
+  'chunked-frequency-list',
+  'chunked-derived-frequency-list'
 ]);
 
 function fail(message) {
@@ -104,7 +112,12 @@ function validateField(field, description) {
   if (!isPlainObject(field) || !isSafeFieldId(field.id) || !normalizeString(field.label) || !FIELD_TYPES.has(field.type)) {
     fail(`${description} must define an id, label, and supported type`);
   }
-  if (!Number.isInteger(field.sourceColumn) || field.sourceColumn < 0) {
+  if (field.derived !== undefined && typeof field.derived !== 'boolean') {
+    fail(`${description}.derived must be true or false when provided`);
+  }
+  if (field.derived === true) {
+    if (field.sourceColumn !== undefined) fail(`${description}.sourceColumn is not valid for a derived field`);
+  } else if (!Number.isInteger(field.sourceColumn) || field.sourceColumn < 0) {
     fail(`${description}.sourceColumn must be a non-negative integer`);
   }
   if (field.nullable !== undefined && typeof field.nullable !== 'boolean') {
@@ -144,11 +157,11 @@ function validateView(view, description) {
   const sourceColumns = new Set();
   for (const [index, field] of view.fields.entries()) {
     validateField(field, `${description}.fields[${index}]`);
-    if (ids.has(field.id) || sourceColumns.has(field.sourceColumn)) {
+    if (ids.has(field.id) || (field.derived !== true && sourceColumns.has(field.sourceColumn))) {
       fail(`${description}.fields must use unique ids and source columns`);
     }
     ids.add(field.id);
-    sourceColumns.add(field.sourceColumn);
+    if (field.derived !== true) sourceColumns.add(field.sourceColumn);
   }
   if (!ids.has(view.ordering.field)) fail(`${description}.ordering.field must name a field`);
 }
@@ -162,6 +175,21 @@ function validatePublication(publication, description) {
   }
   if (publication.reason !== undefined && !normalizeString(publication.reason)) {
     fail(`${description}.reason must be a non-empty string when provided`);
+  }
+}
+
+function validateDerivation(derivation, description) {
+  if (derivation === undefined) return;
+  if (!isPlainObject(derivation) || derivation.type !== 'conllu-frequency'
+    || !['lemma', 'wordform'].includes(derivation.key)
+    || !Array.isArray(derivation.excludeUniversalPos)
+    || derivation.excludeUniversalPos.some((value) => !normalizeString(value))
+    || !normalizeString(derivation.missingUniversalPos)
+    || !isPlainObject(derivation.expectedSummary)) {
+    fail(`${description}.derivation is invalid`);
+  }
+  for (const field of ['sourceRows', 'recordCount', 'totalFrequency']) {
+    asSafeInteger(derivation.expectedSummary[field], `${description}.derivation.expectedSummary.${field}`);
   }
 }
 
@@ -182,7 +210,7 @@ export function validatePublicationPlan(plan) {
   for (const [index, product] of plan.contractProducts.entries()) {
     const description = `contractProducts[${index}]`;
     if (!isPlainObject(product) || !isSafeId(product.contractId)
-      || !['chunked-wordform-list', 'chunked-comparison', 'metadata-only'].includes(product.productType)) {
+      || ![...CHUNKED_PRODUCT_TYPES, 'metadata-only'].includes(product.productType)) {
       fail(`${description} must name a contract and supported product type`);
     }
     if (contractIds.has(product.contractId)) fail(`${description}.contractId is duplicated`);
@@ -202,14 +230,13 @@ export function validatePublicationPlan(plan) {
       fail(`${description} must publish at least one row view`);
     }
     const viewIds = new Set();
-    const sourceRoles = new Set();
     for (const [viewIndex, view] of product.views.entries()) {
       validateView(view, `${description}.views[${viewIndex}]`);
-      if (viewIds.has(view.id) || sourceRoles.has(view.sourceRole)) {
-        fail(`${description}.views must use unique ids and source roles`);
+      validateDerivation(view.derivation, `${description}.views[${viewIndex}]`);
+      if (viewIds.has(view.id)) {
+        fail(`${description}.views must use unique ids`);
       }
       viewIds.add(view.id);
-      sourceRoles.add(view.sourceRole);
     }
   }
   return plan;
@@ -234,7 +261,10 @@ function publicSourceFile(file) {
     bytes: file.bytes,
     sha256: file.sha256,
     ...(file.rows === undefined ? {} : { rows: file.rows }),
-    ...(file.columns === undefined ? {} : { columns: file.columns })
+    ...(file.columns === undefined ? {} : { columns: file.columns }),
+    ...(file.delimiter === undefined ? {} : { delimiter: file.delimiter }),
+    ...(file.hasHeader === undefined ? {} : { hasHeader: file.hasHeader }),
+    ...(file.archiveMember === undefined ? {} : { archiveMember: file.archiveMember })
   };
 }
 
@@ -250,17 +280,25 @@ function fieldNullCounts(fields) {
     .map((field) => [field.id, 0]));
 }
 
+function parseNonNegativeSafeInteger(value, description) {
+  const normalized = normalizeString(value);
+  if (!/^(?:0|[1-9]\d*)(?:\.\d+)?(?:[eE][+-]?\d+)?$/.test(normalized)) {
+    fail(`${description} has an invalid integer value: ${JSON.stringify(value)}`);
+  }
+  const parsed = Number(normalized);
+  if (!Number.isSafeInteger(parsed) || parsed < 0) {
+    fail(`${description} has an unsafe integer value: ${JSON.stringify(value)}`);
+  }
+  return parsed;
+}
+
 function parseFieldValue(field, value, sourcePath, lineNumber) {
   if (!NUMERIC_FIELD_TYPES.has(field.type)) {
     if (!normalizeString(value)) fail(`${sourcePath} line ${lineNumber} has an empty ${field.id} value`);
     return value;
   }
   if (value === '' && field.nullable === true) return null;
-  if (!/^\d+$/.test(value)) fail(`${sourcePath} line ${lineNumber} has an invalid ${field.id} value: ${JSON.stringify(value)}`);
-  const parsed = Number(value);
-  if (!Number.isSafeInteger(parsed) || parsed < 0) {
-    fail(`${sourcePath} line ${lineNumber} has an unsafe ${field.id} value`);
-  }
+  const parsed = parseNonNegativeSafeInteger(value, `${sourcePath} line ${lineNumber} ${field.id}`);
   if (field.type === 'coverage-code' && !Object.hasOwn(field.values, String(parsed))) {
     fail(`${sourcePath} line ${lineNumber} has an unlabelled coverage code: ${parsed}`);
   }
@@ -347,9 +385,12 @@ async function buildChunkedView({ productId, productDirectory, view, sourceFile,
     input: createReadStream(sourcePath, { encoding: 'utf8' }),
     crlfDelay: Infinity
   });
+  let physicalLineNumber = 0;
   for await (const line of lines) {
+    physicalLineNumber += 1;
+    if (sourceFile.hasHeader === true && physicalLineNumber === 1) continue;
     sourceRows += 1;
-    const values = line.split(delimiter);
+    const values = parseDelimitedLine(line, delimiter);
     if (values.length !== sourceFile.columns) {
       fail(`${sourceDisplayPath} line ${sourceRows} has ${values.length} columns; expected ${sourceFile.columns}`);
     }
@@ -398,6 +439,173 @@ async function buildChunkedView({ productId, productDirectory, view, sourceFile,
     fields: view.fields,
     ordering: view.ordering,
     sourceFile: publicSourceFile(sourceFile),
+    maxChunkBytes: view.chunkBytes,
+    summary,
+    chunks
+  };
+  await writeJson(path.join(viewDirectory, 'index.json'), index);
+  return {
+    id: view.id,
+    title: view.title,
+    description: view.description,
+    index: `views/${view.id}/index.json`,
+    sourceRole: view.sourceRole,
+    recordEncoding: 'array',
+    summary
+  };
+}
+
+function assertDerivedConlluView(view, sourceFile) {
+  if (sourceFile.format !== 'zip-conllu' || !isSafeRelativePath(sourceFile.archiveMember)
+    || !isPlainObject(sourceFile.conlluSummary)) {
+    fail(`${view.id} requires a zip-conllu source file with an archive member and summary`);
+  }
+  for (const field of ['integerTokenRows', 'nonPunctuationRows', 'sentences', 'uncompressedBytes']) {
+    asSafeInteger(sourceFile.conlluSummary[field], `${view.id} source ${field}`);
+  }
+  if (!/^[a-f0-9]{64}$/.test(sourceFile.conlluSummary.sha256)) {
+    fail(`${view.id} source conlluSummary.sha256 must be a SHA-256 checksum`);
+  }
+  if (!view.derivation || view.derivation.type !== 'conllu-frequency') {
+    fail(`${view.id} requires a conllu-frequency derivation`);
+  }
+  const countField = view.fields.at(-1);
+  if (view.fields.length !== 3 || countField?.derived !== true || !SUMMARIZED_FIELD_TYPES.has(countField.type)) {
+    fail(`${view.id} must expose lexical value, Universal POS, and one derived count`);
+  }
+}
+
+function compareFrequencyEntries(left, right) {
+  if (left.count !== right.count) return right.count - left.count;
+  if (left.key !== right.key) return left.key < right.key ? -1 : 1;
+  return left.universalPos < right.universalPos ? -1 : left.universalPos > right.universalPos ? 1 : 0;
+}
+
+async function buildDerivedConlluFrequencyView({ productId, productDirectory, view, sourceFile, sourceRoot }) {
+  assertDerivedConlluView(view, sourceFile);
+  const { realRoot, sourcePath } = await resolveSourcePath(sourceRoot, sourceFile.path);
+  const sourceDisplayPath = sourceRelativePath(realRoot, sourcePath);
+  const viewDirectory = path.join(productDirectory, 'views', view.id);
+  const chunksDirectory = path.join(viewDirectory, 'chunks');
+  await mkdir(chunksDirectory, { recursive: true });
+
+  const child = spawn('unzip', ['-p', sourcePath, sourceFile.archiveMember], {
+    stdio: ['ignore', 'pipe', 'pipe']
+  });
+  const childExit = new Promise((resolve, reject) => {
+    child.once('error', reject);
+    child.once('close', resolve);
+  });
+  let unzipError = '';
+  child.stderr.setEncoding('utf8');
+  child.stderr.on('data', (chunk) => { unzipError += chunk; });
+
+  const archiveHash = createHash('sha256');
+  let archiveBytes = 0;
+  child.stdout.on('data', (chunk) => {
+    archiveHash.update(chunk);
+    archiveBytes += chunk.byteLength;
+  });
+  const lines = createInterface({ input: child.stdout, crlfDelay: Infinity });
+  const excludedUniversalPos = new Set(view.derivation.excludeUniversalPos);
+  const entries = new Map();
+  let integerTokenRows = 0;
+  let nonPunctuationRows = 0;
+  let sentences = 0;
+
+  for await (const line of lines) {
+    if (line.startsWith('# sent_id = ')) {
+      sentences += 1;
+      continue;
+    }
+    if (line === '' || line.startsWith('#')) continue;
+    const values = line.split('\t');
+    if (values.length !== 10) fail(`${sourceDisplayPath} has a malformed CoNLL-U row`);
+    if (!/^\d+$/.test(values[0])) continue;
+    integerTokenRows += 1;
+    const universalPos = normalizeString(values[3]) || view.derivation.missingUniversalPos;
+    if (excludedUniversalPos.has(universalPos)) continue;
+    const key = normalizeString(view.derivation.key === 'lemma' ? values[2] : values[1]);
+    if (!key) fail(`${sourceDisplayPath} has an empty ${view.derivation.key} at token row ${integerTokenRows}`);
+    nonPunctuationRows += 1;
+    const aggregateKey = `${key}\u0000${universalPos}`;
+    entries.set(aggregateKey, {
+      key,
+      universalPos,
+      count: (entries.get(aggregateKey)?.count ?? 0) + 1
+    });
+  }
+  const exitCode = await childExit;
+  if (exitCode !== 0) fail(`could not read ${sourceDisplayPath} archive member ${sourceFile.archiveMember}: ${unzipError.trim()}`);
+
+  const conlluSummary = sourceFile.conlluSummary;
+  if (archiveBytes !== conlluSummary.uncompressedBytes || archiveHash.digest('hex') !== conlluSummary.sha256
+    || integerTokenRows !== conlluSummary.integerTokenRows || sentences !== conlluSummary.sentences
+    || nonPunctuationRows !== conlluSummary.nonPunctuationRows) {
+    fail(`${sourceDisplayPath} CoNLL-U archive member does not match its reviewed summary`);
+  }
+
+  const records = [...entries.values()].sort(compareFrequencyEntries)
+    .map((entry) => [entry.key, entry.universalPos, entry.count]);
+  const expected = view.derivation.expectedSummary;
+  const totalFrequency = records.reduce((total, record) => total + record.at(-1), 0);
+  if (nonPunctuationRows !== expected.sourceRows || records.length !== expected.recordCount || totalFrequency !== expected.totalFrequency) {
+    fail(`${sourceDisplayPath} ${view.id} does not match its reviewed derived summary`);
+  }
+
+  const suffix = ']}\n';
+  const chunks = [];
+  let chunkNumber = 0;
+  let recordJsons = [];
+  let recordsBytes = 0;
+  async function flushChunk() {
+    if (recordJsons.length === 0) return;
+    const serialized = `${chunkPrefix(productId, view.id, chunkNumber)}${recordJsons.join(',')}${suffix}`;
+    const buffer = Buffer.from(serialized, 'utf8');
+    if (buffer.byteLength > view.chunkBytes) fail(`${productId}/${view.id} chunk ${chunkNumber} exceeds its ${view.chunkBytes}-byte budget`);
+    const filename = `${String(chunkNumber + 1).padStart(6, '0')}.json`;
+    await writeFile(path.join(chunksDirectory, filename), buffer);
+    chunks.push({
+      file: `chunks/${filename}`,
+      records: recordJsons.length,
+      bytes: buffer.byteLength,
+      sha256: createHash('sha256').update(buffer).digest('hex')
+    });
+    chunkNumber += 1;
+    recordJsons = [];
+    recordsBytes = 0;
+  }
+  for (const record of records) {
+    const recordJson = JSON.stringify(record);
+    const candidateBytes = Buffer.byteLength(chunkPrefix(productId, view.id, chunkNumber)) + recordsBytes
+      + (recordJsons.length === 0 ? 0 : 1) + Buffer.byteLength(recordJson) + Buffer.byteLength(suffix);
+    if (candidateBytes > view.chunkBytes && recordJsons.length > 0) await flushChunk();
+    const currentBytes = Buffer.byteLength(chunkPrefix(productId, view.id, chunkNumber)) + recordsBytes
+      + (recordJsons.length === 0 ? 0 : 1) + Buffer.byteLength(recordJson) + Buffer.byteLength(suffix);
+    if (currentBytes > view.chunkBytes) fail(`${sourceDisplayPath} ${view.id} produced an oversize record`);
+    recordJsons.push(recordJson);
+    recordsBytes += (recordJsons.length === 1 ? 0 : 1) + Buffer.byteLength(recordJson);
+  }
+  await flushChunk();
+  if (chunks.length === 0) fail(`${sourceDisplayPath} ${view.id} produced no records`);
+
+  const numericTotals = fieldTotals(view.fields);
+  numericTotals[view.fields.at(-1).id] = totalFrequency;
+  const summary = {
+    sourceRows: nonPunctuationRows,
+    recordCount: records.length,
+    numericTotals,
+    nullCounts: fieldNullCounts(view.fields)
+  };
+  const index = {
+    schemaVersion: 1,
+    productId,
+    viewId: view.id,
+    recordEncoding: 'array',
+    fields: view.fields,
+    ordering: view.ordering,
+    sourceFile: publicSourceFile(sourceFile),
+    derivation: view.derivation,
     maxChunkBytes: view.chunkBytes,
     summary,
     chunks
@@ -508,13 +716,20 @@ async function buildContractProduct({ contract, contractProduct, sourceRepositor
 
   const filesByRole = new Map(contract.source.files.map((file) => [file.role, file]));
   const views = [];
+  const usedSourceRoles = new Set();
   for (const view of contractProduct.views) {
     const sourceFile = filesByRole.get(view.sourceRole);
     if (!sourceFile) fail(`${contract.id} has no source file with role ${view.sourceRole}`);
-    views.push(await buildChunkedView({ productId: contract.id, productDirectory, view, sourceFile, sourceRoot }));
+    usedSourceRoles.add(view.sourceRole);
+    if (view.derivation !== undefined) {
+      views.push(await buildDerivedConlluFrequencyView({ productId: contract.id, productDirectory, view, sourceFile, sourceRoot }));
+    } else {
+      views.push(await buildChunkedView({ productId: contract.id, productDirectory, view, sourceFile, sourceRoot }));
+    }
   }
-  if (views.length !== contract.source.files.length) {
-    fail(`${contract.id} must publish exactly one view for every reviewed machine-readable source file`);
+  if (usedSourceRoles.size !== contract.source.files.length
+    || contract.source.files.some((file) => !usedSourceRoles.has(file.role))) {
+    fail(`${contract.id} must publish at least one view for every reviewed machine-readable source file`);
   }
 
   const manifest = {

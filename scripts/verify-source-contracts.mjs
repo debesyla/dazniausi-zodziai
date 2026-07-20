@@ -2,6 +2,7 @@ import { createHash } from 'node:crypto';
 import { readFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { parseDelimitedLine } from './prepare-dataset.mjs';
 
 const repositoryRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const defaultContractPath = path.join(repositoryRoot, 'data', 'contracts', 'deferred-sources.json');
@@ -22,8 +23,15 @@ function countLines(text) {
 }
 
 function parseInteger(value, description) {
-  if (!/^\d+$/.test(value)) fail(`${description} must be a non-negative integer, received "${value}"`);
-  return BigInt(value);
+  const normalized = value.trim();
+  if (!/^(?:0|[1-9]\d*)(?:\.\d+)?(?:[eE][+-]?\d+)?$/.test(normalized)) {
+    fail(`${description} must be a non-negative integer, received "${value}"`);
+  }
+  const parsed = Number(normalized);
+  if (!Number.isSafeInteger(parsed) || parsed < 0) {
+    fail(`${description} must be a safe non-negative integer, received "${value}"`);
+  }
+  return BigInt(parsed);
 }
 
 async function resolveSourcePath(sourceRoot, relativePath) {
@@ -46,7 +54,9 @@ function verifyTextFile(file, buffer) {
     fail(`source file is not valid UTF-8: ${file.path}`);
   }
 
-  const lines = countLines(text);
+  const physicalLines = countLines(text);
+  const lines = file.hasHeader === true ? physicalLines.slice(1) : physicalLines;
+  if (file.hasHeader === true && physicalLines.length === 0) fail(`${file.path} is missing its header`);
   if (lines.length !== file.rows) fail(`${file.path} row count mismatch: expected ${file.rows}, received ${lines.length}`);
 
   const delimiter = file.delimiter ?? '\t';
@@ -58,7 +68,7 @@ function verifyTextFile(file, buffer) {
   const allowedValues = file.allowedValues ?? {};
 
   for (const [lineIndex, line] of lines.entries()) {
-    const columns = line.split(delimiter);
+    const columns = parseDelimitedLine(line, delimiter);
     if (columns.length !== file.columns) fail(`${file.path} column count mismatch at row ${lineIndex + 1}: expected ${file.columns}, received ${columns.length}`);
 
     for (const column of numericColumns) {
@@ -111,7 +121,7 @@ export async function verifySourceContracts({ contractPath = defaultContractPath
       const checksum = createHash('sha256').update(buffer).digest('hex');
       if (buffer.byteLength !== file.bytes) fail(`${file.path} byte count mismatch: expected ${file.bytes}, received ${buffer.byteLength}`);
       if (checksum !== file.sha256) fail(`${file.path} checksum mismatch: expected ${file.sha256}, received ${checksum}`);
-      if (file.format !== 'binary') verifyTextFile(file, buffer);
+      if (!['binary', 'zip-conllu'].includes(file.format)) verifyTextFile(file, buffer);
       verifiedFiles += 1;
     }
   }

@@ -24,9 +24,11 @@ This strategy keeps the rendered DOM constant for a list such as CCLL (over
 catalog-first loader also ensures such a dataset is fetched only when selected.
 
 The current generic explorer still keeps the selected file in browser memory.
-CCLL is already published separately as compact, pre-indexed JSON chunks; it
-is intentionally not selectable in that explorer. Before adding a CCLL-sized
-file to the explorer, move filtering and sorting to a web worker or server-side
-page endpoint. Pagination, rank semantics, result counts, and CSV export are
+The 15.2-million-row raw CCLL wordform list and the 1,030,562-row Delfi.lt
+one-gram list are already published as compact, pre-indexed JSON chunks; neither
+is selectable in that explorer. The separate 142,228-row CCLL lemma list is
+small enough for the browser catalog. Before adding either larger list to the
+explorer, move filtering and sorting to a web worker or server-side page
+endpoint. Pagination, rank semantics, result counts, and CSV export are
 deliberately independent of that future transport, so the UI contract does not
 need to change.

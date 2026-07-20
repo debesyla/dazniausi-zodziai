@@ -29,7 +29,8 @@
     "bytes": 25251347,
     "sha256": "58baa109d29b8910b888346ad89524efe0b1694c33c277d4f80e6dd52e0c5d84",
     "rows": 1733157,
-    "columns": 2
+    "columns": 2,
+    "delimiter": " "
   },
   "maxChunkBytes": 65536,
   "summary": {
