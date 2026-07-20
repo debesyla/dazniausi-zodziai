@@ -70,6 +70,10 @@ function isNonNegativeInteger(value: unknown): value is number {
   return typeof value === 'number' && Number.isSafeInteger(value) && value >= 0;
 }
 
+function isNullableString(value: unknown): value is string | null {
+  return value === null || isNonEmptyString(value);
+}
+
 function isEntryKind(value: unknown): value is Dataset['entryKind'] {
   return value === 'lemma' || value === 'wordform';
 }
@@ -146,7 +150,7 @@ export function validateCatalog(data: unknown): DatasetCatalog {
     throw new Error('Invalid dataset catalog');
   }
   for (const dataset of catalog.datasets) {
-    if (!isNonEmptyString(dataset.id) || !isNonEmptyString(dataset.title) || !isNonEmptyString(dataset.author) || !isPositiveInteger(dataset.year) || !isEntryKind(dataset.entryKind) || !isSafeDatasetFile(dataset.file) || !isNonNegativeInteger(dataset.records) || !isNonNegativeInteger(dataset.totalFrequency) || typeof dataset.hasPartOfSpeech !== 'boolean') {
+    if (!isNonEmptyString(dataset.id) || !isNonEmptyString(dataset.title) || !isNonEmptyString(dataset.author) || !isPositiveInteger(dataset.year) || !isEntryKind(dataset.entryKind) || !isSafeDatasetFile(dataset.file) || !isNonNegativeInteger(dataset.records) || !isNonNegativeInteger(dataset.totalFrequency) || typeof dataset.hasPartOfSpeech !== 'boolean' || !isNullableString(dataset.licence) || !isNullableString(dataset.citation)) {
       throw new Error('Invalid dataset catalog entry');
     }
   }
