@@ -3,6 +3,7 @@ import { vi } from 'vitest';
 
 const catalog = {
   schemaVersion: 1,
+  defaultDatasetId: 'second',
   datasets: [
     {
       id: 'first', title: 'First dataset', author: 'First author', year: 2024,
@@ -41,7 +42,7 @@ describe('Page', () => {
     });
 
     const select = getByRole('combobox');
-    expect(select).toHaveValue('first');
+    expect(select).toHaveValue('second');
     expect(select.querySelectorAll('option')).toHaveLength(2);
     expect(select).toHaveTextContent('First dataset (2024)');
   });

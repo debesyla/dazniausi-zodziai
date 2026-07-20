@@ -1,54 +1,91 @@
 # Dataset preparation
 
-The application is a curated static catalog. Dataset imports are a rare maintainer task, not a browser upload feature.
+The application is a curated static catalog. Dataset imports are rare maintainer tasks, not a browser-upload feature. Review the source decision table in [source-catalog.md](source-catalog.md) before adding a configuration or public artifact.
 
-## Build command
+## Build and verify
+
+Build one reviewed dataset from an explicit local source root:
 
 ```bash
 npm run data:build -- \
-  --config data/datasets/utka-2018-lemmatized-totals.json \
+  --config data/datasets/dadurkevicius-2020-jcl-lemmas.json \
   --source-root /path/to/dazniausi-zodziai-sources \
-  --output static/datasets/utka-2018-lemmatized-totals.json \
+  --output static/datasets/dadurkevicius-2020-jcl-lemmas.json \
   --catalog static/datasets/catalog.json
 ```
 
-`--source-root` is intentionally explicit so no local machine path is committed to the repository. The configured source file must remain inside that directory.
+After building every configured dataset, compare each generated JSON file byte-for-byte with the committed public artifact:
 
-The command accepts UTF-8 CSV and TSV input, handles a UTF-8 BOM and CRLF line endings, validates every frequency, and writes formatted JSON only after the full source has been accepted.
+```bash
+npm run data:verify -- --source-root /path/to/dazniausi-zodziai-sources
+```
+
+`--source-root` is intentionally explicit so no local machine path is committed to the repository. The importer only accepts a relative input path that remains within that root after symbolic links are resolved.
 
 ## Dataset configuration
 
+Every public dataset configuration must define its identity, field mapping, aggregation policy, source encoding and reviewed snapshot, visible provenance, expected summary, and manual samples.
+
 ```json
 {
-  "id": "utka-2018-lemmatized-totals",
-  "title": "Utka 2018 Lithuanian Wordlist — Lemmatized totals",
-  "author": "Andrius Utka",
-  "year": 2018,
+  "id": "example-2024-lemmas",
+  "title": "Reviewed Lithuanian lemma list",
+  "author": "Dataset author",
+  "year": 2024,
   "entryKind": "lemma",
   "duplicatePolicy": "keep",
   "input": {
-    "path": "utka-2018/lemmatized_totals.csv",
-    "delimiter": ",",
-    "hasHeader": false,
-    "columns": { "word": 0, "type": 1, "frequency": 2 }
+    "path": "collection/original/lemmas.tsv",
+    "delimiter": "\t",
+    "hasHeader": true,
+    "encoding": "utf-8",
+    "snapshot": {
+      "repositoryUrl": "https://example.org/reviewed-source-repository",
+      "revision": "reviewed-release-or-revision",
+      "sha256": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
+    },
+    "columns": { "word": "lemma", "type": "pos", "frequency": "count" }
   },
   "provenance": {
-    "licence": "Confirm before publishing",
-    "citation": "Source-specific citation"
+    "licence": "CC BY 4.0",
+    "citation": "Source-specific citation",
+    "sourceUrl": "https://example.org/source-record",
+    "partOfSpeech": {
+      "name": "Source POS scheme",
+      "labels": { "N": "Noun", "V": "Verb" }
+    }
+  },
+  "validation": {
+    "summary": {
+      "sourceRows": 2,
+      "entryCount": 2,
+      "totalFrequency": 15,
+      "duplicateEntries": 0
+    },
+    "samples": [
+      { "word": "pavyzdys", "type": "N", "frequency": 10 },
+      { "word": "būti", "type": "V", "frequency": 5 }
+    ]
   }
 }
 ```
 
-For input with headers, use the header names instead of numeric indexes:
+For a source without part-of-speech data, omit both `input.columns.type` and `provenance.partOfSpeech`; samples then omit `type` as well.
 
-```json
-"columns": { "word": "lemma", "type": "pos", "frequency": "count" }
-```
+`entryKind` is either `lemma` or `wordform`. Use `keep` to preserve every source row, or `aggregate-word-type` only when repeated word-plus-POS rows should be combined. `summary.duplicateEntries` always records the number of duplicate word-plus-type keys found in the source, even when an aggregation policy collapses those published rows.
 
-`entryKind` is either `lemma` or `wordform`. Choose `keep` to preserve all source entries, or `aggregate-word-type` only when repeated word-plus-POS rows should be summed. The generated summary reports the number of duplicate keys either way.
+## Import validation
 
-## Generated outputs
+The importer rejects a build when any of these checks fail:
 
-The generated dataset contains source metadata, provenance, validated word entries, and a summary of source rows, published entries, total frequency, and duplicate keys. When `--catalog` is supplied, it also upserts a compact catalog record suitable for loading before the full dataset.
+- the source path is absolute, escapes the supplied root, or escapes it through a symbolic link;
+- the raw source bytes do not match the configured SHA-256 snapshot;
+- UTF-8 decoding, headers, field mapping, quoting, words, or positive integer frequencies are invalid;
+- a typed source has missing, unmapped, or unused POS labels;
+- the generated source-row count, published-entry count, total frequency, duplicate-key count, or reviewed representative sample differs from the configuration.
 
-Review the generated summary against the raw source before committing a newly published dataset.
+The generated dataset preserves `sourceSnapshot` in its public provenance: repository URL, revision, relative path, encoding, and SHA-256. The browser validates this metadata alongside every word entry and its summary before showing a dataset.
+
+## Catalog behavior
+
+When `--catalog` is supplied, the importer upserts a compact catalog record. The catalog’s `defaultDatasetId` is preserved so adding an alphabetically earlier title does not silently change the dataset selected on first visit. Review the visible licence, citation, source URL, summary totals, and generated catalog entry before committing.

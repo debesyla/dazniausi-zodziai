@@ -25,7 +25,24 @@ describe('project hygiene', () => {
 		const readme = await readRepositoryFile('README.md');
 
 		expect(readme).toContain('data/datasets/utka-2018-lemmatized-totals.json');
+		expect(readme).toContain('npm run data:verify');
 		expect(readme).not.toContain('data/datasets/example.json');
 		expect(readme).not.toContain('test:e2e');
+	});
+
+	it('tracks a curation decision for every known source collection', async () => {
+		const sourceCatalog = await readRepositoryFile('docs/source-catalog.md');
+
+		for (const collection of [
+			'Utka 2018 lemmatised word list',
+			'Dadurkevičius DML6 vs JCL',
+			'Dadurkevičius JCL word list',
+			'Rimkutė morphemic dictionary',
+			'Utka CCLL word lists',
+			'Utka CCLL2 vs war in Ukraine'
+		]) {
+			expect(sourceCatalog).toContain(collection);
+		}
+		expect(sourceCatalog).toContain('byte-for-byte reproducibility');
 	});
 });

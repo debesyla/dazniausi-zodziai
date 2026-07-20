@@ -5,6 +5,7 @@
   "author": "Andrius Utka",
   "year": 2018,
   "entryKind": "lemma",
+  "duplicatePolicy": "keep",
   "provenance": {
     "licence": "CC BY 4.0",
     "citation": "Utka, Andrius. 2018. Lemmatised Wordlist of 1 m. Corpus of Contemporary Lithuanian. Vytautas Magnus University. CLARIN-LT Repository. https://hdl.handle.net/20.500.11821/12",
@@ -30,6 +31,13 @@
         "tikr. dkt2": "Tikrinis daiktavardis (variantas)",
         "vksm": "Veiksmažodis"
       }
+    },
+    "sourceSnapshot": {
+      "repositoryUrl": "https://github.com/debesyla/dazniausi-zodziai-sources.git",
+      "revision": "d1f4c06e93d4142ec3c42a3c1d02c06b6a301e13",
+      "path": "utka-2018-01-18-Lithuanian-wordlist/modified/lemmatized_totals.csv",
+      "encoding": "utf-8",
+      "sha256": "d509af774a736534b3d638d3e46dd5e66f299ec83d11749eecbb7eb575af9c52"
     }
   },
   "summary": {

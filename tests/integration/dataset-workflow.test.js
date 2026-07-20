@@ -8,6 +8,25 @@ import Page from '../../src/routes/+page.svelte';
 
 const repositoryRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 
+function provenance(labels) {
+  return {
+    licence: 'CC BY 4.0',
+    citation: 'Test citation',
+    sourceUrl: 'https://example.test/source',
+    sourceSnapshot: {
+      repositoryUrl: 'https://example.test/sources',
+      revision: 'test-revision',
+      path: 'source.tsv',
+      encoding: 'utf-8',
+      sha256: 'a'.repeat(64)
+    },
+    partOfSpeech: {
+      name: 'Test POS',
+      labels
+    }
+  };
+}
+
 const firstDataset = {
   schemaVersion: 1,
   id: 'first',
@@ -15,7 +34,8 @@ const firstDataset = {
   author: 'Pirmas autorius',
   year: 2024,
   entryKind: 'lemma',
-  provenance: {},
+  duplicatePolicy: 'keep',
+  provenance: provenance({ noun: 'Noun', verb: 'Verb' }),
   summary: { sourceRows: 2, entryCount: 2, totalFrequency: 15, duplicateEntries: 0 },
   words: [
     { word: 'beta', type: 'noun', frequency: 10 },
@@ -30,7 +50,8 @@ const secondDataset = {
   author: 'Antras autorius',
   year: 2023,
   entryKind: 'wordform',
-  provenance: {},
+  duplicatePolicy: 'keep',
+  provenance: provenance({ adjective: 'Adjective' }),
   summary: { sourceRows: 1, entryCount: 1, totalFrequency: 20, duplicateEntries: 0 },
   words: [{ word: 'kitas', type: 'adjective', frequency: 20 }]
 };
@@ -68,7 +89,7 @@ describe('dataset workflow integration', () => {
     URL.createObjectURL = createObjectURL;
     URL.revokeObjectURL = revokeObjectURL;
     const user = userEvent.setup();
-    const { container, getByLabelText, getByRole, getByText, queryByRole, queryByText } = render(Page);
+    const { container, getByRole, getByText, queryByRole, queryByText } = render(Page);
 
     await waitFor(() => expect(getByRole('heading', { name: firstDataset.title })).toBeInTheDocument());
     expect(container.querySelector('.table-container tbody tr')).toHaveTextContent('beta');
@@ -76,7 +97,7 @@ describe('dataset workflow integration', () => {
     await user.click(getByRole('button', { name: 'Rikiuoti pagal Žodis: nerikiuota' }));
     await waitFor(() => expect(container.querySelector('.table-container tbody tr')).toHaveTextContent('alfa'));
 
-    await user.click(getByLabelText('noun'));
+    await user.click(getByRole('checkbox', { name: /Noun/ }));
     await waitFor(() => expect(getByRole('button', { name: 'Išvalyti filtrus' })).toBeInTheDocument());
 
     await user.selectOptions(getByRole('combobox', { name: 'Pasirinkite duomenis:' }), 'second');
