@@ -1,6 +1,15 @@
 import type { Word } from './data';
 
 export type WordSortKey = 'word' | 'frequency' | 'type';
+export const RESULTS_PER_PAGE = 50;
+
+export interface Page<T> {
+  items: T[];
+  currentPage: number;
+  totalPages: number;
+  start: number;
+  end: number;
+}
 
 /**
  * Filters an array of words based on a search query and optional type filter.
@@ -35,7 +44,7 @@ export function filterWords(words: Word[], query: string, selectedTypes?: string
  * @param asc - Sort ascending (true) or descending (false)
  * @returns Sorted array of words
  */
-export function sortWords(words: Word[], key: WordSortKey, asc: boolean = true): Word[] {
+export function sortWords<T extends Word>(words: T[], key: WordSortKey, asc: boolean = true): T[] {
   return [...words].sort((a, b) => {
     if (key === 'word') {
       const aStr = a.word;
@@ -52,4 +61,23 @@ export function sortWords(words: Word[], key: WordSortKey, asc: boolean = true):
     const bType = b.type ?? '';
     return asc ? aType.localeCompare(bType) : bType.localeCompare(aType);
   });
+}
+
+/**
+ * Returns one bounded, one-indexed result page. The source array is never
+ * mutated, so it can safely be shared by the table, dashboard, and export.
+ */
+export function paginate<T>(items: T[], requestedPage: number, pageSize = RESULTS_PER_PAGE): Page<T> {
+  const totalPages = Math.max(1, Math.ceil(items.length / pageSize));
+  const currentPage = Math.min(Math.max(1, requestedPage), totalPages);
+  const start = items.length === 0 ? 0 : (currentPage - 1) * pageSize + 1;
+  const end = Math.min(currentPage * pageSize, items.length);
+
+  return {
+    items: items.slice(start === 0 ? 0 : start - 1, end),
+    currentPage,
+    totalPages,
+    start,
+    end
+  };
 }
