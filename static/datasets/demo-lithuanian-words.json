@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "id": "demo-lithuanian-words",
+  "title": "Demonstracinis lietuviškų žodžių rinkinys",
+  "author": "Lithuanian Language Institute",
+  "year": 2023,
+  "entryKind": "lemma",
+  "summary": {
+    "sourceRows": 5,
+    "entryCount": 5,
+    "totalFrequency": 45800,
+    "duplicateEntries": 0
+  },
+  "words": [
+    { "word": "ir", "type": "conjunction", "frequency": 12500 },
+    { "word": "būti", "type": "verb", "frequency": 9800 },
+    { "word": "tas", "type": "pronoun", "frequency": 8600 },
+    { "word": "kad", "type": "conjunction", "frequency": 7200 },
+    { "word": "su", "type": "preposition", "frequency": 6500 }
+  ]
+}
