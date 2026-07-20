@@ -21,7 +21,7 @@
     loadCatalog().then((loadedCatalog) => {
       if (cancelled) return;
       catalog = loadedCatalog;
-      selectedDatasetId = loadedCatalog.datasets[0]?.id ?? '';
+      selectedDatasetId = loadedCatalog.defaultDatasetId ?? loadedCatalog.datasets[0]?.id ?? '';
       catalogLoading = false;
     }).catch((error) => {
       if (cancelled) return;

@@ -40,15 +40,18 @@ npm run build
 
 Datasets are prepared rarely by a maintainer, not uploaded through the public
 app. The canonical schema, source configuration, validation rules, and command
-are in [docs/data-preparation.md](docs/data-preparation.md).
+are in [docs/data-preparation.md](docs/data-preparation.md). The reviewed
+decision for every maintained source collection is tracked in
+[docs/source-catalog.md](docs/source-catalog.md).
 
 ```bash
 npm run data:build -- --config data/datasets/utka-2018-lemmatized-totals.json --source-root /path/to/dazniausi-zodziai-sources --output static/datasets/utka-2018-lemmatized-totals.json --catalog static/datasets/catalog.json
+npm run data:verify -- --source-root /path/to/dazniausi-zodziai-sources
 ```
 
-Review provenance, licence, citation, summary totals, and the generated catalog
-entry before committing a new dataset. The table's large-list strategy is
-documented in [docs/scalable-exploration.md](docs/scalable-exploration.md).
+Review provenance, licence, citation, source snapshot, summary totals, and the
+generated catalog entry before committing a new dataset. The table's large-list
+strategy is documented in [docs/scalable-exploration.md](docs/scalable-exploration.md).
 
 ## Deployment
 

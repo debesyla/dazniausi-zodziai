@@ -9,6 +9,12 @@
     "path": "utka-2018-01-18-Lithuanian-wordlist/modified/lemmatized_totals.csv",
     "delimiter": ",",
     "hasHeader": false,
+    "encoding": "utf-8",
+    "snapshot": {
+      "repositoryUrl": "https://github.com/debesyla/dazniausi-zodziai-sources.git",
+      "revision": "d1f4c06e93d4142ec3c42a3c1d02c06b6a301e13",
+      "sha256": "d509af774a736534b3d638d3e46dd5e66f299ec83d11749eecbb7eb575af9c52"
+    },
     "columns": {
       "word": 0,
       "type": 1,
@@ -41,5 +47,30 @@
         "vksm": "Veiksmažodis"
       }
     }
+  },
+  "validation": {
+    "summary": {
+      "sourceRows": 41977,
+      "entryCount": 41977,
+      "totalFrequency": 922949,
+      "duplicateEntries": 2
+    },
+    "samples": [
+      {
+        "word": "ir",
+        "type": "jng",
+        "frequency": 28174
+      },
+      {
+        "word": "būti",
+        "type": "vksm",
+        "frequency": 17128
+      },
+      {
+        "word": "Lietuva",
+        "type": "tikr. dkt",
+        "frequency": 3394
+      }
+    ]
   }
 }
