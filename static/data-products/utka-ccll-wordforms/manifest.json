@@ -11,7 +11,7 @@
   "provenance": {
     "sourceRepository": {
       "repositoryUrl": "https://github.com/debesyla/dazniausi-zodziai-sources.git",
-      "revision": "d1f4c06e93d4142ec3c42a3c1d02c06b6a301e13"
+      "revision": "5aa69dd8df47c17b21e50ca4b41709159deb1bf0"
     },
     "sourceUrl": "https://clarin-repo.lt/items/a67d3e7a-c2f0-4d0b-9f69-72fdaf2e6c0b",
     "licence": "CC BY 4.0",
@@ -33,7 +33,8 @@
         "bytes": 25251347,
         "sha256": "58baa109d29b8910b888346ad89524efe0b1694c33c277d4f80e6dd52e0c5d84",
         "rows": 1733157,
-        "columns": 2
+        "columns": 2,
+        "delimiter": " "
       },
       {
         "role": "subcorpus-fiction",

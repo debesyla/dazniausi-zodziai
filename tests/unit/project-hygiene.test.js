@@ -37,6 +37,9 @@ describe('project hygiene', () => {
 			'Utka 2018 lemmatised word list',
 			'Dadurkevičius DML6 vs JCL',
 			'Dadurkevičius JCL word list',
+			'Petkevičius CCLL lemmatised frequency list',
+			'Bielinskienė et al. Delfi.lt 1-gram list',
+			'MATAS v3.0',
 			'Rimkutė morphemic dictionary',
 			'Utka CCLL word lists',
 			'Utka CCLL2 vs war in Ukraine'
@@ -51,12 +54,15 @@ describe('project hygiene', () => {
 
 		expect(plan.genericProducts.map((product) => product.datasetFile)).toEqual([
 			'datasets/utka-2018-lemmatized-totals.json',
-			'datasets/dadurkevicius-2020-jcl-lemmas.json'
+			'datasets/dadurkevicius-2020-jcl-lemmas.json',
+			'datasets/petkevicius-2025-ccll-lemmas.json'
 		]);
 		expect(plan.contractProducts.map((product) => product.contractId)).toEqual([
 			'utka-ccll-wordforms',
 			'dadurkevicius-dml6-vs-jcl-comparison',
 			'utka-ccll2-war-ukraine-comparison',
+			'bielinskiene-2019-delfi-1grams',
+			'rimkute-2024-matas-v3-frequencies',
 			'rimkute-morphemic-dictionary'
 		]);
 		expect(plan.contractProducts.find((product) => product.contractId === 'rimkute-morphemic-dictionary')).toMatchObject({

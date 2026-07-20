@@ -3,7 +3,7 @@
   "contractType": "deferred-source-contracts",
   "sourceRepository": {
     "repositoryUrl": "https://github.com/debesyla/dazniausi-zodziai-sources.git",
-    "revision": "d1f4c06e93d4142ec3c42a3c1d02c06b6a301e13"
+    "revision": "5aa69dd8df47c17b21e50ca4b41709159deb1bf0"
   },
   "contracts": [
     {
@@ -268,6 +268,101 @@
           "Show normalized units and source denominators beside every metric.",
           "Keep token and document metrics distinct.",
           "Do not rank or export the six metrics as one total-frequency column."
+        ]
+      }
+    },
+    {
+      "id": "bielinskiene-2019-delfi-1grams",
+      "title": "Lithuanian 1-gram frequency list from the Delfi.lt corpus",
+      "decision": "publish",
+      "reason": "The source is a 1,030,562-row raw wordform frequency list. It is published as bounded static JSON chunks rather than loaded into the generic browser selector.",
+      "source": {
+        "sourceUrl": "https://clarin-repo.lt/items/37a8bc68-1355-40cd-ba17-33958fbee697",
+        "licence": "CC BY 4.0",
+        "citation": "Bielinskienė, A., Boizou, L., Bumbulienė, I., Kovalevskaitė, J., Krilavičius, T., Mandravickaitė, J., Rimkutė, E., Vilkaitė-Lozdienė, L. 2019. Lithuanian 1-gram dataset. Baltic Institute of Advanced Technology and Vytautas Magnus University. CLARIN-LT Repository. https://hdl.handle.net/20.500.11821/27.",
+        "encoding": "utf-8",
+        "entryKind": "wordform",
+        "hasPartOfSpeech": false,
+        "corpusTokens": 72883351,
+        "files": [
+          {
+            "path": "bielinskiene-2019-lithuanian-1gram-dataset/original/unigrams_frequency.csv",
+            "role": "all-by-frequency",
+            "bytes": 13791422,
+            "rows": 1030562,
+            "sha256": "f9405c785817c493a301dbcf8434de494827fe2ec19da7f18fd5dd1f55d52926",
+            "delimiter": ",",
+            "hasHeader": true,
+            "columns": 2,
+            "numericColumns": [1],
+            "numericTotals": { "1": 72883351 },
+            "samples": ["ir,2.167369e+06", "kad,903754", "yra,446639"]
+          }
+        ]
+      },
+      "schema": {
+        "key": "word",
+        "columns": [
+          { "id": "word", "label": "Word form", "type": "string", "sourceColumn": 0 },
+          { "id": "count", "label": "Token count", "type": "raw-token-count", "sourceColumn": 1, "nullable": false }
+        ],
+        "frequencyField": "count",
+        "sourceOrdering": { "frequency": "descending" }
+      },
+      "delivery": {
+        "status": "published-static-json",
+        "mode": "static-chunked-json",
+        "constraints": [
+          "Treat each source row as a raw one-gram token count, not as a lemmatised frequency.",
+          "Preserve the source token string, including punctuation and non-alphabetic forms.",
+          "Parse integer-valued scientific notation exactly before exposing numeric JSON counts.",
+          "Use the manifest and chunk index before requesting individual data chunks."
+        ]
+      }
+    },
+    {
+      "id": "rimkute-2024-matas-v3-frequencies",
+      "title": "MATAS v3.0 derived lemma and wordform frequencies",
+      "decision": "publish",
+      "reason": "The reviewed CoNLL-U corpus can produce reproducible frequency views while retaining the source Universal POS value and clearly excluding punctuation from word-frequency totals.",
+      "source": {
+        "sourceUrl": "https://clarin-repo.lt/items/298f8a26-20d6-44cf-ab33-e53538ec7df9",
+        "licence": "CC BY 4.0",
+        "citation": "Rimkutė, E., Bielinskienė, A., Dadurkevičius, V., Kovalevskaitė, J., Utka, A., Boizou, L. 2024. Lithuanian morphologically annotated corpus — MATAS v3.0. Institute of Digital Resources and Interdisciplinary Research (SITTI), Vytautas Magnus University. CLARIN-LT Repository. https://hdl.handle.net/20.500.11821/61.",
+        "encoding": "utf-8",
+        "entryKind": "lemma-and-wordform",
+        "hasPartOfSpeech": true,
+        "files": [
+          {
+            "path": "rimkute-2024-12-19-MATAS-v3/original/MATAS3.conllu.zip",
+            "role": "matas-conllu",
+            "format": "zip-conllu",
+            "bytes": 24221501,
+            "sha256": "2fb910266fd6320c6f6ba615bf44c3dd9efd014f20b9bbc75ea202028479ee03",
+            "archiveMember": "MATAS3.conllu",
+            "conlluSummary": {
+              "uncompressedBytes": 196453759,
+              "sha256": "57a5238ec6d13928aaf0a16a6bdc511f1ae09cd99293994b0f75341a30eaf122",
+              "integerTokenRows": 2137281,
+              "nonPunctuationRows": 1694814,
+              "sentences": 144026
+            }
+          }
+        ]
+      },
+      "schema": {
+        "key": "lemma-or-wordform plus Universal POS",
+        "frequencyField": "count",
+        "derivation": "Count integer-ID CoNLL-U rows by lemma or form plus Universal POS; exclude UPOS=PUNCT and map a missing UPOS to UNSPECIFIED."
+      },
+      "delivery": {
+        "status": "published-static-json",
+        "mode": "static-chunked-derived-frequency-json",
+        "constraints": [
+          "Do not conflate this derived corpus frequency with the source's generic token total.",
+          "Exclude UPOS=PUNCT from both frequency views.",
+          "Preserve the Universal POS value; use UNSPECIFIED only where the source field is empty.",
+          "Keep lemma and wordform frequencies as separate views."
         ]
       }
     },

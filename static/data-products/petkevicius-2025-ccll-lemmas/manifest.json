@@ -1,0 +1,36 @@
+{
+  "schemaVersion": 1,
+  "id": "petkevicius-2025-ccll-lemmas",
+  "title": "Dabartinės lietuvių kalbos tekstyno lemuotas dažninis sąrašas",
+  "productType": "generic-frequency-dataset",
+  "publication": {
+    "status": "published",
+    "scope": "Every public entry in petkevicius-2025-ccll-lemmas.",
+    "access": "The complete reviewed JSON dataset is available directly and is also selectable in the browser explorer."
+  },
+  "description": "The current CCLL lemma-frequency view, published as a reviewed browser-selectable dataset.",
+  "provenance": {
+    "licence": "CC BY 4.0",
+    "citation": "Petkevičius, Mindaugas. 2025. CCLL Lemmatised Frequency Lists. Institute of Digital Resources and Interdisciplinary Research (SITTI) at Vytautas Magnus University. CLARIN-LT Repository. https://hdl.handle.net/20.500.11821/77.",
+    "sourceUrl": "https://clarin-repo.lt/items/5671f65b-bdc2-41d5-ad04-cc57004f3c3b",
+    "sourceSnapshot": {
+      "repositoryUrl": "https://github.com/debesyla/dazniausi-zodziai-sources.git",
+      "revision": "5aa69dd8df47c17b21e50ca4b41709159deb1bf0",
+      "path": "petkevicius-2025-12-29-CCLL-Lemmatised-Frequency-Lists/original/4-LT_lemma_alpha_freq_list.txt",
+      "encoding": "utf-8",
+      "sha256": "852997dd68c3ca15ca8cb5d7b8149fe50f4408443a0086a0fe6b78cd9f61ae10"
+    }
+  },
+  "content": {
+    "format": "dazniausi-zodziai-dataset-v1",
+    "file": "../../datasets/petkevicius-2025-ccll-lemmas.json",
+    "entryKind": "lemma",
+    "recordEncoding": "object",
+    "summary": {
+      "sourceRows": 142228,
+      "entryCount": 142228,
+      "totalFrequency": 156125239,
+      "duplicateEntries": 0
+    }
+  }
+}

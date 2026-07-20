@@ -23,6 +23,12 @@ const SUMMARIZED_FIELD_TYPES = new Set([
   'normalized-token-count',
   'normalized-document-count'
 ]);
+const CHUNKED_PRODUCT_TYPES = new Set([
+  'chunked-wordform-list',
+  'chunked-comparison',
+  'chunked-frequency-list',
+  'chunked-derived-frequency-list'
+]);
 
 function fail(message) {
   throw new Error(`Data-product verification failed: ${message}`);
@@ -84,9 +90,14 @@ function sameObject(left, right) {
 }
 
 function validateField(field, description) {
-  if (!isPlainObject(field) || !isSafeFieldId(field.id) || !normalizeString(field.label) || !FIELD_TYPES.has(field.type)
-    || !Number.isInteger(field.sourceColumn) || field.sourceColumn < 0) {
+  if (!isPlainObject(field) || !isSafeFieldId(field.id) || !normalizeString(field.label) || !FIELD_TYPES.has(field.type)) {
     fail(`${description} is invalid`);
+  }
+  if (field.derived !== undefined && typeof field.derived !== 'boolean') fail(`${description}.derived is invalid`);
+  if (field.derived === true) {
+    if (field.sourceColumn !== undefined) fail(`${description}.sourceColumn is invalid for a derived field`);
+  } else if (!Number.isInteger(field.sourceColumn) || field.sourceColumn < 0) {
+    fail(`${description}.sourceColumn is invalid`);
   }
   if (field.nullable !== undefined && typeof field.nullable !== 'boolean') fail(`${description}.nullable is invalid`);
   if (NUMERIC_FIELD_TYPES.has(field.type) && !normalizeString(field.unit)) fail(`${description}.unit is invalid`);
@@ -207,8 +218,18 @@ async function verifyChunkedProduct({ manifest, productDirectory }) {
       viewRecords += chunk.records.length;
     }
 
+    let sourceRows = viewRecords;
+    if (index.derivation !== undefined) {
+      if (!isPlainObject(index.derivation) || !isPlainObject(index.derivation.expectedSummary)
+        || !Number.isSafeInteger(index.derivation.expectedSummary.sourceRows)
+        || index.derivation.expectedSummary.sourceRows < viewRecords
+        || index.derivation.expectedSummary.recordCount !== viewRecords) {
+        fail(`${manifest.id}/${view.id} derivation metadata is invalid`);
+      }
+      sourceRows = index.derivation.expectedSummary.sourceRows;
+    }
     const expectedSummary = {
-      sourceRows: viewRecords,
+      sourceRows,
       recordCount: viewRecords,
       numericTotals: totals,
       nullCounts
@@ -272,7 +293,7 @@ export async function verifyDataProducts({ outputRoot = defaultOutputRoot, stati
       result.chunkedViews += genericResult.chunkedViews;
       result.chunks += genericResult.chunks;
       result.records += genericResult.records;
-    } else if (manifest.productType === 'chunked-wordform-list' || manifest.productType === 'chunked-comparison') {
+    } else if (CHUNKED_PRODUCT_TYPES.has(manifest.productType)) {
       const chunkedResult = await verifyChunkedProduct({ manifest, productDirectory });
       if (entry.viewCount !== chunkedResult.viewCount || entry.recordCount !== null) {
         fail(`${entry.id} chunked catalog counts are invalid`);

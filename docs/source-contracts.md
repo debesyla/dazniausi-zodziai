@@ -27,6 +27,8 @@ copying the raw source repository into the application source tree.
 | `utka-ccll-wordforms` | Published chunked JSON | Wordform token counts for the aggregate and five named subcorpora | Static manifest, source-order index, and bounded chunks; a future interactive explorer must still meet the budgets below |
 | `dadurkevicius-dml6-vs-jcl-comparison` | Published chunked comparison JSON | JCL token counts, DML6 coverage categories, lemma/POS occurrences, and missing types | Three separate views with explicit fields and labels |
 | `utka-ccll2-war-ukraine-comparison` | Published chunked comparison JSON | Six normalized token/document metrics across three source collections | Null-preserving view with source denominators in every field definition |
+| `bielinskiene-2019-delfi-1grams` | Published chunked frequency JSON | Every raw CSV one-gram and its raw count | CSV quoting, header handling, and integer-valued scientific notation are verified before chunking |
+| `rimkute-2024-matas-v3-frequencies` | Published chunked derived-frequency JSON | Non-punctuation MATAS lemma/POS and wordform/POS frequencies | The original ZIP and its CoNLL-U member are checksummed; derivation totals and record counts are pinned per view |
 | `rimkute-morphemic-dictionary` | Published metadata-only JSON | Citation and source-file inventory only | Licensable machine-readable source and reuse terms, tracked in [issue #41](https://github.com/debesyla/dazniausi-zodziai/issues/41) |
 
 The comparison contracts deliberately have no generic `frequency` field. A
@@ -62,6 +64,17 @@ subcorpus.
 
 The budgets are an interactive-explorer gate, not a publication gate: the
 source is already available in the public data-product catalog.
+
+## Derived MATAS frequency views
+
+MATAS v3.0 is stored as its original public ZIP archive. During the product
+build, its UTF-8 CoNLL-U member is checksummed and parsed. Only integer-ID
+rows participate; `UPOS=PUNCT` rows are excluded from word-frequency totals.
+The builder aggregates the remaining rows by either source lemma or source
+wordform plus Universal POS. A blank source POS is retained as
+`UNSPECIFIED`, rather than silently dropping the token. The index marks the
+count field as derived and pins the reviewed source-row, output-row, and total
+counts for each view.
 
 ## Updating a contract
 

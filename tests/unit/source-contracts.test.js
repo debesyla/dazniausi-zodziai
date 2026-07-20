@@ -71,6 +71,27 @@ describe('verifySourceContracts', () => {
     await expect(verifySourceContracts({ contractPath, sourceRoot })).rejects.toThrow('unexpected value');
   });
 
+  it('validates a quoted CSV header and integer-valued scientific notation', async () => {
+    const sourceRoot = await makeDirectory();
+    const source = '_id,frequency\n"ir,",2.5e1\nkad,5\n';
+    await writeFile(path.join(sourceRoot, 'onegrams.csv'), source);
+    const contractPath = path.join(sourceRoot, 'contract.json');
+    await writeFile(contractPath, JSON.stringify(manifestFor({
+      path: 'onegrams.csv',
+      bytes: Buffer.byteLength(source),
+      rows: 2,
+      sha256: checksum(source),
+      delimiter: ',',
+      hasHeader: true,
+      columns: 2,
+      numericColumns: [1],
+      numericTotals: { 1: 30 },
+      samples: ['"ir,",2.5e1', 'kad,5']
+    })));
+
+    await expect(verifySourceContracts({ contractPath, sourceRoot })).resolves.toEqual({ contracts: 1, files: 1 });
+  });
+
   it('rejects a source symlink that escapes the configured root', async () => {
     const sourceRoot = await makeDirectory();
     const outsideRoot = await makeDirectory();

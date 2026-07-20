@@ -23,6 +23,16 @@
       "recordCount": 169787
     },
     {
+      "id": "petkevicius-2025-ccll-lemmas",
+      "title": "Dabartinės lietuvių kalbos tekstyno lemuotas dažninis sąrašas",
+      "productType": "generic-frequency-dataset",
+      "publicationStatus": "published",
+      "manifest": "petkevicius-2025-ccll-lemmas/manifest.json",
+      "licence": "CC BY 4.0",
+      "viewCount": 1,
+      "recordCount": 142228
+    },
+    {
       "id": "utka-ccll-wordforms",
       "title": "Dabartinės lietuvių kalbos tekstyno žodžių formų dažniniai sąrašai",
       "productType": "chunked-wordform-list",
@@ -50,6 +60,26 @@
       "manifest": "utka-ccll2-war-ukraine-comparison/manifest.json",
       "licence": "CC BY 4.0",
       "viewCount": 1,
+      "recordCount": null
+    },
+    {
+      "id": "bielinskiene-2019-delfi-1grams",
+      "title": "Lithuanian 1-gram frequency list from the Delfi.lt corpus",
+      "productType": "chunked-frequency-list",
+      "publicationStatus": "published",
+      "manifest": "bielinskiene-2019-delfi-1grams/manifest.json",
+      "licence": "CC BY 4.0",
+      "viewCount": 1,
+      "recordCount": null
+    },
+    {
+      "id": "rimkute-2024-matas-v3-frequencies",
+      "title": "MATAS v3.0 derived lemma and wordform frequencies",
+      "productType": "chunked-derived-frequency-list",
+      "publicationStatus": "published",
+      "manifest": "rimkute-2024-matas-v3-frequencies/manifest.json",
+      "licence": "CC BY 4.0",
+      "viewCount": 2,
       "recordCount": null
     },
     {

@@ -1,0 +1,189 @@
+{
+  "schemaVersion": 1,
+  "productId": "rimkute-2024-matas-v3-frequencies",
+  "viewId": "lemmas-by-pos-frequency",
+  "recordEncoding": "array",
+  "fields": [
+    {
+      "id": "lemma",
+      "label": "Lemma",
+      "type": "string",
+      "sourceColumn": 2
+    },
+    {
+      "id": "universalPos",
+      "label": "Universal POS",
+      "type": "source-pos-code",
+      "sourceColumn": 3
+    },
+    {
+      "id": "count",
+      "label": "Token count",
+      "type": "raw-token-count",
+      "unit": "tokens",
+      "derived": true
+    }
+  ],
+  "ordering": {
+    "field": "count",
+    "direction": "descending"
+  },
+  "sourceFile": {
+    "role": "matas-conllu",
+    "path": "rimkute-2024-12-19-MATAS-v3/original/MATAS3.conllu.zip",
+    "format": "zip-conllu",
+    "bytes": 24221501,
+    "sha256": "2fb910266fd6320c6f6ba615bf44c3dd9efd014f20b9bbc75ea202028479ee03",
+    "archiveMember": "MATAS3.conllu"
+  },
+  "derivation": {
+    "type": "conllu-frequency",
+    "key": "lemma",
+    "excludeUniversalPos": [
+      "PUNCT"
+    ],
+    "missingUniversalPos": "UNSPECIFIED",
+    "expectedSummary": {
+      "sourceRows": 1694814,
+      "recordCount": 56420,
+      "totalFrequency": 1694814
+    }
+  },
+  "maxChunkBytes": 65536,
+  "summary": {
+    "sourceRows": 1694814,
+    "recordCount": 56420,
+    "numericTotals": {
+      "count": 1694814
+    },
+    "nullCounts": {}
+  },
+  "chunks": [
+    {
+      "file": "chunks/000001.json",
+      "records": 2797,
+      "bytes": 65525,
+      "sha256": "cb07c52958c136b5dc6a4c194c72d98205d31fff3e8008fe8f9a6158c0cb3583"
+    },
+    {
+      "file": "chunks/000002.json",
+      "records": 2805,
+      "bytes": 65534,
+      "sha256": "ea0a78b419649e15567c17cd879a844a16b8011068bc527d38bb0d86c26fda10"
+    },
+    {
+      "file": "chunks/000003.json",
+      "records": 2759,
+      "bytes": 65536,
+      "sha256": "60632d845278c27e2476ba2f9f46caa4a2ef5a99a2f4f4390e2b20f94d473908"
+    },
+    {
+      "file": "chunks/000004.json",
+      "records": 2736,
+      "bytes": 65535,
+      "sha256": "3447ff57071e68a19126f625dc81adcc3039977b3c47690cced317a7e1bfbdb9"
+    },
+    {
+      "file": "chunks/000005.json",
+      "records": 2785,
+      "bytes": 65523,
+      "sha256": "a3b656c824c20c10abfa38497f911626a79272b9fb42ca4525aa780cdb038858"
+    },
+    {
+      "file": "chunks/000006.json",
+      "records": 2842,
+      "bytes": 65514,
+      "sha256": "1bc8a65f3d3c4f64b404e91d1b08e15c84fb1d12b18e5b67d61e55e2d3b91659"
+    },
+    {
+      "file": "chunks/000007.json",
+      "records": 2863,
+      "bytes": 65525,
+      "sha256": "d43e35762a470bb51a1ea16b7ec6a40feca056c32d7335fc5704f4d80405bcf8"
+    },
+    {
+      "file": "chunks/000008.json",
+      "records": 2845,
+      "bytes": 65521,
+      "sha256": "a2f4a5623c869984e0d41d3cf9c264f55e226e45086a07b1f23a162fe2b1f7d3"
+    },
+    {
+      "file": "chunks/000009.json",
+      "records": 2781,
+      "bytes": 65532,
+      "sha256": "c018ebe401ae0075448d50ea843e2fcf63aaeb7b2377350998489982999eac0d"
+    },
+    {
+      "file": "chunks/000010.json",
+      "records": 2965,
+      "bytes": 65534,
+      "sha256": "c56dbcd28789c44968b18629b8bafec1a964dc2f971d383c3ed00e104176fc4c"
+    },
+    {
+      "file": "chunks/000011.json",
+      "records": 2755,
+      "bytes": 65528,
+      "sha256": "325d054fbd77e8380e1b11d2440808f9bbcf17e1177da2bedb52b9a865505844"
+    },
+    {
+      "file": "chunks/000012.json",
+      "records": 2732,
+      "bytes": 65534,
+      "sha256": "3c5f03ecfe742d4de649402a906fe8c308af105c8876cdb2a076df27c2cc75f2"
+    },
+    {
+      "file": "chunks/000013.json",
+      "records": 3195,
+      "bytes": 65532,
+      "sha256": "52b7f1cedf95667a879cab202378094954b3d5beac3e2a17988e768af962b3f8"
+    },
+    {
+      "file": "chunks/000014.json",
+      "records": 2947,
+      "bytes": 65523,
+      "sha256": "4832ad958e3f9411b68dc45611b596d891a3b1d5153ba1ab10efb433c73344ab"
+    },
+    {
+      "file": "chunks/000015.json",
+      "records": 2899,
+      "bytes": 65536,
+      "sha256": "8befc3f5c9e120809ea43d39a2e4726494f89cfa240d39b22557c52002b800dc"
+    },
+    {
+      "file": "chunks/000016.json",
+      "records": 2784,
+      "bytes": 65513,
+      "sha256": "9c3dc9b9aafc719254baf1d6cf1d27925624635ce25af9ed0c5219281de90a90"
+    },
+    {
+      "file": "chunks/000017.json",
+      "records": 2738,
+      "bytes": 65523,
+      "sha256": "167dffac0588bbcc78a5840958efc889a9767feee1c39c8cd26da52ab013c6a2"
+    },
+    {
+      "file": "chunks/000018.json",
+      "records": 2643,
+      "bytes": 65533,
+      "sha256": "37c333ec752bf8fe93289a92194838d99d81acdfbb9761f723e4ed85f5d29573"
+    },
+    {
+      "file": "chunks/000019.json",
+      "records": 2729,
+      "bytes": 65530,
+      "sha256": "5324fba586dc6053af96547d68169c892a59f3933d7db4f5de318cdf0444a00d"
+    },
+    {
+      "file": "chunks/000020.json",
+      "records": 2752,
+      "bytes": 65534,
+      "sha256": "7d0314622ce9da6ded9948bda842a9bf8f5527460e80539ae1375847fd7d306c"
+    },
+    {
+      "file": "chunks/000021.json",
+      "records": 68,
+      "bytes": 1771,
+      "sha256": "5697face8f392400071014d6dc4b9dba5e1b3e0253c107073fca03ad9f2dc985"
+    }
+  ]
+}
