@@ -1,14 +1,34 @@
 <script lang="ts">
   import DataLoader from '../components/DataLoader.svelte';
   import { t } from '$lib/translations';
-  import { getAvailableDatasets } from '$lib/data';
+  import { loadCatalog, type DatasetCatalog } from '$lib/data';
 
-  let selectedFilename = $state(getAvailableDatasets()[0]?.filename || 'sample-dataset.json');
+  let catalog = $state<DatasetCatalog | null>(null);
+  let catalogLoading = $state(true);
+  let catalogError = $state<string | null>(null);
+  let selectedDatasetId = $state('');
 
-  let options = $derived(getAvailableDatasets().map(({filename, author}) => ({
-    value: filename,
-    label: author
-  })));
+  let selectedDataset = $derived(catalog?.datasets.find((dataset) => dataset.id === selectedDatasetId));
+
+  $effect(() => {
+    let cancelled = false;
+    catalogLoading = true;
+    catalogError = null;
+    loadCatalog().then((loadedCatalog) => {
+      if (cancelled) return;
+      catalog = loadedCatalog;
+      selectedDatasetId = loadedCatalog.datasets[0]?.id ?? '';
+      catalogLoading = false;
+    }).catch((error) => {
+      if (cancelled) return;
+      catalogError = error instanceof Error ? error.message : String(error);
+      catalogLoading = false;
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  });
 </script>
 
 <svelte:head>
@@ -17,16 +37,29 @@
 
 <h1>{t('pageTitle')}</h1>
 
-<div class="dataset-selector">
-  <label for="dataset-select">{t('selectDataset')}:</label>
-  <select id="dataset-select" bind:value={selectedFilename}>
-    {#each options as opt}
-      <option value={opt.value}>{opt.label}</option>
-    {/each}
-  </select>
-</div>
+{#if catalogLoading}
+  <div class="loading">{t('loadingCatalog')}</div>
+{:else if catalogError}
+  <div class="error">
+    <h2>{t('errorLoadingCatalog')}</h2>
+    <p>{catalogError}</p>
+  </div>
+{:else if catalog && catalog.datasets.length > 0}
+  <div class="dataset-selector">
+    <label for="dataset-select">{t('selectDataset')}:</label>
+    <select id="dataset-select" bind:value={selectedDatasetId}>
+      {#each catalog.datasets as dataset}
+        <option value={dataset.id}>{dataset.title} ({dataset.year})</option>
+      {/each}
+    </select>
+  </div>
 
-<DataLoader filename={selectedFilename} />
+  {#if selectedDataset}
+    <DataLoader filename={selectedDataset.file} />
+  {/if}
+{:else}
+  <p class="empty-catalog" role="status">{t('noDatasets')}</p>
+{/if}
 
 <style>
   h1 {
@@ -47,5 +80,16 @@
     color: #FFBF00;
     border: 1px solid #FFBF00;
     padding: var(--xs) var(--sm);
+  }
+
+  .loading,
+  .error,
+  .empty-catalog {
+    padding: var(--md);
+    border: 1px solid #FFBF00;
+  }
+
+  .error h2 {
+    margin-bottom: var(--sm);
   }
 </style>
