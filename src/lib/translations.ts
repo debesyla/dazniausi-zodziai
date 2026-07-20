@@ -3,12 +3,15 @@ export const translations = {
   lt: {
     // SearchBar component
     searchPlaceholder: 'Ieškoti žodžių...',
+    searchWords: 'Ieškoti žodžių',
     clearSearch: 'Išvalyti paiešką',
     
     // DataTable component
     word: 'Žodis',
     type: 'Tipas',
     frequency: 'Dažnumas',
+    sortBy: 'Rikiuoti pagal',
+    unsorted: 'nerikiuota',
     
     // DataLoader component
     loading: 'Kraunamas duomenų rinkinys...',
