@@ -26,7 +26,13 @@ export const translations = {
     filterByType: 'Filtruoti pagal tipą:',
     posScheme: 'Kalbos dalių žymėjimas',
     clearFilters: 'Išvalyti filtrus',
-    loadAll: 'Rodyti visus',
+    updatingResults: 'Atnaujinami rezultatai…',
+    noMatchingWords: 'Nėra žodžių, atitinkančių aktyvius filtrus.',
+    showingResults: 'Rodomi {start}–{end} iš {total}',
+    pagination: 'Rezultatų puslapiai',
+    previousPage: 'Ankstesnis',
+    nextPage: 'Kitas',
+    pageOf: '{page} puslapis iš {total}',
     
     // DownloadButton component
     downloadData: 'Atsisiųsti duomenis .csv formatu',
@@ -41,7 +47,6 @@ export const translations = {
     // Frequency dashboard
     frequencyDashboard: 'Dažnumo vaizdas',
     analysisForActiveFilters: 'Skaičiavimai atnaujinami pagal pasirinktą rinkinį ir aktyvius filtrus.',
-    noMatchingWords: 'Nėra žodžių, atitinkančių aktyvius filtrus.',
     headlineMetrics: 'Pagrindiniai dažnumo rodikliai',
     entries: 'Įrašai',
     totalFrequency: 'Bendras dažnumas',

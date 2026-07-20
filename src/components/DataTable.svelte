@@ -6,6 +6,7 @@
     word: string;
     type?: string;
     frequency: number;
+    rank?: number;
   }
 
   let {
@@ -29,7 +30,7 @@
     }
   }
 
-  let sortedWords = $derived(sortWords(words, sortKey, sortAsc));
+  let sortedWords = $derived<Word[]>(sortWords(words, sortKey, sortAsc));
 
   function displayType(type?: string) {
     if (!type) return '';
@@ -40,6 +41,7 @@
 <table>
   <thead>
     <tr>
+      <th>{t('rank')}</th>
       <th onclick={() => sortBy('word')} class="sortable">{t('word')} {sortKey === 'word' ? (sortAsc ? '↑' : '↓') : ''}</th>
       <th onclick={() => sortBy('frequency')} class="sortable">{t('frequency')} {sortKey === 'frequency' ? (sortAsc ? '↑' : '↓') : ''}</th>
       <th onclick={() => sortBy('type')} class="sortable">{t('type')} {sortKey === 'type' ? (sortAsc ? '↑' : '↓') : ''}</th>
@@ -48,6 +50,7 @@
   <tbody>
     {#each sortedWords as word}
       <tr>
+        <td>{word.rank ?? ''}</td>
         <td>{word.word}</td>
         <td>{word.frequency.toLocaleString()}</td>
         <td>{displayType(word.type)}</td>

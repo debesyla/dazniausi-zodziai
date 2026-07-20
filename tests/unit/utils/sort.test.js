@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { sortWords } from '../../../src/lib/utils.ts';
+import { paginate, RESULTS_PER_PAGE, sortWords } from '../../../src/lib/utils.ts';
 
 describe('sortWords', () => {
   const words = [
@@ -63,5 +63,23 @@ describe('sortWords', () => {
     const original = [...words];
     sortWords(words, 'word');
     expect(words).toEqual(original);
+  });
+});
+
+describe('paginate', () => {
+  it('keeps rendering bounded to 50 records even when many results match', () => {
+    const matches = Array.from({ length: 50_001 }, (_, index) => `word-${index + 1}`);
+    const page = paginate(matches, 1);
+
+    expect(RESULTS_PER_PAGE).toBe(50);
+    expect(page).toMatchObject({ start: 1, end: 50, currentPage: 1, totalPages: 1001 });
+    expect(page.items).toHaveLength(50);
+    expect(page.items[0]).toBe('word-1');
+    expect(page.items[49]).toBe('word-50');
+  });
+
+  it('clamps out-of-range pages and represents an empty result set', () => {
+    expect(paginate(['a', 'b'], 99)).toMatchObject({ currentPage: 1, totalPages: 1, start: 1, end: 2 });
+    expect(paginate([], 4)).toMatchObject({ currentPage: 1, totalPages: 1, start: 0, end: 0, items: [] });
   });
 });

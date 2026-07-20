@@ -1,6 +1,6 @@
 <script lang="ts">
   import { loadDataset, type Dataset } from '$lib/data';
-  import { filterWords, sortWords } from '$lib/utils';
+  import { filterWords, paginate, RESULTS_PER_PAGE, sortWords } from '$lib/utils';
   import type { WordSortKey } from '$lib/utils';
   import { t } from '$lib/translations';
   import SearchBar from './SearchBar.svelte';
@@ -14,10 +14,12 @@
   let loading = $state(true);
   let error = $state<string | null>(null);
   let searchQuery = $state('');
+  let appliedSearchQuery = $state('');
+  let searchPending = $state(false);
   let selectedTypes = $state<string[]>([]);
-  let loadedAll = $state(false);
   let sortKey = $state<WordSortKey>('frequency');
   let sortAsc = $state(false);
+  let currentPage = $state(1);
 
   let uniqueTypes = $derived(dataset
     ? [...new Set(dataset.words.map((word) => word.type).filter((type): type is string => type !== undefined))]
@@ -25,17 +27,29 @@
 
   let typeLabels = $derived(dataset?.provenance.partOfSpeech?.labels ?? {});
 
-  let filteredWords = $derived(dataset?.words ? filterWords(dataset.words, searchQuery, selectedTypes) : []);
+  let filteredWords = $derived(dataset?.words ? filterWords(dataset.words, appliedSearchQuery, selectedTypes) : []);
 
-  let sortedFilteredWords = $derived(sortWords(filteredWords, sortKey, sortAsc));
+  let rankedFilteredWords = $derived(sortWords(filteredWords, 'frequency', false).map((word, index) => ({ ...word, rank: index + 1 })));
 
-  let displayedWords = $derived(loadedAll ? sortedFilteredWords : sortedFilteredWords.slice(0, 10));
+  let sortedFilteredWords = $derived(sortWords(rankedFilteredWords, sortKey, sortAsc));
+
+  let resultPage = $derived(paginate(sortedFilteredWords, currentPage));
 
   let hasActiveFilters = $derived(searchQuery.trim().length > 0 || selectedTypes.length > 0);
 
   function clearFilters() {
     searchQuery = '';
+    appliedSearchQuery = '';
+    searchPending = false;
     selectedTypes = [];
+  }
+
+  function previousPage() {
+    currentPage = Math.max(1, resultPage.currentPage - 1);
+  }
+
+  function nextPage() {
+    currentPage = Math.min(resultPage.totalPages, resultPage.currentPage + 1);
   }
 
   $effect(() => {
@@ -63,14 +77,31 @@
   $effect(() => {
     if (!filename) return;
     searchQuery = '';
+    appliedSearchQuery = '';
+    searchPending = false;
     selectedTypes = [];
-    loadedAll = false;
+    sortKey = 'frequency';
+    sortAsc = false;
+    currentPage = 1;
   });
 
   $effect(() => {
-    searchQuery;
+    const query = searchQuery;
+    searchPending = query !== appliedSearchQuery;
+    const timer = window.setTimeout(() => {
+      appliedSearchQuery = query;
+      searchPending = false;
+    }, 150);
+    return () => window.clearTimeout(timer);
+  });
+
+  $effect(() => {
+    appliedSearchQuery;
     selectedTypes;
-    loadedAll = false;
+    sortKey;
+    sortAsc;
+    dataset?.id;
+    currentPage = 1;
   });
 </script>
 
@@ -97,13 +128,16 @@
       <p><a href={dataset.provenance.sourceUrl} target="_blank" rel="noreferrer">{t('source')}</a></p>
     {/if}
     
-    <h3>{t('words')} ({displayedWords.length}{#if sortedFilteredWords.length > 10 && !loadedAll} / {sortedFilteredWords.length}{/if})</h3>
+    <h3>{t('words')} ({sortedFilteredWords.length})</h3>
     <div class="search-and-clear">
       <SearchBar bind:value={searchQuery} />
       {#if hasActiveFilters}
         <button onclick={clearFilters} class="clear-filters">{t('clearFilters')}</button>
       {/if}
     </div>
+    {#if searchPending}
+      <p class="updating-results" role="status">{t('updatingResults')}</p>
+    {/if}
     {#if uniqueTypes.length > 0}
       <div class="type-filter">
         <h4>{t('filterByType')}</h4>
@@ -118,21 +152,28 @@
         {/each}
       </div>
     {/if}
-    <FrequencyDashboard words={filteredWords} typeLabels={typeLabels} />
+    {#if sortedFilteredWords.length > 0}
+      <FrequencyDashboard words={filteredWords} typeLabels={typeLabels} />
+    {/if}
     <DownloadButton
       words={sortedFilteredWords}
       metadata={{ id: dataset.id, title: dataset.title, author: dataset.author, year: dataset.year }}
-      exploration={{ query: searchQuery, types: selectedTypes, sortKey, sortAsc }}
+      exploration={{ query: appliedSearchQuery, types: selectedTypes, sortKey, sortAsc }}
     />
     <div class="table-container">
       {#if sortedFilteredWords.length === 0}
         <p class="empty-state" role="status">{t('noMatchingWords')}</p>
       {:else}
         {#key filename}
-          <DataTable words={displayedWords} typeLabels={typeLabels} bind:sortKey bind:sortAsc />
+          <p class="result-count">{t('showingResults', { start: resultPage.start, end: resultPage.end, total: sortedFilteredWords.length })}</p>
+          <DataTable words={resultPage.items} typeLabels={typeLabels} bind:sortKey bind:sortAsc />
         {/key}
-        {#if sortedFilteredWords.length > 10 && !loadedAll}
-          <button onclick={() => loadedAll = true} class="load-all">{t('loadAll')}</button>
+        {#if resultPage.totalPages > 1}
+          <nav class="pagination" aria-label={t('pagination')}>
+            <button onclick={previousPage} disabled={resultPage.currentPage === 1}>{t('previousPage')}</button>
+            <span>{t('pageOf', { page: resultPage.currentPage, total: resultPage.totalPages })}</span>
+            <button onclick={nextPage} disabled={resultPage.currentPage === resultPage.totalPages}>{t('nextPage')}</button>
+          </nav>
         {/if}
       {/if}
     </div>
@@ -201,21 +242,6 @@
     color: #222;
   }
 
-  .load-all {
-    background: transparent;
-    border: 1px solid #FFBF00;
-    color: #FFBF00;
-    padding: var(--xs) var(--sm);
-    cursor: pointer;
-    user-select: none;
-    margin: var(--sm) 0;
-  }
-
-  .load-all:hover {
-    background: #FFBF00;
-    color: #222;
-  }
-
   .table-container {
     margin-top: var(--sm);
     text-align: center;
@@ -231,6 +257,24 @@
     display: flex;
     gap: var(--sm);
     align-items: center;
+  }
+
+  .updating-results,
+  .result-count {
+    margin-top: var(--sm);
+  }
+
+  .pagination {
+    align-items: center;
+    display: flex;
+    gap: var(--sm);
+    justify-content: center;
+    margin: var(--md) 0 0;
+  }
+
+  .pagination button:disabled {
+    cursor: not-allowed;
+    opacity: .5;
   }
 
   @media (max-width: 767px) {
