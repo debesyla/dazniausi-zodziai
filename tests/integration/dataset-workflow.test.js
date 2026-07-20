@@ -73,9 +73,7 @@ describe('dataset workflow integration', () => {
     await waitFor(() => expect(getByRole('heading', { name: firstDataset.title })).toBeInTheDocument());
     expect(container.querySelector('.table-container tbody tr')).toHaveTextContent('beta');
 
-    const wordHeader = [...container.querySelectorAll('.table-container th.sortable')]
-      .find((header) => header.textContent?.includes('Žodis'));
-    await user.click(wordHeader);
+    await user.click(getByRole('button', { name: 'Rikiuoti pagal Žodis: nerikiuota' }));
     await waitFor(() => expect(container.querySelector('.table-container tbody tr')).toHaveTextContent('alfa'));
 
     await user.click(getByLabelText('noun'));
