@@ -18,7 +18,6 @@ export const translations = {
     errorLoadingData: 'Klaida Kraunant Duomenis',
     author: 'Autorius',
     year: 'Metai',
-    datasetInformation: 'Duomenų informacija:',
     entryKind: 'Duomenų vienetas',
     lemma: 'Lema',
     wordform: 'Žodžio forma',

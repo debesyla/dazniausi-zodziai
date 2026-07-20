@@ -8,7 +8,7 @@
   import DownloadButton from './DownloadButton.svelte';
   import FrequencyDashboard from './FrequencyDashboard.svelte';
 
-  let { filename = 'sample-dataset.json' } = $props();
+  let { filename } = $props<{ filename: string }>();
 
   let dataset = $state<Dataset | null>(null);
   let loading = $state(true);
