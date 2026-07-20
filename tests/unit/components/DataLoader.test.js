@@ -154,6 +154,7 @@ describe('DataLoader', () => {
     await rerender({ filename: 'second.json' });
 
     await waitFor(() => {
+      expect(getByText('Second Author')).toBeInTheDocument();
       expect(loadDataset).toHaveBeenCalledWith('second.json');
       expect(getByLabelText('verb')).not.toBeChecked();
     });

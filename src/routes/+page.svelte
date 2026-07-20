@@ -10,6 +10,10 @@
 
   let selectedDataset = $derived(catalog?.datasets.find((dataset) => dataset.id === selectedDatasetId));
 
+  function selectDataset(event: Event) {
+    selectedDatasetId = (event.currentTarget as HTMLSelectElement).value;
+  }
+
   $effect(() => {
     let cancelled = false;
     catalogLoading = true;
@@ -47,7 +51,7 @@
 {:else if catalog && catalog.datasets.length > 0}
   <div class="dataset-selector">
     <label for="dataset-select">{t('selectDataset')}:</label>
-    <select id="dataset-select" bind:value={selectedDatasetId}>
+    <select id="dataset-select" value={selectedDatasetId} onchange={selectDataset}>
       {#each catalog.datasets as dataset}
         <option value={dataset.id}>{dataset.title} ({dataset.year})</option>
       {/each}
