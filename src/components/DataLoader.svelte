@@ -35,6 +35,8 @@
 
   let resultPage = $derived(paginate(sortedFilteredWords, currentPage));
 
+  let hasActiveFilters = $derived(searchQuery.trim().length > 0 || selectedTypes.length > 0);
+
   function clearFilters() {
     searchQuery = '';
     selectedTypes = [];
@@ -66,6 +68,19 @@
     return () => {
       cancelled = true;
     };
+  });
+
+  // Filters describe a dataset-specific exploration. Keeping them when the
+  // source changes can make a valid dataset look empty.
+  $effect(() => {
+    if (!filename) return;
+    searchQuery = '';
+    appliedSearchQuery = '';
+    searchPending = false;
+    selectedTypes = [];
+    sortKey = 'frequency';
+    sortAsc = false;
+    currentPage = 1;
   });
 
   $effect(() => {
@@ -114,7 +129,7 @@
     <h3>{t('words')} ({sortedFilteredWords.length})</h3>
     <div class="search-and-clear">
       <SearchBar bind:value={searchQuery} />
-      {#if searchQuery || selectedTypes.length > 0}
+      {#if hasActiveFilters}
         <button onclick={clearFilters} class="clear-filters">{t('clearFilters')}</button>
       {/if}
     </div>
@@ -145,10 +160,12 @@
     />
     <div class="table-container">
       {#if sortedFilteredWords.length === 0}
-        <p class="empty-results" role="status">{t('noMatchingWords')}</p>
+        <p class="empty-state" role="status">{t('noMatchingWords')}</p>
       {:else}
         <p class="result-count">{t('showingResults', { start: resultPage.start, end: resultPage.end, total: sortedFilteredWords.length })}</p>
-        <DataTable words={resultPage.items} typeLabels={typeLabels} bind:sortKey bind:sortAsc />
+        {#key filename}
+          <DataTable words={resultPage.items} typeLabels={typeLabels} bind:sortKey bind:sortAsc />
+        {/key}
         {#if resultPage.totalPages > 1}
           <nav class="pagination" aria-label={t('pagination')}>
             <button onclick={previousPage} disabled={resultPage.currentPage === 1}>{t('previousPage')}</button>
@@ -228,6 +245,12 @@
     text-align: center;
   }
 
+  .empty-state {
+    margin: var(--md) 0;
+    padding: var(--md);
+    border: 1px solid #FFBF00;
+  }
+
   .search-and-clear {
     display: flex;
     gap: var(--sm);
@@ -235,8 +258,7 @@
   }
 
   .updating-results,
-  .result-count,
-  .empty-results {
+  .result-count {
     margin-top: var(--sm);
   }
 
