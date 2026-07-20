@@ -80,6 +80,9 @@ export const translations = {
     loadingCatalog: 'Kraunamas duomenų katalogas...',
     errorLoadingCatalog: 'Klaida kraunant duomenų katalogą',
     noDatasets: 'Duomenų kataloge nėra rinkinių.',
+    dataProductsTitle: 'Vieši duomenų produktai',
+    dataProductsDescription: 'Dideli žodžių formų sąrašai ir palyginamieji rinkiniai pateikiami atskirais dokumentuotais JSON failais, kad jų rodikliai nebūtų supainioti su įprastu dažnumu.',
+    openDataProducts: 'Atverti viešų duomenų produktų katalogą (JSON)',
     footerText: 'Turi pasiūlymų? Parašyk! ',
     footerEmail: 'labas@dago.lt',
   }

@@ -45,4 +45,24 @@ describe('project hygiene', () => {
 		}
 		expect(sourceCatalog).toContain('byte-for-byte reproducibility');
 	});
+
+	it('assigns every collection a public JSON product or an explicit metadata-only decision', async () => {
+		const plan = JSON.parse(await readRepositoryFile('data/products/publication-plan.json'));
+
+		expect(plan.genericProducts.map((product) => product.datasetFile)).toEqual([
+			'datasets/utka-2018-lemmatized-totals.json',
+			'datasets/dadurkevicius-2020-jcl-lemmas.json'
+		]);
+		expect(plan.contractProducts.map((product) => product.contractId)).toEqual([
+			'utka-ccll-wordforms',
+			'dadurkevicius-dml6-vs-jcl-comparison',
+			'utka-ccll2-war-ukraine-comparison',
+			'rimkute-morphemic-dictionary'
+		]);
+		expect(plan.contractProducts.find((product) => product.contractId === 'rimkute-morphemic-dictionary')).toMatchObject({
+			productType: 'metadata-only',
+			publication: { status: 'metadata-only' },
+			blockedBy: ['https://github.com/debesyla/dazniausi-zodziai/issues/41']
+		});
+	});
 });

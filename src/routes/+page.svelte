@@ -7,6 +7,7 @@
   let catalogLoading = $state(true);
   let catalogError = $state<string | null>(null);
   let selectedDatasetId = $state('');
+  const dataProductsCatalog = `${import.meta.env.BASE_URL}data-products/catalog.json`;
 
   let selectedDataset = $derived(catalog?.datasets.find((dataset) => dataset.id === selectedDatasetId));
 
@@ -65,6 +66,12 @@
   {:else}
     <p class="empty-catalog" role="status">{t('noDatasets')}</p>
   {/if}
+
+  <section class="data-products" aria-labelledby="data-products-title">
+    <h2 id="data-products-title">{t('dataProductsTitle')}</h2>
+    <p>{t('dataProductsDescription')}</p>
+    <a href={dataProductsCatalog}>{t('openDataProducts')}</a>
+  </section>
 </main>
 
 <style>
@@ -96,6 +103,17 @@
   }
 
   .error h2 {
+    margin-bottom: var(--sm);
+  }
+
+  .data-products {
+    margin-top: var(--xl);
+    padding: var(--md);
+    border: 1px solid var(--border-color);
+  }
+
+  .data-products h2,
+  .data-products p {
     margin-bottom: var(--sm);
   }
 </style>

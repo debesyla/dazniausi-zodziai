@@ -9,11 +9,11 @@
     {
       "id": "utka-ccll-wordforms",
       "title": "Dabartinės lietuvių kalbos tekstyno žodžių formų dažniniai sąrašai",
-      "decision": "deferred",
-      "reason": "The aggregate has 1,733,157 rows. It needs indexed worker delivery before it can be selected in the browser.",
+      "decision": "publish",
+      "reason": "The aggregate has 1,733,157 rows. It is published as bounded static JSON chunks rather than loaded into the generic browser selector.",
       "source": {
         "sourceUrl": "https://clarin-repo.lt/items/a67d3e7a-c2f0-4d0b-9f69-72fdaf2e6c0b",
-        "licence": "CLARIN-LT PUB",
+        "licence": "CC BY 4.0",
         "citation": "Rimkutė, E., Kovalevskaitė, J., Melninkaitė, V., Utka, A., Vitkutė-Adžgauskienė, D. 2010. Corpus of Contemporary Lithuanian Language – the Standardised Way.",
         "encoding": "utf-8",
         "entryKind": "wordform",
@@ -113,8 +113,8 @@
         }
       },
       "delivery": {
-        "status": "blocked-pending-capability-review",
-        "mode": "static-indexed-worker",
+        "status": "published-static-json",
+        "mode": "static-chunked-json",
         "initialCatalogBytesBudget": 10240,
         "initialChunkBytesBudget": 65536,
         "maxMainThreadRows": 50,
@@ -123,7 +123,8 @@
         "indexes": ["frequency-descending", "alphabetical-prefix"],
         "constraints": [
           "Fetch the aggregate or one selected subcorpus only after selection.",
-          "Keep parsing, filtering, sorting, ranking, and export in the worker.",
+          "Use the published manifest and view index before requesting individual chunks.",
+          "Keep parsing, filtering, sorting, ranking, and export off the main thread when adding an interactive explorer.",
           "Never add the aggregate count to the five subcorpus counts.",
           "Expose token-count units and source corpus scope in every result."
         ]
@@ -132,11 +133,11 @@
     {
       "id": "dadurkevicius-dml6-vs-jcl-comparison",
       "title": "Dictionary of Modern Lithuanian coverage compared with JCL",
-      "decision": "reshape",
-      "reason": "The source contains a JCL token count, a DML6 coverage code, a separate lemma occurrence list, and a missing-types list.",
+      "decision": "publish",
+      "reason": "The source contains a JCL token count, a DML6 coverage code, a separate lemma occurrence list, and a missing-types list. Each is published as its own documented JSON view.",
       "source": {
         "sourceUrl": "https://clarin-repo.lt/items/b03a5f31-cd2b-4035-9c1b-d568e2524e37",
-        "licence": "CLARIN-LT PUB",
+        "licence": "CC BY 4.0",
         "citation": "Dadurkevičius, V., Petrauskaitė, R. 2020. Corpus based methods for assessment of the traditional dictionaries.",
         "encoding": "utf-8",
         "files": [
@@ -207,8 +208,8 @@
         ]
       },
       "delivery": {
-        "status": "contract-only",
-        "mode": "future-static-comparison-artifact",
+        "status": "published-static-json",
+        "mode": "static-chunked-comparison-json",
         "constraints": [
           "Render coverage codes as labelled categories, never as counts.",
           "Keep the missing-types list separate from lemma occurrences.",
@@ -219,11 +220,11 @@
     {
       "id": "utka-ccll2-war-ukraine-comparison",
       "title": "CCLL2 compared with wartime media and social-network lexicons",
-      "decision": "reshape",
-      "reason": "The source has six normalized metrics, with missing values where a word is absent from one source.",
+      "decision": "publish",
+      "reason": "The source has six normalized metrics, with missing values where a word is absent from one source. It is published as a null-preserving comparison JSON view.",
       "source": {
-        "sourceUrl": "https://clarin.vdu.lt/xmlui/handle/20.500.11821/57",
-        "licence": "CLARIN-LT PUB",
+        "sourceUrl": "https://clarin-repo.lt/items/60607329-be91-4e04-8a74-62e12ae0078d",
+        "licence": "CC BY 4.0",
         "citation": "Utka, A. 2024. Comparative wordlist based on CCLL2 and wartime media and social-network lexicons.",
         "encoding": "utf-8",
         "files": [
@@ -260,8 +261,8 @@
         ]
       },
       "delivery": {
-        "status": "contract-only",
-        "mode": "future-static-comparison-artifact",
+        "status": "published-static-json",
+        "mode": "static-chunked-comparison-json",
         "constraints": [
           "Preserve null for an absent source metric; do not coerce it to zero.",
           "Show normalized units and source denominators beside every metric.",
@@ -273,8 +274,8 @@
     {
       "id": "rimkute-morphemic-dictionary",
       "title": "Dažninis lietuvių kalbos morfemikos žodynas",
-      "decision": "no-go",
-      "reason": "The source directory contains PDFs but no reviewed machine-readable input, and reuse terms for a converted public artifact are unresolved.",
+      "decision": "metadata-only",
+      "reason": "The source directory contains PDFs but no reviewed machine-readable input, and reuse terms for a converted public artifact are unresolved. A metadata-only JSON manifest is publishable while issue #41 remains open.",
       "source": {
         "sourceUrl": "https://hdl.handle.net/20.500.12259/249",
         "licence": "unresolved",
@@ -287,9 +288,9 @@
       },
       "schema": null,
       "delivery": {
-        "status": "not-approved",
-        "mode": "none",
-        "constraints": ["Do not extract, publish, or add the PDFs to the web catalog until machine-readable provenance and reuse terms are reviewed."]
+        "status": "metadata-only-published",
+        "mode": "manifest-only",
+        "constraints": ["Do not extract, publish, or add the PDFs or dictionary rows to the web catalog until machine-readable provenance and reuse terms are reviewed in issue #41."]
       }
     }
   ]
