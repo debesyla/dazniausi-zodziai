@@ -1,100 +1,32 @@
 # Dažniausi lietuviški žodžiai
 
-[![Deploy to GitHub Pages](https://github.com/Debesyla/dazniausi-zodziai/actions/workflows/deploy.yml/badge.svg)](https://github.com/Debesyla/dazniausi-zodziai/actions/workflows/deploy.yml)
+A static SvelteKit application for exploring Lithuanian word-frequency lists.
+It loads one catalog-selected dataset at a time, then offers filters, a
+frequency dashboard, a paginated table, and a faithful CSV export.
 
-An interactive web application for exploring Lithuanian word frequency datasets. Built with a distinctive Baltic amber terminal aesthetic to make linguistic data exploration engaging and accessible for researchers, linguists, and students.
+The initial published dataset is Andrius Utka's 2018 lemmatised word list. Its
+source licence and citation are shown in the app and preserved in the dataset
+metadata.
 
-🌐 **Live Demo**: [https://debesyla.github.io/dazniausi-zodziai](https://debesyla.github.io/dazniausi-zodziai)
+## What the app does
 
-## ✨ Features
+- Select a curated dataset from `static/datasets/catalog.json`.
+- Inspect headline totals, top words, rank/frequency, cumulative coverage, and
+  source-provided part-of-speech composition.
+- Search, filter by part of speech, sort by word/frequency/type, and browse a
+  50-row page at a time.
+- Export the complete active filtered and sorted result set as UTF-8 CSV.
 
-- **Dataset Browser**: Load and explore multiple Lithuanian word frequency datasets
-- **Interactive Search**: Filter words by text input with real-time results
-- **Advanced Sorting**: Sort by word (A-Z) or frequency count
-- **Type Filtering**: Filter words by grammatical type/category
-- **Data Export**: Download filtered results in CSV format
-- **Responsive Design**: Works seamlessly on desktop and mobile devices
-- **Cultural Design**: Unique Baltic amber terminal-inspired interface
-- **Fast Performance**: Client-side processing with sub-2-second load times
+## Development
 
-## 🚀 Quick Start
+Requires Node.js 20 or newer.
 
-### Prerequisites
-- Node.js (v18 or higher)
-- npm, pnpm, or yarn
-
-### Installation
-
-1. Clone the repository:
 ```bash
-git clone https://github.com/Debesyla/dazniausi-zodziai.git
-cd dazniausi-zodziai
-```
-
-2. Install dependencies:
-```bash
-npm install
-```
-
-3. Start the development server:
-```bash
+npm ci
 npm run dev
 ```
 
-4. Open [http://localhost:5173](http://localhost:5173) in your browser
-
-## 📊 Usage
-
-1. **Select Dataset**: Choose from available Lithuanian word frequency datasets using the dropdown
-2. **Browse Data**: View words in a sortable table with frequency information
-3. **Search & Filter**: Use the search bar to find specific words or filter by type
-4. **Download**: Export your filtered results as CSV for further analysis
-
-## 🛠️ Tech Stack
-
-- **Framework**: [SvelteKit](https://svelte.dev/) - Modern web framework
-- **Language**: TypeScript - Type-safe JavaScript
-- **Build Tool**: [Vite](https://vitejs.dev/) - Fast build tool
-- **Styling**: Custom CSS with Baltic amber theme
-- **Data Processing**: [PapaParse](https://www.papaparse.com/) - CSV parsing
-- **Testing**: [Vitest](https://vitest.dev/) + Testing Library
-- **Deployment**: GitHub Pages with GitHub Actions
-
-## 📁 Project Structure
-
-```
-src/
-├── components/          # Reusable UI components
-│   ├── DataLoader.svelte    # Dataset loading and display
-│   ├── DataTable.svelte     # Sortable data table
-│   ├── SearchBar.svelte     # Search and filter interface
-│   └── DownloadButton.svelte # Data export functionality
-├── lib/
-│   ├── data.ts          # Dataset management
-│   ├── translations.ts  # Lithuanian translations
-│   └── utils.ts         # Utility functions
-├── routes/
-│   └── +page.svelte     # Main application page
-└── data/                # Sample datasets
-```
-
-## 🧪 Testing
-
-Run the test suite:
-```bash
-npm test
-```
-
-Run tests in watch mode:
-```bash
-npm run test:watch
-```
-
-### Pull-request checks
-
-Every pull request runs the type checker, the full test suite (including the
-catalog-to-table integration workflow and dataset-preparation fixtures), and a
-production build. Run the same checks before requesting review:
+Run the same checks used for pull requests and GitHub Pages deployment:
 
 ```bash
 npm run check
@@ -102,46 +34,37 @@ npm test
 npm run build
 ```
 
-## 🗂️ Dataset preparation
+`npm run preview` serves the production build locally.
 
-Datasets are prepared by maintainers before publication; visitors do not upload files in the browser. See [the dataset preparation guide](docs/data-preparation.md) for the validated CSV/TSV conversion command and dataset configuration format.
+## Dataset maintenance
 
-## 🚢 Deployment
-
-The application is automatically deployed to GitHub Pages on every push to the main branch via GitHub Actions.
-
-### Manual Deployment
+Datasets are prepared rarely by a maintainer, not uploaded through the public
+app. The canonical schema, source configuration, validation rules, and command
+are in [docs/data-preparation.md](docs/data-preparation.md).
 
 ```bash
-# Build for production
-npm run build
-
-# Preview production build locally
-npm run preview
+npm run data:build -- --config data/datasets/utka-2018-lemmatized-totals.json --source-root /path/to/dazniausi-zodziai-sources --output static/datasets/utka-2018-lemmatized-totals.json --catalog static/datasets/catalog.json
 ```
 
-See [DEPLOYMENT.md](DEPLOYMENT.md) for detailed deployment instructions.
+Review provenance, licence, citation, summary totals, and the generated catalog
+entry before committing a new dataset. The table's large-list strategy is
+documented in [docs/scalable-exploration.md](docs/scalable-exploration.md).
 
-## 🤝 Contributing
+## Deployment
 
-Contributions are welcome! This project aims to make Lithuanian linguistic data more accessible.
+GitHub Pages deploys automatically after a successful push to `main` through
+`.github/workflows/deploy.yml`. Repository Settings → Pages must use **GitHub
+Actions** as its source. Pull requests run the separate verification workflow
+in `.github/workflows/verify.yml`.
 
-1. Fork the repository
-2. Create a feature branch: `git checkout -b feature/amazing-feature`
-3. Commit your changes: `git commit -m 'Add amazing feature'`
-4. Push to the branch: `git push origin feature/amazing-feature`
-5. Open a Pull Request
+## Analytics and privacy
 
-## 📄 License
+The application contains no analytics, tracking script, referrer collection, or
+browser-storage telemetry. The static host may still have its own operational
+logs under its service terms.
 
-This project is open source and available under the [MIT License](LICENSE).
+## Licence
 
-## 🙏 Acknowledgments
-
-- Lithuanian linguists and researchers who collected the word frequency data
-- The Svelte community for the excellent framework
-- Baltic design inspiration for the unique aesthetic
-
-## AI notice
-
-This whole project was AI generated.
+The application code is available under the [MIT License](LICENSE). Individual
+datasets retain the licences and attribution recorded in their provenance;
+those terms can differ from the code licence.

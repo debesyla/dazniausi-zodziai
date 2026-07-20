@@ -6,9 +6,9 @@ The application is a curated static catalog. Dataset imports are a rare maintain
 
 ```bash
 npm run data:build -- \
-  --config data/datasets/example.json \
-  --source-root /path/to/raw-sources \
-  --output static/datasets/example.json \
+  --config data/datasets/utka-2018-lemmatized-totals.json \
+  --source-root /path/to/dazniausi-zodziai-sources \
+  --output static/datasets/utka-2018-lemmatized-totals.json \
   --catalog static/datasets/catalog.json
 ```
 
