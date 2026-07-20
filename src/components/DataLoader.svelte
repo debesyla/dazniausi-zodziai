@@ -27,6 +27,8 @@
 
   let displayedWords = $derived(loadedAll ? sortedFilteredWords : sortedFilteredWords.slice(0, 10));
 
+  let hasActiveFilters = $derived(searchQuery.trim().length > 0 || selectedTypes.length > 0);
+
   function clearFilters() {
     searchQuery = '';
     selectedTypes = [];
@@ -50,6 +52,15 @@
     return () => {
       cancelled = true;
     };
+  });
+
+  // Filters describe a dataset-specific exploration. Keeping them when the
+  // source changes can make a valid dataset look empty.
+  $effect(() => {
+    if (!filename) return;
+    searchQuery = '';
+    selectedTypes = [];
+    loadedAll = false;
   });
 
   $effect(() => {
@@ -85,7 +96,7 @@
     <h3>{t('words')} ({displayedWords.length}{#if sortedFilteredWords.length > 10 && !loadedAll} / {sortedFilteredWords.length}{/if})</h3>
     <div class="search-and-clear">
       <SearchBar bind:value={searchQuery} />
-      {#if searchQuery || selectedTypes.length > 0}
+      {#if hasActiveFilters}
         <button onclick={clearFilters} class="clear-filters">{t('clearFilters')}</button>
       {/if}
     </div>
@@ -105,9 +116,15 @@
     {/if}
     <DownloadButton words={filteredWords} metadata={{author: dataset.author, year: dataset.year}} />
     <div class="table-container">
-      <DataTable words={displayedWords} typeLabels={typeLabels} />
-      {#if sortedFilteredWords.length > 10 && !loadedAll}
-        <button onclick={() => loadedAll = true} class="load-all">{t('loadAll')}</button>
+      {#if sortedFilteredWords.length === 0}
+        <p class="empty-state" role="status">{t('noMatchingWords')}</p>
+      {:else}
+        {#key filename}
+          <DataTable words={displayedWords} typeLabels={typeLabels} />
+        {/key}
+        {#if sortedFilteredWords.length > 10 && !loadedAll}
+          <button onclick={() => loadedAll = true} class="load-all">{t('loadAll')}</button>
+        {/if}
       {/if}
     </div>
   </div>
@@ -193,6 +210,12 @@
   .table-container {
     margin-top: var(--sm);
     text-align: center;
+  }
+
+  .empty-state {
+    margin: var(--md) 0;
+    padding: var(--md);
+    border: 1px solid #FFBF00;
   }
 
   .search-and-clear {
