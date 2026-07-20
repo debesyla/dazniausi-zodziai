@@ -24,6 +24,7 @@
 		"@testing-library/user-event": "^14.6.1",
 		"@types/papaparse": "^5.3.16",
 		"@vitest/ui": "^4.0.4",
+		"axe-core": "^4.12.1",
 		"happy-dom": "^20.0.8",
 		"jsdom": "^27.0.1",
 		"svelte": "^5.39.5",

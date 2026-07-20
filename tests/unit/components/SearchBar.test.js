@@ -1,10 +1,11 @@
 import { render } from '@testing-library/svelte/svelte5';
 import SearchBar from '../../../src/components/SearchBar.svelte';
 
-test('SearchBar renders input and button with accessibility when value is set', () => {
-  const { getByRole, getByPlaceholderText } = render(SearchBar, { value: 'test' });
+test('SearchBar renders a labelled input and accessible clear button when value is set', () => {
+  const { getByRole, getByLabelText, getByPlaceholderText } = render(SearchBar, { value: 'test' });
 
   expect(getByPlaceholderText('Ieškoti žodžių...')).toBeInTheDocument();
+  expect(getByLabelText('Ieškoti žodžių')).toBeInTheDocument();
 
   const button = getByRole('button');
   expect(button).toBeInTheDocument();
