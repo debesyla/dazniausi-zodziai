@@ -8,6 +8,7 @@
   let catalogError = $state<string | null>(null);
   let selectedDatasetId = $state('');
   const dataProductsCatalog = `${import.meta.env.BASE_URL}data-products/catalog.json`;
+  const methodologyUrl = `${import.meta.env.BASE_URL}apie`;
 
   let selectedDataset = $derived(catalog?.datasets.find((dataset) => dataset.id === selectedDatasetId));
 
@@ -43,6 +44,11 @@
 <main>
   <h1>{t('pageTitle')}</h1>
 
+  <section class="site-introduction" aria-label={t('methodologyAndSources')}>
+    <p>{t('siteIntroduction')}</p>
+    <a href={methodologyUrl}>{t('openMethodology')}</a>
+  </section>
+
   {#if catalogLoading}
     <div class="loading" role="status" aria-live="polite">{t('loadingCatalog')}</div>
   {:else if catalogError}
@@ -77,6 +83,16 @@
 <style>
   h1 {
     margin-bottom: var(--lg);
+  }
+
+  .site-introduction {
+    border-left: 2px solid var(--border-color);
+    margin-bottom: var(--xl);
+    padding-left: var(--md);
+  }
+
+  .site-introduction p {
+    margin-bottom: var(--sm);
   }
 
   .dataset-selector {
