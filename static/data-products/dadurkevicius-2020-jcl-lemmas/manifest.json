@@ -1,0 +1,57 @@
+{
+  "schemaVersion": 1,
+  "id": "dadurkevicius-2020-jcl-lemmas",
+  "title": "Lemų sąrašas iš Jungtinio lietuvių kalbos tekstyno",
+  "productType": "generic-frequency-dataset",
+  "publication": {
+    "status": "published",
+    "scope": "Every public entry in dadurkevicius-2020-jcl-lemmas.",
+    "access": "The complete reviewed JSON dataset is available directly and is also selectable in the browser explorer."
+  },
+  "description": "The reviewed JCL lemma and part-of-speech frequency dataset already used by the browser explorer.",
+  "provenance": {
+    "licence": "CC BY 4.0",
+    "citation": "Dadurkevičius, Virginijus. 2020. Wordlist of Lemmas from the Joint Corpus of Lithuanian. Vilnius University. CLARIN-LT Repository. https://hdl.handle.net/20.500.11821/41.",
+    "sourceUrl": "https://clarin-repo.lt/items/e61bfe1a-03a9-486a-bd5b-7d31d7102723",
+    "partOfSpeech": {
+      "name": "JCL",
+      "labels": {
+        "A": "Būdvardis",
+        "C": "Jungtukas",
+        "I": "Jaustukas",
+        "M": "Skaitvardis",
+        "N": "Daiktavardis",
+        "Nf": "Tikrinis daiktavardis (vardas)",
+        "Ng": "Tikrinis daiktavardis (geografinis pavadinimas)",
+        "Np": "Tikrinis daiktavardis",
+        "Ns": "Tikrinis daiktavardis (pavardė)",
+        "O": "Ištiktukas",
+        "P": "Įvardis",
+        "Q": "Dalelytė",
+        "R": "Prieveiksmis",
+        "S": "Prielinksnis",
+        "V": "Veiksmažodis",
+        "Y": "Sutrumpinimas"
+      }
+    },
+    "sourceSnapshot": {
+      "repositoryUrl": "https://github.com/debesyla/dazniausi-zodziai-sources.git",
+      "revision": "d1f4c06e93d4142ec3c42a3c1d02c06b6a301e13",
+      "path": "dadurkevicius-2020-10-27-JCL_Wordlist/original/JCL_lemmas.txt",
+      "encoding": "utf-8",
+      "sha256": "895d9eeb8ed3d2fc8869ee8ba337d9dd5f782af992999d5b6505267d08693679"
+    }
+  },
+  "content": {
+    "format": "dazniausi-zodziai-dataset-v1",
+    "file": "../../datasets/dadurkevicius-2020-jcl-lemmas.json",
+    "entryKind": "lemma",
+    "recordEncoding": "object",
+    "summary": {
+      "sourceRows": 169787,
+      "entryCount": 169787,
+      "totalFrequency": 1266854554,
+      "duplicateEntries": 0
+    }
+  }
+}

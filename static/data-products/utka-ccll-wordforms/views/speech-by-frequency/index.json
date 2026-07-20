@@ -1,0 +1,129 @@
+{
+  "schemaVersion": 1,
+  "productId": "utka-ccll-wordforms",
+  "viewId": "speech-by-frequency",
+  "recordEncoding": "array",
+  "fields": [
+    {
+      "id": "word",
+      "label": "Word form",
+      "type": "string",
+      "sourceColumn": 0
+    },
+    {
+      "id": "count",
+      "label": "Token count",
+      "type": "raw-token-count",
+      "unit": "tokens",
+      "sourceColumn": 1
+    }
+  ],
+  "ordering": {
+    "field": "count",
+    "direction": "descending"
+  },
+  "sourceFile": {
+    "role": "subcorpus-speech",
+    "path": "utka-2016-11-17-CCLL-Wordlists/original/byfrequency-2022/freq-sakytine-dzn.txt",
+    "format": "text",
+    "bytes": 692277,
+    "sha256": "342f3cd227fc6bca6e8e4197a8a1a833b281571650a7b46f71c129f59b54f092",
+    "rows": 53878,
+    "columns": 2
+  },
+  "maxChunkBytes": 65536,
+  "summary": {
+    "sourceRows": 53878,
+    "recordCount": 53878,
+    "numericTotals": {
+      "count": 490040
+    },
+    "nullCounts": {}
+  },
+  "chunks": [
+    {
+      "file": "chunks/000001.json",
+      "records": 4309,
+      "bytes": 65536,
+      "sha256": "43267697c0bf072bc1c3c5631060da4a028fb1d3d1776a38a27836357a2acd8e"
+    },
+    {
+      "file": "chunks/000002.json",
+      "records": 4368,
+      "bytes": 65530,
+      "sha256": "16c9b76db81b9aa2a2c5576ec47aa28d330eaf847b3a617d4e9120ed521e8f93"
+    },
+    {
+      "file": "chunks/000003.json",
+      "records": 4300,
+      "bytes": 65531,
+      "sha256": "df852e032c83b7bac7f7b0309bb598cf1ce90b048330c7ddf01ab2b7e69003e1"
+    },
+    {
+      "file": "chunks/000004.json",
+      "records": 4214,
+      "bytes": 65534,
+      "sha256": "68e0332cc0bb280cf29fe89d67fb557aa66f5130a8ef0fec7ced31c7cc5e5393"
+    },
+    {
+      "file": "chunks/000005.json",
+      "records": 4096,
+      "bytes": 65524,
+      "sha256": "c57d4ba1477c77cc7f40a073e857715390a6b30d19bcbfe8ade238a5d465c0e5"
+    },
+    {
+      "file": "chunks/000006.json",
+      "records": 4131,
+      "bytes": 65530,
+      "sha256": "d186031adeb54993d919303ee00475e8628fa08149bb83eb05118ee96a1d1f17"
+    },
+    {
+      "file": "chunks/000007.json",
+      "records": 4100,
+      "bytes": 65533,
+      "sha256": "f210368169e4c87b6ffcd99ac794ceb1e05f4afbab2fa86064ec341318afe40f"
+    },
+    {
+      "file": "chunks/000008.json",
+      "records": 4078,
+      "bytes": 65532,
+      "sha256": "1a9b58304b374ff26d50b8791014db45722474178a6a989f79cc516859447dc9"
+    },
+    {
+      "file": "chunks/000009.json",
+      "records": 4065,
+      "bytes": 65531,
+      "sha256": "2e724a156092bd6d11feba2901a9cabe0e1e8df04fbca88e16ead576ec8d9483"
+    },
+    {
+      "file": "chunks/000010.json",
+      "records": 3916,
+      "bytes": 65530,
+      "sha256": "d54452fc270f4aec7553b5ce732429636bf1975d6f2ff94b5e78e6003b4e18f4"
+    },
+    {
+      "file": "chunks/000011.json",
+      "records": 3871,
+      "bytes": 65535,
+      "sha256": "ee467377eb8403f9f84dcbaffcb0d56dc9e64d3d9863aeb9cd4cbe8605bfe617"
+    },
+    {
+      "file": "chunks/000012.json",
+      "records": 4078,
+      "bytes": 65533,
+      "sha256": "5c77c6af0ccb3ceec34a0e15bef4e0697fa7e1e7d6f2493e6938fc2a465638e2"
+    },
+    {
+      "file": "chunks/000013.json",
+      "records": 4140,
+      "bytes": 65533,
+      "sha256": "3b45f2c58b9b8eed3f112db08134eba617170fc866cdfc891f2489a6c8aa6c06"
+    },
+    {
+      "file": "chunks/000014.json",
+      "records": 212,
+      "bytes": 3501,
+      "sha256": "b6a82a8a582896715a4133ba7b0e05f3e3d95f38905d111971d0c57fdc3c92cd"
+    }
+  ]
+}

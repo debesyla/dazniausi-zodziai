@@ -57,18 +57,20 @@ npm run products:verify
 
 Review provenance, licence, citation, source snapshot, summary totals, and the
 generated catalog entry before committing a new dataset. `products:build`
-recreates ignored `static/data-products/` artifacts from the pinned raw-source
-snapshot; `products:verify` checks every generated manifest and chunk. The
-table's large-list strategy is documented in [docs/scalable-exploration.md](docs/scalable-exploration.md).
+recreates the checked-in `static/data-products/` artifacts from the pinned
+raw-source snapshot; stage those regenerated JSON files together with their
+contract change. `products:verify` checks every generated manifest and chunk.
+The table's large-list strategy is documented in [docs/scalable-exploration.md](docs/scalable-exploration.md).
 
 ## Deployment
 
 GitHub Pages deploys automatically after a successful push to `main` through
 `.github/workflows/deploy.yml`. Repository Settings → Pages must use **GitHub
 Actions** as its source. Pull requests run the separate verification workflow
-in `.github/workflows/verify.yml`. Both workflows check out raw source revision
-`d1f4c06e93d4142ec3c42a3c1d02c06b6a301e13`, regenerate every public data
-product, verify it, and then build the site.
+in `.github/workflows/verify.yml`. The checked-in public data products are
+verified before each deployment and copied unchanged into the static site.
+Maintainers rebuild them locally from raw source revision
+`d1f4c06e93d4142ec3c42a3c1d02c06b6a301e13` before updating a product.
 
 ## Analytics and privacy
 
