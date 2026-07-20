@@ -2,17 +2,17 @@
   "schemaVersion": 1,
   "datasets": [
     {
-      "id": "demo-lithuanian-words",
-      "title": "Demonstracinis lietuviškų žodžių rinkinys",
-      "author": "Lithuanian Language Institute",
-      "year": 2023,
+      "id": "utka-2018-lemmatized-totals",
+      "title": "Lemuotas 1 mln. lietuvių kalbos tekstyno žodžių sąrašas",
+      "author": "Andrius Utka",
+      "year": 2018,
       "entryKind": "lemma",
-      "file": "demo-lithuanian-words.json",
-      "records": 5,
-      "totalFrequency": 45800,
+      "file": "utka-2018-lemmatized-totals.json",
+      "records": 41977,
+      "totalFrequency": 922949,
       "hasPartOfSpeech": true,
-      "licence": null,
-      "citation": null
+      "licence": "CC BY 4.0",
+      "citation": "Utka, Andrius. 2018. Lemmatised Wordlist of 1 m. Corpus of Contemporary Lithuanian. Vytautas Magnus University. CLARIN-LT Repository. https://hdl.handle.net/20.500.11821/12"
     }
   ]
 }
