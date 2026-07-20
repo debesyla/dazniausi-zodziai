@@ -52,7 +52,7 @@
       `# ${t('year')}: ${metadata.year}`,
       `# ${t('exported')}: ${date}`,
       `# ${t('query')}: ${exploration.query || t('all')}`,
-      `# ${t('filterByType')}: ${exploration.types.length ? exploration.types.join(', ') : t('all')}`,
+      `# ${t('types')}: ${exploration.types.length ? exploration.types.join(', ') : t('all')}`,
       `# ${t('sortOrder')}: ${sortDescription(exploration)}`
     ];
     const rows = words.map((word) => [word.word, word.type ?? '', word.frequency]);

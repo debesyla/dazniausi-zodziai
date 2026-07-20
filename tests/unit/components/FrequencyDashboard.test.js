@@ -10,7 +10,7 @@ const words = Array.from({ length: 25 }, (_, index) => ({
 }));
 
 it('renders frequency concentration metrics and source-labelled POS composition', () => {
-  const { getByText, getAllByRole } = render(FrequencyDashboard, {
+  const { getByText, getAllByText, getAllByRole } = render(FrequencyDashboard, {
     words,
     typeLabels: { dkt: 'Daiktavardis', jng: 'Jungtukas' }
   });
@@ -19,6 +19,8 @@ it('renders frequency concentration metrics and source-labelled POS composition'
   expect(getByText((_, element) => element?.tagName === 'DD' && element.textContent === 'žodis-1 (100)')).toBeInTheDocument();
   expect(getByText('Žodis · dažnumas · kalbos dalis')).toBeInTheDocument();
   expect(getByText('Kalbos dalių sudėtis')).toBeInTheDocument();
+  const posBar = getAllByText('Jungtukas (jng)')[0].closest('.bar-row')?.querySelector('.bar-fill');
+  expect(posBar).toHaveStyle({ width: '48%' });
   expect(getAllByRole('img')).toHaveLength(4);
 });
 
