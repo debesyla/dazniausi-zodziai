@@ -36,6 +36,35 @@ export const translations = {
     query: 'Paieška',
     all: 'visi',
     sortOrder: 'Rikiavimas',
+
+    // Frequency dashboard
+    frequencyDashboard: 'Dažnumo vaizdas',
+    analysisForActiveFilters: 'Skaičiavimai atnaujinami pagal pasirinktą rinkinį ir aktyvius filtrus.',
+    noMatchingWords: 'Nėra žodžių, atitinkančių aktyvius filtrus.',
+    headlineMetrics: 'Pagrindiniai dažnumo rodikliai',
+    entries: 'Įrašai',
+    totalFrequency: 'Bendras dažnumas',
+    mostFrequent: 'Dažniausias įrašas',
+    availableDimensions: 'Turimi matmenys',
+    wordAndFrequency: 'Žodis · dažnumas',
+    wordFrequencyAndPos: 'Žodis · dažnumas · kalbos dalis',
+    topWords: 'Dažniausi žodžiai',
+    topWordsDescription: 'Didžiausio dažnumo įrašai tarp šiuo metu rodomų duomenų.',
+    showTop: 'Rodyti pirmus',
+    tableEquivalent: 'Duomenys lentelėje',
+    rank: 'Rangas',
+    rankFrequency: 'Rango ir dažnumo kreivė',
+    rankFrequencyDescription: 'Abi ašys yra logaritminės, todėl matoma ir dažniausių, ir retų žodžių koncentracija.',
+    rankFrequencyText: 'Iš {count} atrinktų įrašų pirmo rango dažnumas yra {first}, o paskutinio — {last}.',
+    rankLogScale: 'Rangas (log skalė)',
+    frequencyLogScale: 'Dažnumas (log skalė)',
+    cumulativeCoverage: 'Sukaupta žetonų aprėptis',
+    coverageDescription: 'Rodo, kokią viso dažnumo dalį sukaupia dažniausi žodžiai.',
+    coverageText: 'Pirmi dešimt įrašų sudaro {topTen} atrinktų žetonų dažnumo.',
+    cumulativeFrequency: 'Sukauptas dažnumas',
+    tokenCoverage: 'Žetonų aprėptis',
+    posComposition: 'Kalbos dalių sudėtis',
+    posCompositionDescription: 'Žetonų dažnumo dalis pagal šaltinio pateiktas kalbos dalių žymas.',
     
     // Main page
     pageTitle: 'Dažniausi lietuviški žodžiai',
@@ -48,7 +77,7 @@ export const translations = {
   }
 };
 
-export function t(key: string): string {
+export function t(key: string, parameters: Record<string, string | number> = {}): string {
   const keys = key.split('.');
   let value: any = translations.lt;
   
@@ -60,5 +89,7 @@ export function t(key: string): string {
     }
   }
   
-  return value;
+  return Object.entries(parameters).reduce((text, [name, parameter]) => {
+    return text.replaceAll(`{${name}}`, String(parameter));
+  }, value);
 }
