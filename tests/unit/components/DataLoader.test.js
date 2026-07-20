@@ -131,6 +131,7 @@ describe('DataLoader', () => {
     const secondDataset = {
       ...mockDataset,
       id: 'second-dataset',
+      title: 'Second dataset',
       author: 'Second Author',
       year: 2024,
       words: [{ word: 'other', type: 'verb', frequency: 20 }]
@@ -154,6 +155,7 @@ describe('DataLoader', () => {
 
     await waitFor(() => {
       expect(getByText('Second Author')).toBeInTheDocument();
+      expect(loadDataset).toHaveBeenCalledWith('second.json');
       expect(getByLabelText('verb')).not.toBeChecked();
     });
     expect(queryByText('clearFilters')).not.toBeInTheDocument();
