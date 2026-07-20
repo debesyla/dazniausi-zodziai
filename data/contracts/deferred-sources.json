@@ -1,0 +1,297 @@
+{
+  "schemaVersion": 1,
+  "contractType": "deferred-source-contracts",
+  "sourceRepository": {
+    "repositoryUrl": "https://github.com/debesyla/dazniausi-zodziai-sources.git",
+    "revision": "d1f4c06e93d4142ec3c42a3c1d02c06b6a301e13"
+  },
+  "contracts": [
+    {
+      "id": "utka-ccll-wordforms",
+      "title": "Dabartinės lietuvių kalbos tekstyno žodžių formų dažniniai sąrašai",
+      "decision": "publish",
+      "reason": "The aggregate has 1,733,157 rows. It is published as bounded static JSON chunks rather than loaded into the generic browser selector.",
+      "source": {
+        "sourceUrl": "https://clarin-repo.lt/items/a67d3e7a-c2f0-4d0b-9f69-72fdaf2e6c0b",
+        "licence": "CC BY 4.0",
+        "citation": "Rimkutė, E., Kovalevskaitė, J., Melninkaitė, V., Utka, A., Vitkutė-Adžgauskienė, D. 2010. Corpus of Contemporary Lithuanian Language – the Standardised Way.",
+        "encoding": "utf-8",
+        "entryKind": "wordform",
+        "hasPartOfSpeech": false,
+        "corpusTokens": 123451211,
+        "files": [
+          {
+            "path": "utka-2016-11-17-CCLL-Wordlists/original/byfrequency-2022/freq-visas-dzn.txt",
+            "role": "aggregate",
+            "bytes": 25251347,
+            "rows": 1733157,
+            "sha256": "541c4bac1d1741b610fef1d0ba63df11c754f6037b2831a728165e01d352e601",
+            "columns": 2,
+            "numericColumns": [1],
+            "numericTotals": { "1": 123451211 },
+            "samples": ["ir\t4452765", "kad\t1260878", "į\t1158672"]
+          },
+          {
+            "path": "utka-2016-11-17-CCLL-Wordlists/original/byalphabet-2022/freq-visas-abc.txt",
+            "role": "aggregate-alphabetical-index",
+            "bytes": 25251347,
+            "rows": 1733157,
+            "sha256": "58baa109d29b8910b888346ad89524efe0b1694c33c277d4f80e6dd52e0c5d84",
+            "columns": 2,
+            "delimiter": " ",
+            "numericColumns": [1],
+            "numericTotals": { "1": 123451211 },
+            "samples": ["a 302051", "aa 936", "aaa 413"]
+          },
+          {
+            "path": "utka-2016-11-17-CCLL-Wordlists/original/byfrequency-2022/freq-grozine-dzn.txt",
+            "role": "subcorpus-fiction",
+            "bytes": 8193921,
+            "rows": 575736,
+            "sha256": "0a2650da314d3b6deddb266f30d66dcf201dec39a8303bb283cc9bab0de3f262",
+            "columns": 2,
+            "numericColumns": [1],
+            "numericTotals": { "1": 15535386 },
+            "samples": ["ir\t600403"]
+          },
+          {
+            "path": "utka-2016-11-17-CCLL-Wordlists/original/byfrequency-2022/freq-negrozine-dzn.txt",
+            "role": "subcorpus-non-fiction",
+            "bytes": 9289384,
+            "rows": 644314,
+            "sha256": "0684ecbe43ba16b294f0d0ceee442b2ec53a2c6da8d46ea8e63dfea5dffd3fbe",
+            "columns": 2,
+            "numericColumns": [1],
+            "numericTotals": { "1": 19993171 },
+            "samples": ["ir\t809226"]
+          },
+          {
+            "path": "utka-2016-11-17-CCLL-Wordlists/original/byfrequency-2022/freq-administracine-dzn.txt",
+            "role": "subcorpus-administrative",
+            "bytes": 3258546,
+            "rows": 229446,
+            "sha256": "82a81a00c4cda21041d657690b9b6f80a5b1136dd248f0868ff15fe567ece191",
+            "columns": 2,
+            "numericColumns": [1],
+            "numericTotals": { "1": 11190519 },
+            "samples": ["ir\t388801"]
+          },
+          {
+            "path": "utka-2016-11-17-CCLL-Wordlists/original/byfrequency-2022/freq-publicistika-dzn.txt",
+            "role": "subcorpus-periodicals",
+            "bytes": 18794925,
+            "rows": 1296174,
+            "sha256": "81818db84086cdd9f08478825410ce44ddba84630cb96e095a1bde1aa1aa46ac",
+            "columns": 2,
+            "numericColumns": [1],
+            "numericTotals": { "1": 76242095 },
+            "samples": ["ir\t2638014"]
+          },
+          {
+            "path": "utka-2016-11-17-CCLL-Wordlists/original/byfrequency-2022/freq-sakytine-dzn.txt",
+            "role": "subcorpus-speech",
+            "bytes": 692277,
+            "rows": 53878,
+            "sha256": "342f3cd227fc6bca6e8e4197a8a1a833b281571650a7b46f71c129f59b54f092",
+            "columns": 2,
+            "numericColumns": [1],
+            "numericTotals": { "1": 490040 },
+            "samples": ["ir\t16321"]
+          }
+        ]
+      },
+      "schema": {
+        "key": "word",
+        "columns": [
+          { "id": "word", "label": "Word form", "type": "string", "sourceColumn": 0 },
+          { "id": "count", "label": "Token count", "type": "raw-token-count", "sourceColumn": 1, "nullable": false }
+        ],
+        "frequencyField": null,
+        "sourceOrdering": {
+          "frequency": "descending",
+          "alphabetical": "ascending"
+        }
+      },
+      "delivery": {
+        "status": "published-static-json",
+        "mode": "static-chunked-json",
+        "initialCatalogBytesBudget": 10240,
+        "initialChunkBytesBudget": 65536,
+        "maxMainThreadRows": 50,
+        "interactionP95Milliseconds": 100,
+        "operations": ["search", "sort-by-frequency", "sort-alphabetically", "rank", "paginate", "export"],
+        "indexes": ["frequency-descending", "alphabetical-prefix"],
+        "constraints": [
+          "Fetch the aggregate or one selected subcorpus only after selection.",
+          "Use the published manifest and view index before requesting individual chunks.",
+          "Keep parsing, filtering, sorting, ranking, and export off the main thread when adding an interactive explorer.",
+          "Never add the aggregate count to the five subcorpus counts.",
+          "Expose token-count units and source corpus scope in every result."
+        ]
+      }
+    },
+    {
+      "id": "dadurkevicius-dml6-vs-jcl-comparison",
+      "title": "Dictionary of Modern Lithuanian coverage compared with JCL",
+      "decision": "publish",
+      "reason": "The source contains a JCL token count, a DML6 coverage code, a separate lemma occurrence list, and a missing-types list. Each is published as its own documented JSON view.",
+      "source": {
+        "sourceUrl": "https://clarin-repo.lt/items/b03a5f31-cd2b-4035-9c1b-d568e2524e37",
+        "licence": "CC BY 4.0",
+        "citation": "Dadurkevičius, V., Petrauskaitė, R. 2020. Corpus based methods for assessment of the traditional dictionaries.",
+        "encoding": "utf-8",
+        "files": [
+          {
+            "path": "dadurkevicius-2020-06-30-DML6_vs_JCL/original/JCL_types_vs_DML6.txt",
+            "role": "types-coverage",
+            "bytes": 77300496,
+            "rows": 4968125,
+            "sha256": "6a67d41b3004209c535e711b65ec943e338a6ac02b58256ffbb104ac419445e1",
+            "columns": 3,
+            "numericColumns": [1, 2],
+            "numericTotals": { "1": 1334845080 },
+            "allowedValues": { "2": [0, 1, 2, 3] },
+            "valueCounts": { "2": { "0": 3715755, "1": 1240106, "2": 12153, "3": 111 } },
+            "samples": ["ir\t40854832\t1", "kad\t11790884\t1", "į\t9317347\t1"]
+          },
+          {
+            "path": "dadurkevicius-2020-06-30-DML6_vs_JCL/original/DML6_lemmas_vs_JCL.txt",
+            "role": "lemma-occurrences",
+            "bytes": 1424602,
+            "rows": 85893,
+            "sha256": "93e4c3583366d792937d118b662f7d2115d54098bf9bc4097c4bc9ef1040159e",
+            "columns": 3,
+            "numericColumns": [2],
+            "numericTotals": { "2": 1607796536 },
+            "allowedValues": { "1": ["A", "C", "I", "M", "N", "O", "P", "Q", "R", "S", "V", "Y"] },
+            "samples": ["a\tI\t3651148", "a\tQ\t3651148", "ą\tQ\t102649"]
+          },
+          {
+            "path": "dadurkevicius-2020-06-30-DML6_vs_JCL/original/JCL_types_missing_in_DML6_(filtered_list).txt",
+            "role": "missing-types",
+            "bytes": 4031628,
+            "rows": 254726,
+            "sha256": "befafd13559f4f8f633e46f4b15d96a6b4404f3cf0a330b0ddb65b4425707f45",
+            "columns": 2,
+            "numericColumns": [1],
+            "numericTotals": { "1": 19727931 },
+            "samples": ["šiek\t175933", "žymos\t161164", "km\t155771"]
+          }
+        ]
+      },
+      "schema": {
+        "key": "word-or-lemma",
+        "comparisonOnly": true,
+        "frequencyField": null,
+        "metrics": [
+          {
+            "id": "jclTokenCount",
+            "label": "JCL token count",
+            "type": "raw-token-count",
+            "unit": "tokens",
+            "normalization": "raw"
+          },
+          {
+            "id": "dml6CoverageCode",
+            "label": "DML6 coverage",
+            "type": "coverage-code",
+            "unit": "category",
+            "values": { "0": "not in DML6", "1": "main entry", "2": "geographic name", "3": "abbreviation" }
+          },
+          {
+            "id": "jclLemmaOccurrenceCount",
+            "label": "JCL occurrence count for lemma and part of speech",
+            "type": "raw-token-count",
+            "unit": "tokens",
+            "normalization": "raw"
+          }
+        ]
+      },
+      "delivery": {
+        "status": "published-static-json",
+        "mode": "static-chunked-comparison-json",
+        "constraints": [
+          "Render coverage codes as labelled categories, never as counts.",
+          "Keep the missing-types list separate from lemma occurrences.",
+          "Do not expose either comparison metric as the generic dataset frequency."
+        ]
+      }
+    },
+    {
+      "id": "utka-ccll2-war-ukraine-comparison",
+      "title": "CCLL2 compared with wartime media and social-network lexicons",
+      "decision": "publish",
+      "reason": "The source has six normalized metrics, with missing values where a word is absent from one source. It is published as a null-preserving comparison JSON view.",
+      "source": {
+        "sourceUrl": "https://clarin-repo.lt/items/60607329-be91-4e04-8a74-62e12ae0078d",
+        "licence": "CC BY 4.0",
+        "citation": "Utka, A. 2024. Comparative wordlist based on CCLL2 and wartime media and social-network lexicons.",
+        "encoding": "utf-8",
+        "files": [
+          {
+            "path": "utka-2016-11-17-ccll2_vs_war_in_UA/original/ccll2_vs_war_in_UA.txt",
+            "role": "normalized-comparison",
+            "bytes": 46957375,
+            "rows": 2264779,
+            "sha256": "2513dc5dedc0a11e4e2856a54ca27fbc2046aaf3560259c4a9aed66170e9d3ed",
+            "columns": 7,
+            "numericColumns": [1, 2, 3, 4, 5, 6],
+            "nullableColumns": [1, 2, 3, 4, 5, 6],
+            "numericTotals": { "1": 99786439, "2": 30661534, "3": 99629711, "4": 62758948, "5": 95981354, "6": 67522568 },
+            "missingCounts": { "1": 151388, "2": 151388, "3": 1663115, "4": 1663115, "5": 2130518, "6": 2130518 },
+            "samples": [
+              "IR\t3414819\t4992\t3099414\t223816\t3572546\t221725",
+              "HRS\t1\t1\t\t\t42408\t42408",
+              "BACHMUTO\t\t\t11669\t2629\t41686\t26382"
+            ]
+          }
+        ]
+      },
+      "schema": {
+        "key": "word",
+        "comparisonOnly": true,
+        "frequencyField": null,
+        "metrics": [
+          { "id": "ccll2Count", "label": "CCLL2 normalized token count", "type": "normalized-token-count", "unit": "tokens per 100 million source words", "nullable": true, "sourceTokens": 162000000, "targetTokens": 100000000 },
+          { "id": "ccll2Documents", "label": "CCLL2 normalized document count", "type": "normalized-document-count", "unit": "documents per 100 million source words", "nullable": true, "sourceTokens": 162000000, "targetTokens": 100000000 },
+          { "id": "mediaCount", "label": "Wartime media normalized token count", "type": "normalized-token-count", "unit": "tokens per 100 million source words", "nullable": true, "sourceTokens": 36000000, "targetTokens": 100000000 },
+          { "id": "mediaDocuments", "label": "Wartime media normalized document count", "type": "normalized-document-count", "unit": "documents per 100 million source words", "nullable": true, "sourceTokens": 36000000, "targetTokens": 100000000 },
+          { "id": "socialCount", "label": "Wartime social-network normalized token count", "type": "normalized-token-count", "unit": "tokens per 100 million source words", "nullable": true, "sourceTokens": 2000000, "targetTokens": 100000000 },
+          { "id": "socialDocuments", "label": "Wartime social-network normalized document count", "type": "normalized-document-count", "unit": "documents per 100 million source words", "nullable": true, "sourceTokens": 2000000, "targetTokens": 100000000 }
+        ]
+      },
+      "delivery": {
+        "status": "published-static-json",
+        "mode": "static-chunked-comparison-json",
+        "constraints": [
+          "Preserve null for an absent source metric; do not coerce it to zero.",
+          "Show normalized units and source denominators beside every metric.",
+          "Keep token and document metrics distinct.",
+          "Do not rank or export the six metrics as one total-frequency column."
+        ]
+      }
+    },
+    {
+      "id": "rimkute-morphemic-dictionary",
+      "title": "Dažninis lietuvių kalbos morfemikos žodynas",
+      "decision": "metadata-only",
+      "reason": "The source directory contains PDFs but no reviewed machine-readable input, and reuse terms for a converted public artifact are unresolved. A metadata-only JSON manifest is publishable while issue #41 remains open.",
+      "source": {
+        "sourceUrl": "https://hdl.handle.net/20.500.12259/249",
+        "licence": "unresolved",
+        "citation": "Rimkutė, E., Kazlauskienė, A., Raškinis, G. 2011. Dažninis lietuvių kalbos morfemikos žodynas.",
+        "files": [
+          { "path": "rimkute-2011-dazninis-morfemikos-zodynas/original/Dažninis lietuvių kalbos morfemikos žodynas (Rimkutė E., Kazlauskienė A., Raškinis G.).pdf", "format": "binary", "bytes": 2404144, "sha256": "982b0080e08b314246d2aa0995248bf10a6b0d9a1424b593d56e410e34547dfa" },
+          { "path": "rimkute-2011-dazninis-morfemikos-zodynas/original/Dažninis lietuvių kalbos morfemikos žodynas. II dalis (Rimkutė Erika, Kazlauskienė Asta etc.).pdf", "format": "binary", "bytes": 1065088, "sha256": "546ada8c3e99cd978b25e4edcadc7958d4f6c0ecf38bc3ee4825db767838cdbc" },
+          { "path": "rimkute-2011-dazninis-morfemikos-zodynas/original/Dažninis lietuvių kalbos morfemikos žodynas. III dalis (Rimkutė Erika, Kazlauskienė Asta etc.).pdf", "format": "binary", "bytes": 2670927, "sha256": "016f23e6bffba91ee53de74871793221177091fd8e950c60901e921efd6f266e" }
+        ]
+      },
+      "schema": null,
+      "delivery": {
+        "status": "metadata-only-published",
+        "mode": "manifest-only",
+        "constraints": ["Do not extract, publish, or add the PDFs or dictionary rows to the web catalog until machine-readable provenance and reuse terms are reviewed in issue #41."]
+      }
+    }
+  ]
+}

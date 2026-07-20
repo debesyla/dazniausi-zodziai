@@ -1,0 +1,66 @@
+{
+  "schemaVersion": 1,
+  "title": "Dažniausi lietuviški žodžiai public data products",
+  "products": [
+    {
+      "id": "utka-2018-lemmatized-totals",
+      "title": "Lemuotas 1 mln. lietuvių kalbos tekstyno žodžių sąrašas",
+      "productType": "generic-frequency-dataset",
+      "publicationStatus": "published",
+      "manifest": "utka-2018-lemmatized-totals/manifest.json",
+      "licence": "CC BY 4.0",
+      "viewCount": 1,
+      "recordCount": 41977
+    },
+    {
+      "id": "dadurkevicius-2020-jcl-lemmas",
+      "title": "Lemų sąrašas iš Jungtinio lietuvių kalbos tekstyno",
+      "productType": "generic-frequency-dataset",
+      "publicationStatus": "published",
+      "manifest": "dadurkevicius-2020-jcl-lemmas/manifest.json",
+      "licence": "CC BY 4.0",
+      "viewCount": 1,
+      "recordCount": 169787
+    },
+    {
+      "id": "utka-ccll-wordforms",
+      "title": "Dabartinės lietuvių kalbos tekstyno žodžių formų dažniniai sąrašai",
+      "productType": "chunked-wordform-list",
+      "publicationStatus": "published",
+      "manifest": "utka-ccll-wordforms/manifest.json",
+      "licence": "CC BY 4.0",
+      "viewCount": 7,
+      "recordCount": null
+    },
+    {
+      "id": "dadurkevicius-dml6-vs-jcl-comparison",
+      "title": "Dictionary of Modern Lithuanian coverage compared with JCL",
+      "productType": "chunked-comparison",
+      "publicationStatus": "published",
+      "manifest": "dadurkevicius-dml6-vs-jcl-comparison/manifest.json",
+      "licence": "CC BY 4.0",
+      "viewCount": 3,
+      "recordCount": null
+    },
+    {
+      "id": "utka-ccll2-war-ukraine-comparison",
+      "title": "CCLL2 compared with wartime media and social-network lexicons",
+      "productType": "chunked-comparison",
+      "publicationStatus": "published",
+      "manifest": "utka-ccll2-war-ukraine-comparison/manifest.json",
+      "licence": "CC BY 4.0",
+      "viewCount": 1,
+      "recordCount": null
+    },
+    {
+      "id": "rimkute-morphemic-dictionary",
+      "title": "Dažninis lietuvių kalbos morfemikos žodynas",
+      "productType": "metadata-only",
+      "publicationStatus": "metadata-only",
+      "manifest": "rimkute-morphemic-dictionary/manifest.json",
+      "licence": "unresolved",
+      "viewCount": 0,
+      "recordCount": null
+    }
+  ]
+}

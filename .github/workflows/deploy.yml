@@ -37,6 +37,9 @@ jobs:
       - name: Test
         run: npm test
 
+      - name: Verify checked-in public data products
+        run: npm run products:verify
+
       - name: Build
         env:
           NODE_ENV: production

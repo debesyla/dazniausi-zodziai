@@ -1,0 +1,44 @@
+{
+  "schemaVersion": 1,
+  "id": "rimkute-morphemic-dictionary",
+  "title": "Dažninis lietuvių kalbos morfemikos žodynas",
+  "productType": "metadata-only",
+  "publication": {
+    "status": "metadata-only",
+    "scope": "Citation, source-file inventory, and the publication decision only; no dictionary entries or PDF pages are included.",
+    "access": "A JSON manifest documents the blocked collection without redistributing or extracting the source PDFs.",
+    "reason": "The available input is PDF-only and its machine-readable reuse terms have not been resolved."
+  },
+  "blockedBy": [
+    "https://github.com/debesyla/dazniausi-zodziai/issues/41"
+  ],
+  "provenance": {
+    "sourceRepository": {
+      "repositoryUrl": "https://github.com/debesyla/dazniausi-zodziai-sources.git",
+      "revision": "d1f4c06e93d4142ec3c42a3c1d02c06b6a301e13"
+    },
+    "sourceUrl": "https://hdl.handle.net/20.500.12259/249",
+    "licence": "unresolved",
+    "citation": "Rimkutė, E., Kazlauskienė, A., Raškinis, G. 2011. Dažninis lietuvių kalbos morfemikos žodynas.",
+    "files": [
+      {
+        "path": "rimkute-2011-dazninis-morfemikos-zodynas/original/Dažninis lietuvių kalbos morfemikos žodynas (Rimkutė E., Kazlauskienė A., Raškinis G.).pdf",
+        "format": "binary",
+        "bytes": 2404144,
+        "sha256": "982b0080e08b314246d2aa0995248bf10a6b0d9a1424b593d56e410e34547dfa"
+      },
+      {
+        "path": "rimkute-2011-dazninis-morfemikos-zodynas/original/Dažninis lietuvių kalbos morfemikos žodynas. II dalis (Rimkutė Erika, Kazlauskienė Asta etc.).pdf",
+        "format": "binary",
+        "bytes": 1065088,
+        "sha256": "546ada8c3e99cd978b25e4edcadc7958d4f6c0ecf38bc3ee4825db767838cdbc"
+      },
+      {
+        "path": "rimkute-2011-dazninis-morfemikos-zodynas/original/Dažninis lietuvių kalbos morfemikos žodynas. III dalis (Rimkutė Erika, Kazlauskienė Asta etc.).pdf",
+        "format": "binary",
+        "bytes": 2670927,
+        "sha256": "016f23e6bffba91ee53de74871793221177091fd8e950c60901e921efd6f266e"
+      }
+    ]
+  }
+}

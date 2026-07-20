@@ -1,0 +1,209 @@
+{
+  "schemaVersion": 1,
+  "id": "utka-ccll-wordforms",
+  "title": "Dabartinės lietuvių kalbos tekstyno žodžių formų dažniniai sąrašai",
+  "productType": "chunked-wordform-list",
+  "publication": {
+    "status": "published",
+    "scope": "Every row from the reviewed aggregate and named CCLL wordform lists.",
+    "access": "Static JSON chunks. Consumers request a manifest and one view index before requesting only the chunks they need."
+  },
+  "provenance": {
+    "sourceRepository": {
+      "repositoryUrl": "https://github.com/debesyla/dazniausi-zodziai-sources.git",
+      "revision": "d1f4c06e93d4142ec3c42a3c1d02c06b6a301e13"
+    },
+    "sourceUrl": "https://clarin-repo.lt/items/a67d3e7a-c2f0-4d0b-9f69-72fdaf2e6c0b",
+    "licence": "CC BY 4.0",
+    "citation": "Rimkutė, E., Kovalevskaitė, J., Melninkaitė, V., Utka, A., Vitkutė-Adžgauskienė, D. 2010. Corpus of Contemporary Lithuanian Language – the Standardised Way.",
+    "files": [
+      {
+        "role": "aggregate",
+        "path": "utka-2016-11-17-CCLL-Wordlists/original/byfrequency-2022/freq-visas-dzn.txt",
+        "format": "text",
+        "bytes": 25251347,
+        "sha256": "541c4bac1d1741b610fef1d0ba63df11c754f6037b2831a728165e01d352e601",
+        "rows": 1733157,
+        "columns": 2
+      },
+      {
+        "role": "aggregate-alphabetical-index",
+        "path": "utka-2016-11-17-CCLL-Wordlists/original/byalphabet-2022/freq-visas-abc.txt",
+        "format": "text",
+        "bytes": 25251347,
+        "sha256": "58baa109d29b8910b888346ad89524efe0b1694c33c277d4f80e6dd52e0c5d84",
+        "rows": 1733157,
+        "columns": 2
+      },
+      {
+        "role": "subcorpus-fiction",
+        "path": "utka-2016-11-17-CCLL-Wordlists/original/byfrequency-2022/freq-grozine-dzn.txt",
+        "format": "text",
+        "bytes": 8193921,
+        "sha256": "0a2650da314d3b6deddb266f30d66dcf201dec39a8303bb283cc9bab0de3f262",
+        "rows": 575736,
+        "columns": 2
+      },
+      {
+        "role": "subcorpus-non-fiction",
+        "path": "utka-2016-11-17-CCLL-Wordlists/original/byfrequency-2022/freq-negrozine-dzn.txt",
+        "format": "text",
+        "bytes": 9289384,
+        "sha256": "0684ecbe43ba16b294f0d0ceee442b2ec53a2c6da8d46ea8e63dfea5dffd3fbe",
+        "rows": 644314,
+        "columns": 2
+      },
+      {
+        "role": "subcorpus-administrative",
+        "path": "utka-2016-11-17-CCLL-Wordlists/original/byfrequency-2022/freq-administracine-dzn.txt",
+        "format": "text",
+        "bytes": 3258546,
+        "sha256": "82a81a00c4cda21041d657690b9b6f80a5b1136dd248f0868ff15fe567ece191",
+        "rows": 229446,
+        "columns": 2
+      },
+      {
+        "role": "subcorpus-periodicals",
+        "path": "utka-2016-11-17-CCLL-Wordlists/original/byfrequency-2022/freq-publicistika-dzn.txt",
+        "format": "text",
+        "bytes": 18794925,
+        "sha256": "81818db84086cdd9f08478825410ce44ddba84630cb96e095a1bde1aa1aa46ac",
+        "rows": 1296174,
+        "columns": 2
+      },
+      {
+        "role": "subcorpus-speech",
+        "path": "utka-2016-11-17-CCLL-Wordlists/original/byfrequency-2022/freq-sakytine-dzn.txt",
+        "format": "text",
+        "bytes": 692277,
+        "sha256": "342f3cd227fc6bca6e8e4197a8a1a833b281571650a7b46f71c129f59b54f092",
+        "rows": 53878,
+        "columns": 2
+      }
+    ]
+  },
+  "delivery": {
+    "mode": "static-chunked-json",
+    "constraints": [
+      "Fetch the aggregate or one selected subcorpus only after selection.",
+      "Use the published manifest and view index before requesting individual chunks.",
+      "Keep parsing, filtering, sorting, ranking, and export off the main thread when adding an interactive explorer.",
+      "Never add the aggregate count to the five subcorpus counts.",
+      "Expose token-count units and source corpus scope in every result."
+    ]
+  },
+  "views": [
+    {
+      "id": "all-by-frequency",
+      "title": "All CCLL word forms, frequency order",
+      "description": "The complete corpus wordform list, ordered by descending raw token count.",
+      "index": "views/all-by-frequency/index.json",
+      "sourceRole": "aggregate",
+      "recordEncoding": "array",
+      "summary": {
+        "sourceRows": 1733157,
+        "recordCount": 1733157,
+        "numericTotals": {
+          "count": 123451211
+        },
+        "nullCounts": {}
+      }
+    },
+    {
+      "id": "all-alphabetical",
+      "title": "All CCLL word forms, alphabetical order",
+      "description": "The same complete corpus wordform list, ordered alphabetically by the source.",
+      "index": "views/all-alphabetical/index.json",
+      "sourceRole": "aggregate-alphabetical-index",
+      "recordEncoding": "array",
+      "summary": {
+        "sourceRows": 1733157,
+        "recordCount": 1733157,
+        "numericTotals": {
+          "count": 123451211
+        },
+        "nullCounts": {}
+      }
+    },
+    {
+      "id": "fiction-by-frequency",
+      "title": "CCLL fiction word forms",
+      "description": "Word forms in the fiction subcorpus, ordered by descending raw token count.",
+      "index": "views/fiction-by-frequency/index.json",
+      "sourceRole": "subcorpus-fiction",
+      "recordEncoding": "array",
+      "summary": {
+        "sourceRows": 575736,
+        "recordCount": 575736,
+        "numericTotals": {
+          "count": 15535386
+        },
+        "nullCounts": {}
+      }
+    },
+    {
+      "id": "non-fiction-by-frequency",
+      "title": "CCLL non-fiction word forms",
+      "description": "Word forms in the non-fiction subcorpus, ordered by descending raw token count.",
+      "index": "views/non-fiction-by-frequency/index.json",
+      "sourceRole": "subcorpus-non-fiction",
+      "recordEncoding": "array",
+      "summary": {
+        "sourceRows": 644314,
+        "recordCount": 644314,
+        "numericTotals": {
+          "count": 19993171
+        },
+        "nullCounts": {}
+      }
+    },
+    {
+      "id": "administrative-by-frequency",
+      "title": "CCLL administrative word forms",
+      "description": "Word forms in the administrative subcorpus, ordered by descending raw token count.",
+      "index": "views/administrative-by-frequency/index.json",
+      "sourceRole": "subcorpus-administrative",
+      "recordEncoding": "array",
+      "summary": {
+        "sourceRows": 229446,
+        "recordCount": 229446,
+        "numericTotals": {
+          "count": 11190519
+        },
+        "nullCounts": {}
+      }
+    },
+    {
+      "id": "periodicals-by-frequency",
+      "title": "CCLL periodicals word forms",
+      "description": "Word forms in the periodicals subcorpus, ordered by descending raw token count.",
+      "index": "views/periodicals-by-frequency/index.json",
+      "sourceRole": "subcorpus-periodicals",
+      "recordEncoding": "array",
+      "summary": {
+        "sourceRows": 1296174,
+        "recordCount": 1296174,
+        "numericTotals": {
+          "count": 76242095
+        },
+        "nullCounts": {}
+      }
+    },
+    {
+      "id": "speech-by-frequency",
+      "title": "CCLL spoken word forms",
+      "description": "Word forms in the spoken subcorpus, ordered by descending raw token count.",
+      "index": "views/speech-by-frequency/index.json",
+      "sourceRole": "subcorpus-speech",
+      "recordEncoding": "array",
+      "summary": {
+        "sourceRows": 53878,
+        "recordCount": 53878,
+        "numericTotals": {
+          "count": 490040
+        },
+        "nullCounts": {}
+      }
+    }
+  ]
+}

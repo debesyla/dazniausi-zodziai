@@ -1,0 +1,107 @@
+{
+  "schemaVersion": 1,
+  "id": "dadurkevicius-dml6-vs-jcl-comparison",
+  "title": "Dictionary of Modern Lithuanian coverage compared with JCL",
+  "productType": "chunked-comparison",
+  "publication": {
+    "status": "published",
+    "scope": "Every row from the reviewed DML6 and JCL comparison files.",
+    "access": "Static JSON chunks with separate views for coverage, lemma occurrences, and missing types."
+  },
+  "provenance": {
+    "sourceRepository": {
+      "repositoryUrl": "https://github.com/debesyla/dazniausi-zodziai-sources.git",
+      "revision": "d1f4c06e93d4142ec3c42a3c1d02c06b6a301e13"
+    },
+    "sourceUrl": "https://clarin-repo.lt/items/b03a5f31-cd2b-4035-9c1b-d568e2524e37",
+    "licence": "CC BY 4.0",
+    "citation": "Dadurkevičius, V., Petrauskaitė, R. 2020. Corpus based methods for assessment of the traditional dictionaries.",
+    "files": [
+      {
+        "role": "types-coverage",
+        "path": "dadurkevicius-2020-06-30-DML6_vs_JCL/original/JCL_types_vs_DML6.txt",
+        "format": "text",
+        "bytes": 77300496,
+        "sha256": "6a67d41b3004209c535e711b65ec943e338a6ac02b58256ffbb104ac419445e1",
+        "rows": 4968125,
+        "columns": 3
+      },
+      {
+        "role": "lemma-occurrences",
+        "path": "dadurkevicius-2020-06-30-DML6_vs_JCL/original/DML6_lemmas_vs_JCL.txt",
+        "format": "text",
+        "bytes": 1424602,
+        "sha256": "93e4c3583366d792937d118b662f7d2115d54098bf9bc4097c4bc9ef1040159e",
+        "rows": 85893,
+        "columns": 3
+      },
+      {
+        "role": "missing-types",
+        "path": "dadurkevicius-2020-06-30-DML6_vs_JCL/original/JCL_types_missing_in_DML6_(filtered_list).txt",
+        "format": "text",
+        "bytes": 4031628,
+        "sha256": "befafd13559f4f8f633e46f4b15d96a6b4404f3cf0a330b0ddb65b4425707f45",
+        "rows": 254726,
+        "columns": 2
+      }
+    ]
+  },
+  "delivery": {
+    "mode": "static-chunked-json",
+    "constraints": [
+      "Render coverage codes as labelled categories, never as counts.",
+      "Keep the missing-types list separate from lemma occurrences.",
+      "Do not expose either comparison metric as the generic dataset frequency."
+    ]
+  },
+  "views": [
+    {
+      "id": "jcl-types-dml6-coverage",
+      "title": "JCL types and DML6 coverage",
+      "description": "A raw JCL token count paired with a categorical DML6 coverage code. The code is not a frequency.",
+      "index": "views/jcl-types-dml6-coverage/index.json",
+      "sourceRole": "types-coverage",
+      "recordEncoding": "array",
+      "summary": {
+        "sourceRows": 4968125,
+        "recordCount": 4968125,
+        "numericTotals": {
+          "jclTokenCount": 1334845080
+        },
+        "nullCounts": {}
+      }
+    },
+    {
+      "id": "dml6-lemmas-jcl-occurrences",
+      "title": "DML6 lemmas and JCL occurrences",
+      "description": "JCL occurrences for a DML6 lemma and source part-of-speech code.",
+      "index": "views/dml6-lemmas-jcl-occurrences/index.json",
+      "sourceRole": "lemma-occurrences",
+      "recordEncoding": "array",
+      "summary": {
+        "sourceRows": 85893,
+        "recordCount": 85893,
+        "numericTotals": {
+          "jclLemmaOccurrenceCount": 1607796536
+        },
+        "nullCounts": {}
+      }
+    },
+    {
+      "id": "jcl-types-missing-in-dml6",
+      "title": "JCL types missing from DML6",
+      "description": "The source's filtered list of types not found in DML6, with their raw JCL token counts.",
+      "index": "views/jcl-types-missing-in-dml6/index.json",
+      "sourceRole": "missing-types",
+      "recordEncoding": "array",
+      "summary": {
+        "sourceRows": 254726,
+        "recordCount": 254726,
+        "numericTotals": {
+          "jclTokenCount": 19727931
+        },
+        "nullCounts": {}
+      }
+    }
+  ]
+}

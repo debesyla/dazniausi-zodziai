@@ -1,0 +1,70 @@
+{
+  "schemaVersion": 1,
+  "id": "utka-ccll2-war-ukraine-comparison",
+  "title": "CCLL2 compared with wartime media and social-network lexicons",
+  "productType": "chunked-comparison",
+  "publication": {
+    "status": "published",
+    "scope": "Every row from the reviewed CCLL2, wartime media, and social-network comparison file.",
+    "access": "Static JSON chunks. A null metric means the word is absent from that source, not that its count is zero."
+  },
+  "provenance": {
+    "sourceRepository": {
+      "repositoryUrl": "https://github.com/debesyla/dazniausi-zodziai-sources.git",
+      "revision": "d1f4c06e93d4142ec3c42a3c1d02c06b6a301e13"
+    },
+    "sourceUrl": "https://clarin-repo.lt/items/60607329-be91-4e04-8a74-62e12ae0078d",
+    "licence": "CC BY 4.0",
+    "citation": "Utka, A. 2024. Comparative wordlist based on CCLL2 and wartime media and social-network lexicons.",
+    "files": [
+      {
+        "role": "normalized-comparison",
+        "path": "utka-2016-11-17-ccll2_vs_war_in_UA/original/ccll2_vs_war_in_UA.txt",
+        "format": "text",
+        "bytes": 46957375,
+        "sha256": "2513dc5dedc0a11e4e2856a54ca27fbc2046aaf3560259c4a9aed66170e9d3ed",
+        "rows": 2264779,
+        "columns": 7
+      }
+    ]
+  },
+  "delivery": {
+    "mode": "static-chunked-json",
+    "constraints": [
+      "Preserve null for an absent source metric; do not coerce it to zero.",
+      "Show normalized units and source denominators beside every metric.",
+      "Keep token and document metrics distinct.",
+      "Do not rank or export the six metrics as one total-frequency column."
+    ]
+  },
+  "views": [
+    {
+      "id": "ccll2-war-ukraine-normalized-metrics",
+      "title": "CCLL2, wartime media, and social-network metrics",
+      "description": "Token and document counts normalized by the source to 100 million source words. Metrics remain separate and nullable.",
+      "index": "views/ccll2-war-ukraine-normalized-metrics/index.json",
+      "sourceRole": "normalized-comparison",
+      "recordEncoding": "array",
+      "summary": {
+        "sourceRows": 2264779,
+        "recordCount": 2264779,
+        "numericTotals": {
+          "ccll2TokenCount": 99786439,
+          "ccll2DocumentCount": 30661534,
+          "mediaTokenCount": 99629711,
+          "mediaDocumentCount": 62758948,
+          "socialTokenCount": 95981354,
+          "socialDocumentCount": 67522568
+        },
+        "nullCounts": {
+          "ccll2TokenCount": 151388,
+          "ccll2DocumentCount": 151388,
+          "mediaTokenCount": 1663115,
+          "mediaDocumentCount": 1663115,
+          "socialTokenCount": 2130518,
+          "socialDocumentCount": 2130518
+        }
+      }
+    }
+  ]
+}

@@ -43,22 +43,34 @@ app. The canonical schema, source configuration, validation rules, and command
 are in [docs/data-preparation.md](docs/data-preparation.md). The reviewed
 decision for every maintained source collection is tracked in
 [docs/source-catalog.md](docs/source-catalog.md).
+Larger and non-generic collections have implementation-ready source contracts in
+[docs/source-contracts.md](docs/source-contracts.md). The complete public JSON
+delivery model is documented in [docs/data-products.md](docs/data-products.md).
 
 ```bash
 npm run data:build -- --config data/datasets/utka-2018-lemmatized-totals.json --source-root /path/to/dazniausi-zodziai-sources --output static/datasets/utka-2018-lemmatized-totals.json --catalog static/datasets/catalog.json
 npm run data:verify -- --source-root /path/to/dazniausi-zodziai-sources
+npm run source:verify -- --source-root /path/to/dazniausi-zodziai-sources
+npm run products:build -- --source-root /path/to/dazniausi-zodziai-sources
+npm run products:verify
 ```
 
 Review provenance, licence, citation, source snapshot, summary totals, and the
-generated catalog entry before committing a new dataset. The table's large-list
-strategy is documented in [docs/scalable-exploration.md](docs/scalable-exploration.md).
+generated catalog entry before committing a new dataset. `products:build`
+recreates the checked-in `static/data-products/` artifacts from the pinned
+raw-source snapshot; stage those regenerated JSON files together with their
+contract change. `products:verify` checks every generated manifest and chunk.
+The table's large-list strategy is documented in [docs/scalable-exploration.md](docs/scalable-exploration.md).
 
 ## Deployment
 
 GitHub Pages deploys automatically after a successful push to `main` through
 `.github/workflows/deploy.yml`. Repository Settings → Pages must use **GitHub
 Actions** as its source. Pull requests run the separate verification workflow
-in `.github/workflows/verify.yml`.
+in `.github/workflows/verify.yml`. The checked-in public data products are
+verified before each deployment and copied unchanged into the static site.
+Maintainers rebuild them locally from raw source revision
+`d1f4c06e93d4142ec3c42a3c1d02c06b6a301e13` before updating a product.
 
 ## Analytics and privacy
 
