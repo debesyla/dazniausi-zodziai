@@ -1,0 +1,31 @@
+import { access, readFile } from 'node:fs/promises';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { describe, expect, it } from 'vitest';
+
+const repositoryRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
+
+async function readRepositoryFile(filename) {
+	return readFile(path.join(repositoryRoot, filename), 'utf8');
+}
+
+describe('project hygiene', () => {
+	it('ships a declared MIT licence', async () => {
+		await expect(access(path.join(repositoryRoot, 'LICENSE'))).resolves.toBeUndefined();
+		expect(await readRepositoryFile('LICENSE')).toContain('MIT License');
+	});
+
+	it('keeps the application shell free of client-side telemetry', async () => {
+		const appShell = await readRepositoryFile('src/app.html');
+
+		expect(appShell).not.toMatch(/localStorage|document\.referrer|analytics/i);
+	});
+
+	it('documents the supported maintainer dataset command', async () => {
+		const readme = await readRepositoryFile('README.md');
+
+		expect(readme).toContain('data/datasets/utka-2018-lemmatized-totals.json');
+		expect(readme).not.toContain('data/datasets/example.json');
+		expect(readme).not.toContain('test:e2e');
+	});
+});
