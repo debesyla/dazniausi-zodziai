@@ -6,6 +6,7 @@
   import SearchBar from './SearchBar.svelte';
   import DataTable from './DataTable.svelte';
   import DownloadButton from './DownloadButton.svelte';
+  import FrequencyDashboard from './FrequencyDashboard.svelte';
 
   let { filename = 'sample-dataset.json' } = $props();
 
@@ -117,6 +118,7 @@
         {/each}
       </div>
     {/if}
+    <FrequencyDashboard words={filteredWords} typeLabels={typeLabels} />
     <DownloadButton
       words={sortedFilteredWords}
       metadata={{ id: dataset.id, title: dataset.title, author: dataset.author, year: dataset.year }}

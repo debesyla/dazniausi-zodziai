@@ -2,6 +2,7 @@ import { readFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
+import { analyseFrequency } from '../../src/lib/analysis';
 import { validateCatalog, validateDataset } from '../../src/lib/data';
 
 const repositoryRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
@@ -34,6 +35,10 @@ describe('curated dataset catalog', () => {
     expect(dataset.provenance).toMatchObject({
       licence: 'CC BY 4.0',
       sourceUrl: 'https://clarin-repo.lt/items/2bf241af-42ab-4a68-8dd6-c119c2dd0e1e'
+    });
+    expect(analyseFrequency(dataset.words)).toMatchObject({
+      entryCount: 41977,
+      totalFrequency: 922949
     });
   });
 });
