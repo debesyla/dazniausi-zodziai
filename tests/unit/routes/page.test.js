@@ -1,20 +1,30 @@
-import { render } from '@testing-library/svelte/svelte5';
+import { render, waitFor } from '@testing-library/svelte/svelte5';
 import { vi } from 'vitest';
 
-// Mock translations
+const catalog = {
+  schemaVersion: 1,
+  datasets: [
+    {
+      id: 'first', title: 'First dataset', author: 'First author', year: 2024,
+      entryKind: 'lemma', file: 'first.json', records: 2, totalFrequency: 10,
+      hasPartOfSpeech: true, licence: null, citation: null
+    },
+    {
+      id: 'second', title: 'Second dataset', author: 'Second author', year: 2023,
+      entryKind: 'wordform', file: 'second.json', records: 3, totalFrequency: 20,
+      hasPartOfSpeech: false, licence: null, citation: null
+    }
+  ]
+};
+
 vi.mock('../../../src/lib/translations', () => ({
   t: vi.fn((key) => key)
 }));
 
-// Mock data
 vi.mock('../../../src/lib/data', () => ({
-  getAvailableDatasets: vi.fn(() => [
-    { filename: 'sample-dataset-2.json', author: 'Vilnius University Linguistics Department' },
-    { filename: 'sample-dataset.json', author: 'Lithuanian Language Institute' }
-  ])
+  loadCatalog: vi.fn(() => Promise.resolve(catalog))
 }));
 
-// Mock DataLoader
 vi.mock('../../../src/components/DataLoader.svelte', () => ({
   default: vi.fn(() => ({ render: () => ({ html: '<div>DataLoader</div>', css: '' }) }))
 }));
@@ -22,25 +32,17 @@ vi.mock('../../../src/components/DataLoader.svelte', () => ({
 import Page from '../../../src/routes/+page.svelte';
 
 describe('Page', () => {
-  it('renders page title and description', () => {
-    const { getByText, getByRole } = render(Page);
+  it('loads catalog metadata before rendering the dataset selector', async () => {
+    const { getByText, getByRole, queryByText } = render(Page);
 
-    expect(getByText('pageTitle')).toBeInTheDocument();
-
-    const select = getByRole('combobox');
-    expect(select).toBeInTheDocument();
-    expect(select).toHaveValue('sample-dataset-2.json');
-  });
-
-  it('renders dataset options', () => {
-    const { getByRole } = render(Page);
+    expect(getByText('loadingCatalog')).toBeInTheDocument();
+    await waitFor(() => {
+      expect(queryByText('loadingCatalog')).not.toBeInTheDocument();
+    });
 
     const select = getByRole('combobox');
-    const options = select.querySelectorAll('option');
-    expect(options).toHaveLength(2);
-    expect(options[0]).toHaveValue('sample-dataset-2.json');
-    expect(options[0]).toHaveTextContent('Vilnius University Linguistics Department');
-    expect(options[1]).toHaveValue('sample-dataset.json');
-    expect(options[1]).toHaveTextContent('Lithuanian Language Institute');
+    expect(select).toHaveValue('first');
+    expect(select.querySelectorAll('option')).toHaveLength(2);
+    expect(select).toHaveTextContent('First dataset (2024)');
   });
 });
