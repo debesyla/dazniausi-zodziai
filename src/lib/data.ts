@@ -13,6 +13,12 @@ export interface DatasetSummary {
   duplicateEntries: number;
 }
 
+export interface DatasetProvenance {
+  licence?: string;
+  citation?: string;
+  sourceUrl?: string;
+}
+
 export interface Dataset {
   schemaVersion: number;
   id: string;
@@ -20,6 +26,7 @@ export interface Dataset {
   author: string;
   year: number;
   entryKind: 'lemma' | 'wordform';
+  provenance: DatasetProvenance;
   summary: DatasetSummary;
   words: Word[];
 }
@@ -69,6 +76,17 @@ function isSafeDatasetFile(value: unknown): value is string {
   return isNonEmptyString(value) && !value.startsWith('/') && !value.includes('://') && !value.split('/').includes('..');
 }
 
+function validateProvenance(value: unknown): DatasetProvenance | null {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return null;
+  const provenance = value as DatasetProvenance;
+  for (const field of ['licence', 'citation', 'sourceUrl'] as const) {
+    if (provenance[field] !== undefined && !isNonEmptyString(provenance[field])) {
+      return null;
+    }
+  }
+  return provenance;
+}
+
 export function validateDataset(data: unknown): Dataset {
   const dataset = data as Partial<Dataset>;
   if (!isNonNegativeInteger(dataset.schemaVersion)) {
@@ -88,6 +106,9 @@ export function validateDataset(data: unknown): Dataset {
   }
   if (!isEntryKind(dataset.entryKind)) {
     throw new Error('Invalid dataset: missing or invalid "entryKind" field');
+  }
+  if (!validateProvenance(dataset.provenance)) {
+    throw new Error('Invalid dataset: missing or invalid "provenance" field');
   }
   if (!dataset.summary || !isNonNegativeInteger(dataset.summary.sourceRows) || !isNonNegativeInteger(dataset.summary.entryCount) || !isNonNegativeInteger(dataset.summary.totalFrequency) || !isNonNegativeInteger(dataset.summary.duplicateEntries)) {
     throw new Error('Invalid dataset: missing or invalid "summary" field');
