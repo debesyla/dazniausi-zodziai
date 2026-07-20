@@ -24,6 +24,7 @@ export const translations = {
     source: 'Šaltinis',
     words: 'Žodžiai',
     filterByType: 'Filtruoti pagal tipą:',
+    posScheme: 'Kalbos dalių žymėjimas',
     clearFilters: 'Išvalyti filtrus',
     loadAll: 'Rodyti visus',
     

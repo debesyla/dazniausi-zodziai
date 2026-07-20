@@ -13,10 +13,16 @@ export interface DatasetSummary {
   duplicateEntries: number;
 }
 
+export interface PartOfSpeechScheme {
+  name: string;
+  labels: Record<string, string>;
+}
+
 export interface DatasetProvenance {
   licence?: string;
   citation?: string;
   sourceUrl?: string;
+  partOfSpeech?: PartOfSpeechScheme;
 }
 
 export interface Dataset {
@@ -77,6 +83,14 @@ function validateProvenance(value: unknown): DatasetProvenance | null {
   const provenance = value as DatasetProvenance;
   for (const field of ['licence', 'citation', 'sourceUrl'] as const) {
     if (provenance[field] !== undefined && !isNonEmptyString(provenance[field])) {
+      return null;
+    }
+  }
+  if (provenance.partOfSpeech !== undefined) {
+    if (!isNonEmptyString(provenance.partOfSpeech.name) || !provenance.partOfSpeech.labels || typeof provenance.partOfSpeech.labels !== 'object' || Array.isArray(provenance.partOfSpeech.labels)) {
+      return null;
+    }
+    if (Object.values(provenance.partOfSpeech.labels).some((label) => !isNonEmptyString(label))) {
       return null;
     }
   }

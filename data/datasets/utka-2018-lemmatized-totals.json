@@ -18,6 +18,28 @@
   "provenance": {
     "licence": "CC BY 4.0",
     "citation": "Utka, Andrius. 2018. Lemmatised Wordlist of 1 m. Corpus of Contemporary Lithuanian. Vytautas Magnus University. CLARIN-LT Repository. https://hdl.handle.net/20.500.11821/12",
-    "sourceUrl": "https://clarin-repo.lt/items/2bf241af-42ab-4a68-8dd6-c119c2dd0e1e"
+    "sourceUrl": "https://clarin-repo.lt/items/2bf241af-42ab-4a68-8dd6-c119c2dd0e1e",
+    "partOfSpeech": {
+      "name": "Utka 2018",
+      "labels": {
+        "akronim": "Akronimas",
+        "bdv": "Būdvardis",
+        "būdn": "Būdinys",
+        "dkt": "Daiktavardis",
+        "dll": "Dalelytė",
+        "išt": "Ištiktukas",
+        "įv": "Įvardis",
+        "jng": "Jungtukas",
+        "jst": "Jaustukas",
+        "prl": "Prielinksnis",
+        "prv": "Prieveiksmis",
+        "rom. sk": "Romėniškas skaičius",
+        "sktv": "Skaitvardis",
+        "sutr": "Sutrumpinimas",
+        "tikr. dkt": "Tikrinis daiktavardis",
+        "tikr. dkt2": "Tikrinis daiktavardis (variantas)",
+        "vksm": "Veiksmažodis"
+      }
+    }
   }
 }
