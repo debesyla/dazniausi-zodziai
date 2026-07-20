@@ -1,0 +1,99 @@
+{
+  "schemaVersion": 1,
+  "productId": "dadurkevicius-dml6-vs-jcl-comparison",
+  "viewId": "dml6-lemmas-jcl-occurrences",
+  "recordEncoding": "array",
+  "fields": [
+    {
+      "id": "lemma",
+      "label": "Lemma",
+      "type": "string",
+      "sourceColumn": 0
+    },
+    {
+      "id": "partOfSpeechCode",
+      "label": "Source part-of-speech code",
+      "type": "source-pos-code",
+      "sourceColumn": 1
+    },
+    {
+      "id": "jclLemmaOccurrenceCount",
+      "label": "JCL occurrence count",
+      "type": "raw-token-count",
+      "unit": "tokens",
+      "sourceColumn": 2
+    }
+  ],
+  "ordering": {
+    "field": "jclLemmaOccurrenceCount",
+    "direction": "descending"
+  },
+  "sourceFile": {
+    "role": "lemma-occurrences",
+    "path": "dadurkevicius-2020-06-30-DML6_vs_JCL/original/DML6_lemmas_vs_JCL.txt",
+    "format": "text",
+    "bytes": 1424602,
+    "sha256": "93e4c3583366d792937d118b662f7d2115d54098bf9bc4097c4bc9ef1040159e",
+    "rows": 85893,
+    "columns": 3
+  },
+  "maxChunkBytes": 262144,
+  "summary": {
+    "sourceRows": 85893,
+    "recordCount": 85893,
+    "numericTotals": {
+      "jclLemmaOccurrenceCount": 1607796536
+    },
+    "nullCounts": {}
+  },
+  "chunks": [
+    {
+      "file": "chunks/000001.json",
+      "records": 11651,
+      "bytes": 262134,
+      "sha256": "0c9658b2ccaac8aef908023d39a04758e56f0916c9f3f8819c69feaa5709a86e"
+    },
+    {
+      "file": "chunks/000002.json",
+      "records": 11576,
+      "bytes": 262131,
+      "sha256": "6aed3ce617e2e4f89bb3eabe95b7ef9e484b057fc95e5515f87c4f0e59e3b825"
+    },
+    {
+      "file": "chunks/000003.json",
+      "records": 11734,
+      "bytes": 262136,
+      "sha256": "f2eb842be4403b010dfbc571a9e4709208fcb613f9764d17993e5e480c9d250e"
+    },
+    {
+      "file": "chunks/000004.json",
+      "records": 11559,
+      "bytes": 262141,
+      "sha256": "bc7d0749a7d968ec5193de152559589feda743bb387b9de6a73727a0516c24eb"
+    },
+    {
+      "file": "chunks/000005.json",
+      "records": 11418,
+      "bytes": 262125,
+      "sha256": "7dd4ca1346872919cdb76b8d8951c3a64305a26268562ed3362b095c83fa2950"
+    },
+    {
+      "file": "chunks/000006.json",
+      "records": 11638,
+      "bytes": 262140,
+      "sha256": "be07e8a669e0ca7f854bc0dcd55f1a5cdee59eccaf8259b3aad09a1f9c7b4800"
+    },
+    {
+      "file": "chunks/000007.json",
+      "records": 11555,
+      "bytes": 262133,
+      "sha256": "1aff540d8102fe03a348991c755259476107203af87024960bf447476e684387"
+    },
+    {
+      "file": "chunks/000008.json",
+      "records": 4762,
+      "bytes": 106076,
+      "sha256": "3c110631c2a5a5daf28d47ee7de9bb651fa29203a26f9d149654d9b79f4ca544"
+    }
+  ]
+}
