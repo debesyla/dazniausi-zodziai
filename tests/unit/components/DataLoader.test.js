@@ -9,7 +9,9 @@ vi.mock('../../../src/lib/data', () => ({
 }));
 
 vi.mock('../../../src/lib/translations', () => ({
-  t: vi.fn((key) => key)
+  t: vi.fn((key, parameters) => parameters
+    ? `${key}:${Object.values(parameters).join('/')}`
+    : key)
 }));
 
 vi.mock('../../../src/components/SearchBar.svelte', () => ({
@@ -125,10 +127,10 @@ describe('DataLoader', () => {
     });
   });
 
-  it('shows load all button when more than 10 words', async () => {
+  it('shows bounded pagination when more than 50 words', async () => {
     const largeDataset = {
       ...mockDataset,
-      words: Array.from({ length: 12 }, (_, i) => ({ word: `word${i}`, frequency: 100 - i }))
+      words: Array.from({ length: 51 }, (_, i) => ({ word: `word${i}`, frequency: 100 - i }))
     };
     loadDataset.mockResolvedValue(largeDataset);
 
@@ -138,10 +140,11 @@ describe('DataLoader', () => {
       expect(queryByText('loading')).not.toBeInTheDocument();
     });
 
-    expect(getByText('loadAll')).toBeInTheDocument();
+    expect(getByText('nextPage')).toBeInTheDocument();
+    expect(getByText('pageOf:1/2')).toBeInTheDocument();
   });
 
-  it('does not show load all button when 10 or fewer words', async () => {
+  it('does not show pagination when 50 or fewer words', async () => {
     loadDataset.mockResolvedValue(mockDataset); // 2 words
 
     const { queryByText } = render(DataLoader, { filename: 'test.json' });
@@ -150,13 +153,25 @@ describe('DataLoader', () => {
       expect(queryByText('loading')).not.toBeInTheDocument();
     });
 
-    expect(queryByText('loadAll')).not.toBeInTheDocument();
+    expect(queryByText('nextPage')).not.toBeInTheDocument();
   });
 
-  it('loads all words when load all button is clicked', async () => {
+  it('shows a table empty state when no active results remain', async () => {
+    loadDataset.mockResolvedValue({ ...mockDataset, words: [] });
+
+    const { container, queryByText } = render(DataLoader, { filename: 'test.json' });
+
+    await waitFor(() => {
+      expect(queryByText('loading')).not.toBeInTheDocument();
+    });
+
+    expect(container.querySelector('.empty-results')).toHaveTextContent('noMatchingWords');
+  });
+
+  it('moves to the next bounded result page', async () => {
     const largeDataset = {
       ...mockDataset,
-      words: Array.from({ length: 12 }, (_, i) => ({ word: `word${i}`, frequency: 100 - i }))
+      words: Array.from({ length: 51 }, (_, i) => ({ word: `word${i}`, frequency: 100 - i }))
     };
     loadDataset.mockResolvedValue(largeDataset);
 
@@ -166,12 +181,12 @@ describe('DataLoader', () => {
       expect(queryByText('loading')).not.toBeInTheDocument();
     });
 
-    const loadButton = getByText('loadAll');
-    loadButton.click();
+    const nextButton = getByText('nextPage');
+    nextButton.click();
 
-    // After click, button should be hidden
     await waitFor(() => {
-      expect(queryByText('loadAll')).not.toBeInTheDocument();
+      expect(getByText('pageOf:2/2')).toBeInTheDocument();
+      expect(getByText('previousPage')).toBeInTheDocument();
     });
   });
 });
