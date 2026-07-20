@@ -24,10 +24,11 @@ test('DataTable renders table with words', () => {
   expect(getByText('5')).toBeInTheDocument();
 
   const headers = getAllByRole('columnheader');
-  expect(headers).toHaveLength(3);
-  expect(headers[0]).toHaveTextContent('Žodis');
-  expect(headers[1]).toHaveTextContent('Dažnumas ↓');
-  expect(headers[2]).toHaveTextContent('Tipas');
+  expect(headers).toHaveLength(4);
+  expect(headers[0]).toHaveTextContent('Rangas');
+  expect(headers[1]).toHaveTextContent('Žodis');
+  expect(headers[2]).toHaveTextContent('Dažnumas ↓');
+  expect(headers[3]).toHaveTextContent('Tipas');
 });
 
 test('DataTable displays a source-specific POS label without losing the raw code', () => {
@@ -37,6 +38,14 @@ test('DataTable displays a source-specific POS label without losing the raw code
   });
 
   expect(getByText('Jungtukas (jng)')).toBeInTheDocument();
+});
+
+test('DataTable displays the frequency rank supplied by the active result set', () => {
+  const { getByText } = render(DataTable, {
+    words: [{ word: 'ir', type: 'jng', frequency: 10, rank: 3 }]
+  });
+
+  expect(getByText('3')).toBeInTheDocument();
 });
 
 test('DataTable sortable headers have correct class', () => {
