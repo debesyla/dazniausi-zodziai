@@ -41,16 +41,23 @@
   }
 
   $effect(() => {
+    let cancelled = false;
     loading = true;
     error = null;
     dataset = null;
     loadDataset(filename).then((d) => {
+      if (cancelled) return;
       dataset = d;
       loading = false;
     }).catch((err) => {
+      if (cancelled) return;
       error = err instanceof Error ? err.message : String(err);
       loading = false;
     });
+
+    return () => {
+      cancelled = true;
+    };
   });
 
   $effect(() => {

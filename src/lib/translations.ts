@@ -27,6 +27,9 @@ export const translations = {
     // Main page
     pageTitle: 'Dažniausi lietuviški žodžiai',
     selectDataset: 'Pasirinkite duomenis',
+    loadingCatalog: 'Kraunamas duomenų katalogas...',
+    errorLoadingCatalog: 'Klaida kraunant duomenų katalogą',
+    noDatasets: 'Duomenų kataloge nėra rinkinių.',
     footerText: 'Turi pasiūlymų? Parašyk! ',
     footerEmail: 'labas@dago.lt',
   }

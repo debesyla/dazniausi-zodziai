@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "datasets": [
+    {
+      "id": "demo-lithuanian-words",
+      "title": "Demonstracinis lietuviškų žodžių rinkinys",
+      "author": "Lithuanian Language Institute",
+      "year": 2023,
+      "entryKind": "lemma",
+      "file": "demo-lithuanian-words.json",
+      "records": 5,
+      "totalFrequency": 45800,
+      "hasPartOfSpeech": true,
+      "licence": null,
+      "citation": null
+    }
+  ]
+}

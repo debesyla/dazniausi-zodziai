@@ -76,6 +76,27 @@ describe('DataLoader', () => {
     expect(getByText('Load failed')).toBeInTheDocument();
   });
 
+  it('ignores an older dataset response after the filename changes', async () => {
+    const deferred = {};
+    const firstDataset = { ...mockDataset, author: 'First Author' };
+    const secondDataset = { ...mockDataset, author: 'Second Author' };
+    loadDataset.mockImplementation((filename) => new Promise((resolve) => {
+      deferred[filename] = resolve;
+    }));
+
+    const { getByText, rerender } = render(DataLoader, { filename: 'first.json' });
+    await rerender({ filename: 'second.json' });
+
+    deferred['second.json'](secondDataset);
+    await waitFor(() => {
+      expect(getByText('Second Author')).toBeInTheDocument();
+    });
+
+    deferred['first.json'](firstDataset);
+    await Promise.resolve();
+    expect(getByText('Second Author')).toBeInTheDocument();
+  });
+
   it('clears filters when clear button is clicked', async () => {
     loadDataset.mockResolvedValue(mockDataset);
 
