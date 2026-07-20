@@ -8,6 +8,7 @@ const validDataset = {
   author: 'Test author',
   year: 2023,
   entryKind: 'lemma',
+  provenance: {},
   summary: { sourceRows: 2, entryCount: 2, totalFrequency: 15, duplicateEntries: 0 },
   words: [
     { word: 'test', frequency: 10 },

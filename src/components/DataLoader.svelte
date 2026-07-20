@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { loadDataset } from '$lib/data';
+  import { loadDataset, type Dataset } from '$lib/data';
   import { filterWords } from '$lib/utils';
   import { t } from '$lib/translations';
   import SearchBar from './SearchBar.svelte';
@@ -7,18 +7,6 @@
   import DownloadButton from './DownloadButton.svelte';
 
   let { filename = 'sample-dataset.json' } = $props();
-
-  interface Word {
-    word: string;
-    type?: string;
-    frequency: number;
-  }
-
-  interface Dataset {
-    author: string;
-    year: number;
-    words: Word[];
-  }
 
   let dataset = $state<Dataset | null>(null);
   let loading = $state(true);
@@ -87,9 +75,19 @@
   </div>
 {:else if dataset}
   <div class="dataset">
-    <h2>{t('datasetInformation')}</h2>
+    <h2>{dataset.title}</h2>
     <p><strong>{t('author')}:</strong> {dataset.author}</p>
     <p><strong>{t('year')}:</strong> {dataset.year}</p>
+    <p><strong>{t('entryKind')}:</strong> {dataset.entryKind === 'lemma' ? t('lemma') : t('wordform')}</p>
+    {#if dataset.provenance.licence}
+      <p><strong>{t('licence')}:</strong> {dataset.provenance.licence}</p>
+    {/if}
+    {#if dataset.provenance.citation}
+      <p><strong>{t('citation')}:</strong> {dataset.provenance.citation}</p>
+    {/if}
+    {#if dataset.provenance.sourceUrl}
+      <p><a href={dataset.provenance.sourceUrl} target="_blank" rel="noreferrer">{t('source')}</a></p>
+    {/if}
     
     <h3>{t('words')} ({displayedWords.length}{#if sortedFilteredWords.length > 10 && !loadedAll} / {sortedFilteredWords.length}{/if})</h3>
     <div class="search-and-clear">

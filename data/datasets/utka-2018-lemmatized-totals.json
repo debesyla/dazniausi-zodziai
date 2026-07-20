@@ -1,0 +1,23 @@
+{
+  "id": "utka-2018-lemmatized-totals",
+  "title": "Lemuotas 1 mln. lietuvių kalbos tekstyno žodžių sąrašas",
+  "author": "Andrius Utka",
+  "year": 2018,
+  "entryKind": "lemma",
+  "duplicatePolicy": "keep",
+  "input": {
+    "path": "utka-2018-01-18-Lithuanian-wordlist/modified/lemmatized_totals.csv",
+    "delimiter": ",",
+    "hasHeader": false,
+    "columns": {
+      "word": 0,
+      "type": 1,
+      "frequency": 2
+    }
+  },
+  "provenance": {
+    "licence": "CC BY 4.0",
+    "citation": "Utka, Andrius. 2018. Lemmatised Wordlist of 1 m. Corpus of Contemporary Lithuanian. Vytautas Magnus University. CLARIN-LT Repository. https://hdl.handle.net/20.500.11821/12",
+    "sourceUrl": "https://clarin-repo.lt/items/2bf241af-42ab-4a68-8dd6-c119c2dd0e1e"
+  }
+}
