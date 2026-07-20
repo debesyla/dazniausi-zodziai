@@ -1,6 +1,20 @@
 {
   "schemaVersion": 1,
+  "defaultDatasetId": "utka-2018-lemmatized-totals",
   "datasets": [
+    {
+      "id": "dadurkevicius-2020-jcl-lemmas",
+      "title": "Lemų sąrašas iš Jungtinio lietuvių kalbos tekstyno",
+      "author": "Virginijus Dadurkevičius",
+      "year": 2020,
+      "entryKind": "lemma",
+      "file": "dadurkevicius-2020-jcl-lemmas.json",
+      "records": 169787,
+      "totalFrequency": 1266854554,
+      "hasPartOfSpeech": true,
+      "licence": "CC BY 4.0",
+      "citation": "Dadurkevičius, Virginijus. 2020. Wordlist of Lemmas from the Joint Corpus of Lithuanian. Vilnius University. CLARIN-LT Repository. https://hdl.handle.net/20.500.11821/41."
+    },
     {
       "id": "utka-2018-lemmatized-totals",
       "title": "Lemuotas 1 mln. lietuvių kalbos tekstyno žodžių sąrašas",
