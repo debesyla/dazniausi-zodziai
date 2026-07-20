@@ -73,6 +73,8 @@ describe('DownloadButton', () => {
     const csv = await blob.text();
     expect(csv).toContain('# Dataset ID: utka-2018-lemmatized-totals');
     expect(csv).toContain('# Paieška: ąžuolas');
+    expect(csv).toContain('# Tipai: dkt, tikr. dkt');
+    expect(csv).not.toContain('Filtruoti pagal tipą::');
     expect(csv).toContain('# Rikiavimas: Dažnumas (mažėjančia tvarka)');
     expect(csv.startsWith('\ufeff')).toBe(true);
 
