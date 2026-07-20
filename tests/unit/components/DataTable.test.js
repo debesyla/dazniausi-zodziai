@@ -30,6 +30,15 @@ test('DataTable renders table with words', () => {
   expect(headers[2]).toHaveTextContent('Tipas');
 });
 
+test('DataTable displays a source-specific POS label without losing the raw code', () => {
+  const { getByText } = render(DataTable, {
+    words: [{ word: 'ir', type: 'jng', frequency: 10 }],
+    typeLabels: { jng: 'Jungtukas' }
+  });
+
+  expect(getByText('Jungtukas (jng)')).toBeInTheDocument();
+});
+
 test('DataTable sortable headers have correct class', () => {
   const { getByText } = render(DataTable, { words: mockWords });
 
