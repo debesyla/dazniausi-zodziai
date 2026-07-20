@@ -1,6 +1,7 @@
 <script lang="ts">
   import { loadDataset, type Dataset } from '$lib/data';
-  import { filterWords } from '$lib/utils';
+  import { filterWords, sortWords } from '$lib/utils';
+  import type { WordSortKey } from '$lib/utils';
   import { t } from '$lib/translations';
   import SearchBar from './SearchBar.svelte';
   import DataTable from './DataTable.svelte';
@@ -14,6 +15,8 @@
   let searchQuery = $state('');
   let selectedTypes = $state<string[]>([]);
   let loadedAll = $state(false);
+  let sortKey = $state<WordSortKey>('frequency');
+  let sortAsc = $state(false);
 
   let uniqueTypes = $derived(dataset
     ? [...new Set(dataset.words.map((word) => word.type).filter((type): type is string => type !== undefined))]
@@ -23,7 +26,7 @@
 
   let filteredWords = $derived(dataset?.words ? filterWords(dataset.words, searchQuery, selectedTypes) : []);
 
-  let sortedFilteredWords = $derived(filteredWords.slice().sort((a, b) => b.frequency - a.frequency));
+  let sortedFilteredWords = $derived(sortWords(filteredWords, sortKey, sortAsc));
 
   let displayedWords = $derived(loadedAll ? sortedFilteredWords : sortedFilteredWords.slice(0, 10));
 
@@ -114,13 +117,17 @@
         {/each}
       </div>
     {/if}
-    <DownloadButton words={filteredWords} metadata={{author: dataset.author, year: dataset.year}} />
+    <DownloadButton
+      words={sortedFilteredWords}
+      metadata={{ id: dataset.id, title: dataset.title, author: dataset.author, year: dataset.year }}
+      exploration={{ query: searchQuery, types: selectedTypes, sortKey, sortAsc }}
+    />
     <div class="table-container">
       {#if sortedFilteredWords.length === 0}
         <p class="empty-state" role="status">{t('noMatchingWords')}</p>
       {:else}
         {#key filename}
-          <DataTable words={displayedWords} typeLabels={typeLabels} />
+          <DataTable words={displayedWords} typeLabels={typeLabels} bind:sortKey bind:sortAsc />
         {/key}
         {#if sortedFilteredWords.length > 10 && !loadedAll}
           <button onclick={() => loadedAll = true} class="load-all">{t('loadAll')}</button>
