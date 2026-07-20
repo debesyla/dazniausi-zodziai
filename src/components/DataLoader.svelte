@@ -15,7 +15,11 @@
   let selectedTypes = $state<string[]>([]);
   let loadedAll = $state(false);
 
-  let uniqueTypes = $derived(dataset ? [...new Set(dataset.words.map(w => w.type).filter(Boolean))] : []);
+  let uniqueTypes = $derived(dataset
+    ? [...new Set(dataset.words.map((word) => word.type).filter((type): type is string => type !== undefined))]
+    : []);
+
+  let typeLabels = $derived(dataset?.provenance.partOfSpeech?.labels ?? {});
 
   let filteredWords = $derived(dataset?.words ? filterWords(dataset.words, searchQuery, selectedTypes) : []);
 
@@ -99,10 +103,13 @@
     {#if uniqueTypes.length > 0}
       <div class="type-filter">
         <h4>{t('filterByType')}</h4>
+        {#if dataset.provenance.partOfSpeech}
+          <p class="type-note">{t('posScheme')}: {dataset.provenance.partOfSpeech.name}</p>
+        {/if}
         {#each uniqueTypes as type}
           <label>
             <input type="checkbox" bind:group={selectedTypes} value={type} />
-            {type}
+            {typeLabels[type] ?? type}{#if typeLabels[type]} ({type}){/if}
           </label>
         {/each}
       </div>
@@ -113,7 +120,7 @@
         <p class="empty-state" role="status">{t('noMatchingWords')}</p>
       {:else}
         {#key filename}
-          <DataTable words={displayedWords} />
+          <DataTable words={displayedWords} typeLabels={typeLabels} />
         {/key}
         {#if sortedFilteredWords.length > 10 && !loadedAll}
           <button onclick={() => loadedAll = true} class="load-all">{t('loadAll')}</button>
@@ -158,6 +165,10 @@
   .type-filter h4 {
     margin: 0 0 var(--sm) 0;
     color: #FFBF00;
+  }
+
+  .type-note {
+    margin: 0 0 var(--sm);
   }
 
   .type-filter label {

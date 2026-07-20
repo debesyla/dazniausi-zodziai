@@ -130,6 +130,9 @@ describe('DataLoader', () => {
 
   it('resets dataset-specific filters when the filename changes', async () => {
     const secondDataset = {
+      ...mockDataset,
+      id: 'second-dataset',
+      title: 'Second dataset',
       author: 'Second Author',
       year: 2024,
       words: [{ word: 'other', type: 'verb', frequency: 20 }]

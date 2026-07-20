@@ -6,7 +6,7 @@
     frequency: number;
   }
 
-  let { words = [] } = $props<{ words?: Word[] }>();
+  let { words = [], typeLabels = {} } = $props<{ words?: Word[]; typeLabels?: Record<string, string> }>();
 
   let sortKey = $state<'word' | 'frequency' | 'type'>('frequency');
   let sortAsc = $state(false);
@@ -39,6 +39,11 @@
       return sortAsc ? aStr.localeCompare(bStr) : bStr.localeCompare(aStr);
     }
   }));
+
+  function displayType(type?: string) {
+    if (!type) return '';
+    return typeLabels[type] ? `${typeLabels[type]} (${type})` : type;
+  }
 </script>
 
 <table>
@@ -54,7 +59,7 @@
       <tr>
         <td>{word.word}</td>
         <td>{word.frequency.toLocaleString()}</td>
-        <td>{word.type || ''}</td>
+        <td>{displayType(word.type)}</td>
       </tr>
     {/each}
   </tbody>
