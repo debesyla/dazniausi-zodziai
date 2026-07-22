@@ -31,6 +31,9 @@ Run the same checks used for pull requests and GitHub Pages deployment:
 ```bash
 npm run check
 npm test
+npx playwright install chromium # once per machine
+npm run test:browser
+npm run products:verify
 npm run build
 ```
 
