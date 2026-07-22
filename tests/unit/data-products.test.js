@@ -303,4 +303,110 @@ describe('public data-product preparation', () => {
     const chunk = JSON.parse(await readFile(path.join(outputRoot, 'onegrams-fixture', 'views', 'all-by-frequency', index.chunks[0].file), 'utf8'));
     expect(chunk.records).toEqual([['ir,', 25], ['kad', 5]]);
   });
+
+  it('derives a bounded DML6-style coverage profile with transparent frequency bands', async () => {
+    const root = await makeDirectory();
+    const sourceRoot = path.join(root, 'sources');
+    const staticRoot = path.join(root, 'static');
+    const outputRoot = path.join(staticRoot, 'data-products');
+    const planPath = path.join(root, 'plan.json');
+    const contractPath = path.join(root, 'contract.json');
+    const source = 'one\t1\t0\ntwo\t2\t1\nthree\t9\t1\nten\t10\t2\ntie-b\t10\t3\ntie-a\t10\t3\n';
+    const contract = {
+      schemaVersion: 1,
+      sourceRepository: { repositoryUrl: 'https://example.test/source.git', revision: 'fixture-revision' },
+      contracts: [{
+        id: 'coverage-fixture',
+        title: 'Coverage fixture',
+        source: {
+          sourceUrl: 'https://example.test/coverage',
+          licence: 'CC BY 4.0',
+          citation: 'Fixture coverage citation',
+          files: [{
+            path: 'types.tsv',
+            role: 'types-coverage',
+            bytes: Buffer.byteLength(source),
+            rows: 6,
+            sha256: checksum(source),
+            columns: 3,
+            numericColumns: [1, 2],
+            numericTotals: { 1: 42 },
+            allowedValues: { 2: [0, 1, 2, 3] },
+            samples: ['one\t1\t0', 'tie-a\t10\t3']
+          }]
+        },
+        delivery: { constraints: ['Keep coverage codes categorical.'] }
+      }]
+    };
+    const plan = {
+      schemaVersion: 1,
+      title: 'Fixture data products',
+      genericProducts: [],
+      contractProducts: [{
+        contractId: 'coverage-fixture',
+        productType: 'chunked-comparison',
+        publication: { status: 'published', scope: 'Every fixture row.', access: 'Chunked JSON.' },
+        views: [{
+          id: 'types-coverage',
+          sourceRole: 'types-coverage',
+          title: 'Fixture coverage',
+          description: 'A raw count and categorical coverage code.',
+          ordering: { field: 'jclTokenCount', direction: 'descending' },
+          chunkBytes: 1024,
+          fields: [
+            { id: 'word', label: 'Word form', type: 'string', sourceColumn: 0 },
+            { id: 'jclTokenCount', label: 'JCL token count', type: 'raw-token-count', unit: 'tokens', sourceColumn: 1 },
+            { id: 'dml6CoverageCode', label: 'DML6 coverage', type: 'coverage-code', unit: 'category', sourceColumn: 2, values: { 0: 'missing', 1: 'entry', 2: 'place', 3: 'abbreviation' } }
+          ]
+        }],
+        analysisProfiles: [{
+          id: 'coverage-by-band',
+          type: 'frequency-band-coverage',
+          sourceRole: 'types-coverage',
+          title: 'Coverage by band',
+          description: 'Transparent fixture bands.',
+          summaryMaxBytes: 8192,
+          frequencyBands: [
+            { id: 'one', label: '1', minimum: 1, maximum: 1 },
+            { id: 'two-to-nine', label: '2–9', minimum: 2, maximum: 9 },
+            { id: 'ten-plus', label: '10+', minimum: 10, maximum: null }
+          ],
+          drilldown: {
+            limit: 2,
+            maxBytes: 4096,
+            ordering: { field: 'jclTokenCount', direction: 'descending', tieBreak: 'word-ascending' }
+          }
+        }]
+      }]
+    };
+
+    await mkdir(sourceRoot, { recursive: true });
+    await Promise.all([
+      writeFile(path.join(sourceRoot, 'types.tsv'), source),
+      writeJson(planPath, plan),
+      writeJson(contractPath, contract)
+    ]);
+
+    await buildDataProducts({ sourceRoot, staticRoot, outputRoot, planPath, contractPath });
+    await expect(verifyDataProducts({ outputRoot, staticRoot })).resolves.toMatchObject({
+      products: 1,
+      chunkedViews: 1,
+      records: 6
+    });
+
+    const profile = JSON.parse(await readFile(path.join(outputRoot, 'coverage-fixture', 'analysis', 'coverage-by-band', 'manifest.json'), 'utf8'));
+    expect(profile.summary).toMatchObject({
+      sourceRows: 6,
+      totalTypeCount: 6,
+      totalTokenCount: 42
+    });
+    expect(profile.summary.bands.map((band) => [band.id, band.typeCount, band.tokenCount])).toEqual([
+      ['one', 1, 1],
+      ['two-to-nine', 2, 11],
+      ['ten-plus', 3, 30]
+    ]);
+    const abbreviation = profile.summary.bands[2].categories.find((category) => category.coverageCode === 3);
+    const drilldown = JSON.parse(await readFile(path.join(outputRoot, 'coverage-fixture', 'analysis', 'coverage-by-band', abbreviation.drilldown.file), 'utf8'));
+    expect(drilldown.records).toEqual([['tie-a', 10], ['tie-b', 10]]);
+  });
 });

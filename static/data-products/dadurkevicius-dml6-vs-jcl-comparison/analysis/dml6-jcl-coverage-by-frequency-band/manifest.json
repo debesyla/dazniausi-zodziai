@@ -1,0 +1,402 @@
+{
+  "schemaVersion": 1,
+  "productId": "dadurkevicius-dml6-vs-jcl-comparison",
+  "profileId": "dml6-jcl-coverage-by-frequency-band",
+  "profileType": "frequency-band-coverage",
+  "title": "DML6 coverage by JCL frequency band",
+  "description": "Counts of JCL word forms and their raw token mass in transparent frequency bands, split by labelled DML6 coverage category.",
+  "sourceView": {
+    "id": "jcl-types-dml6-coverage",
+    "sourceRole": "types-coverage",
+    "wordField": {
+      "id": "word",
+      "label": "Word form"
+    },
+    "frequencyField": {
+      "id": "jclTokenCount",
+      "label": "JCL token count",
+      "unit": "tokens"
+    },
+    "coverageField": {
+      "id": "dml6CoverageCode",
+      "label": "DML6 coverage",
+      "values": {
+        "0": "not in DML6",
+        "1": "main entry",
+        "2": "geographic name",
+        "3": "abbreviation"
+      }
+    }
+  },
+  "provenance": {
+    "sourceUrl": "https://clarin-repo.lt/items/b03a5f31-cd2b-4035-9c1b-d568e2524e37",
+    "licence": "CC BY 4.0",
+    "citation": "Dadurkevičius, V., Petrauskaitė, R. 2020. Corpus based methods for assessment of the traditional dictionaries.",
+    "sourceFile": {
+      "role": "types-coverage",
+      "path": "dadurkevicius-2020-06-30-DML6_vs_JCL/original/JCL_types_vs_DML6.txt",
+      "format": "text",
+      "bytes": 77300496,
+      "sha256": "6a67d41b3004209c535e711b65ec943e338a6ac02b58256ffbb104ac419445e1",
+      "rows": 4968125,
+      "columns": 3
+    }
+  },
+  "drilldown": {
+    "limit": 50,
+    "maxBytes": 16384,
+    "recordEncoding": "array",
+    "fields": [
+      {
+        "id": "word",
+        "label": "Word form",
+        "type": "string"
+      },
+      {
+        "id": "jclTokenCount",
+        "label": "JCL token count",
+        "type": "raw-token-count",
+        "unit": "tokens"
+      }
+    ],
+    "ordering": {
+      "field": "jclTokenCount",
+      "direction": "descending",
+      "tieBreak": "word-ascending"
+    }
+  },
+  "delivery": {
+    "summaryMaxBytes": 32768
+  },
+  "summary": {
+    "sourceRows": 4968125,
+    "totalTypeCount": 4968125,
+    "totalTokenCount": 1334845080,
+    "bands": [
+      {
+        "id": "one",
+        "label": "1",
+        "minimum": 1,
+        "maximum": 1,
+        "typeCount": 2036144,
+        "tokenCount": 2036144,
+        "categories": [
+          {
+            "coverageCode": 0,
+            "typeCount": 1755600,
+            "tokenCount": 1755600,
+            "drilldown": {
+              "file": "drilldowns/one-0.json",
+              "records": 50,
+              "bytes": 2611,
+              "sha256": "4e9a73236a77227ce5b49dcd2fd304888b07267f34042fef46d785fbd7b3e631"
+            }
+          },
+          {
+            "coverageCode": 1,
+            "typeCount": 279549,
+            "tokenCount": 279549,
+            "drilldown": {
+              "file": "drilldowns/one-1.json",
+              "records": 50,
+              "bytes": 2702,
+              "sha256": "8c7717ff4b06b6cfda9efa50f7fefa28d61d4b1d4b9984f15cf2358843da3732"
+            }
+          },
+          {
+            "coverageCode": 2,
+            "typeCount": 991,
+            "tokenCount": 991,
+            "drilldown": {
+              "file": "drilldowns/one-2.json",
+              "records": 50,
+              "bytes": 2596,
+              "sha256": "7d4caed339b27e765dfe109b3b0386bb9555df5318597bff73e6ad013e509e20"
+            }
+          },
+          {
+            "coverageCode": 3,
+            "typeCount": 4,
+            "tokenCount": 4,
+            "drilldown": {
+              "file": "drilldowns/one-3.json",
+              "records": 4,
+              "bytes": 713,
+              "sha256": "409a852e6807b8b020dd31f6a07ff2112a048be09356609be8d85441ef686060"
+            }
+          }
+        ]
+      },
+      {
+        "id": "two-to-four",
+        "label": "2–4",
+        "minimum": 2,
+        "maximum": 4,
+        "typeCount": 1370394,
+        "tokenCount": 3547437,
+        "categories": [
+          {
+            "coverageCode": 0,
+            "typeCount": 1077809,
+            "tokenCount": 2758978,
+            "drilldown": {
+              "file": "drilldowns/two-to-four-0.json",
+              "records": 50,
+              "bytes": 2521,
+              "sha256": "c7648222853b6378551ca7fb46f19eba3ab352e96f9729c51aea0eedbf0278c5"
+            }
+          },
+          {
+            "coverageCode": 1,
+            "typeCount": 291126,
+            "tokenCount": 784435,
+            "drilldown": {
+              "file": "drilldowns/two-to-four-1.json",
+              "records": 50,
+              "bytes": 2724,
+              "sha256": "c227b76199317ec4b36a2acaf536a6cb7effcd3d579922ad9adb1126475778a6"
+            }
+          },
+          {
+            "coverageCode": 2,
+            "typeCount": 1452,
+            "tokenCount": 4001,
+            "drilldown": {
+              "file": "drilldowns/two-to-four-2.json",
+              "records": 50,
+              "bytes": 2597,
+              "sha256": "1da4140eea85de10ad1458d318a4f1e39bdc63a2230adc7cad79e1573a671c92"
+            }
+          },
+          {
+            "coverageCode": 3,
+            "typeCount": 7,
+            "tokenCount": 23,
+            "drilldown": {
+              "file": "drilldowns/two-to-four-3.json",
+              "records": 7,
+              "bytes": 829,
+              "sha256": "6cb3ef3377889394c9ce0821fbed751bc67684bdc533aeeb4464d85113f5da27"
+            }
+          }
+        ]
+      },
+      {
+        "id": "five-to-nine",
+        "label": "5–9",
+        "minimum": 5,
+        "maximum": 9,
+        "typeCount": 503272,
+        "tokenCount": 3295650,
+        "categories": [
+          {
+            "coverageCode": 0,
+            "typeCount": 348933,
+            "tokenCount": 2273317,
+            "drilldown": {
+              "file": "drilldowns/five-to-nine-0.json",
+              "records": 50,
+              "bytes": 2548,
+              "sha256": "0817d9facf3901391e8da1c4d8408423a6641d4513e179970ccbf3b9dd19a85a"
+            }
+          },
+          {
+            "coverageCode": 1,
+            "typeCount": 153253,
+            "tokenCount": 1014970,
+            "drilldown": {
+              "file": "drilldowns/five-to-nine-1.json",
+              "records": 50,
+              "bytes": 2715,
+              "sha256": "730f36aacd3815fd2871bdc151b8ca008f7ffe4709cae8c3af7f7fc39b21867a"
+            }
+          },
+          {
+            "coverageCode": 2,
+            "typeCount": 1081,
+            "tokenCount": 7333,
+            "drilldown": {
+              "file": "drilldowns/five-to-nine-2.json",
+              "records": 50,
+              "bytes": 2594,
+              "sha256": "4ed42d1ac18bc53fe8a996bdc5d4a5a044ee2d796d83d181ff495ebbc2db09f8"
+            }
+          },
+          {
+            "coverageCode": 3,
+            "typeCount": 5,
+            "tokenCount": 30,
+            "drilldown": {
+              "file": "drilldowns/five-to-nine-3.json",
+              "records": 5,
+              "bytes": 760,
+              "sha256": "c3b43674ead7f4f78e4476db89193180e6d75945312ba686b96632c0764c88cc"
+            }
+          }
+        ]
+      },
+      {
+        "id": "ten-to-ninety-nine",
+        "label": "10–99",
+        "minimum": 10,
+        "maximum": 99,
+        "typeCount": 750564,
+        "tokenCount": 23065500,
+        "categories": [
+          {
+            "coverageCode": 0,
+            "typeCount": 431924,
+            "tokenCount": 12344341,
+            "drilldown": {
+              "file": "drilldowns/ten-to-ninety-nine-0.json",
+              "records": 50,
+              "bytes": 2626,
+              "sha256": "409679e0852ab8bc694dde5b013b606d27306ceb1556e6cb4347a1259d9439b6"
+            }
+          },
+          {
+            "coverageCode": 1,
+            "typeCount": 314691,
+            "tokenCount": 10570536,
+            "drilldown": {
+              "file": "drilldowns/ten-to-ninety-nine-1.json",
+              "records": 50,
+              "bytes": 2700,
+              "sha256": "3c7c962cccb7fd2fbb352376f293ff82ebc82f10f8288650f1bd527d0fd351d1"
+            }
+          },
+          {
+            "coverageCode": 2,
+            "typeCount": 3916,
+            "tokenCount": 149267,
+            "drilldown": {
+              "file": "drilldowns/ten-to-ninety-nine-2.json",
+              "records": 50,
+              "bytes": 2641,
+              "sha256": "6fd22ae3689da7c8c76b02af27e46a60b7035f1832d669808d2957bd83305885"
+            }
+          },
+          {
+            "coverageCode": 3,
+            "typeCount": 33,
+            "tokenCount": 1356,
+            "drilldown": {
+              "file": "drilldowns/ten-to-ninety-nine-3.json",
+              "records": 33,
+              "bytes": 1772,
+              "sha256": "a54ffa90a8f9cbbdafb9420ad6b3555a1d1a606f96ce557da713ec243acf0ed1"
+            }
+          }
+        ]
+      },
+      {
+        "id": "one-hundred-to-nine-hundred-ninety-nine",
+        "label": "100–999",
+        "minimum": 100,
+        "maximum": 999,
+        "typeCount": 229266,
+        "tokenCount": 71840092,
+        "categories": [
+          {
+            "coverageCode": 0,
+            "typeCount": 86209,
+            "tokenCount": 24593551,
+            "drilldown": {
+              "file": "drilldowns/one-hundred-to-nine-hundred-ninety-nine-0.json",
+              "records": 50,
+              "bytes": 2652,
+              "sha256": "fe711564d9c4bf9b1c66da367c78e00a5a19479638f3788a8e8f21ab7a381731"
+            }
+          },
+          {
+            "coverageCode": 1,
+            "typeCount": 139984,
+            "tokenCount": 46133481,
+            "drilldown": {
+              "file": "drilldowns/one-hundred-to-nine-hundred-ninety-nine-1.json",
+              "records": 50,
+              "bytes": 2772,
+              "sha256": "fa75255947c11ddea1d2bca88d464341be3f8190b635a142945dc51795e7423c"
+            }
+          },
+          {
+            "coverageCode": 2,
+            "typeCount": 3046,
+            "tokenCount": 1102850,
+            "drilldown": {
+              "file": "drilldowns/one-hundred-to-nine-hundred-ninety-nine-2.json",
+              "records": 50,
+              "bytes": 2695,
+              "sha256": "48e0908cd9a5bd4961d144ce7d769f3d6de95210cf0c0be6dba90980dc5666b1"
+            }
+          },
+          {
+            "coverageCode": 3,
+            "typeCount": 27,
+            "tokenCount": 10210,
+            "drilldown": {
+              "file": "drilldowns/one-hundred-to-nine-hundred-ninety-nine-3.json",
+              "records": 27,
+              "bytes": 1607,
+              "sha256": "27b10015e4f965c3c8956b57c4c7e810591f67a73ba6b7c40772af4ba7c77533"
+            }
+          }
+        ]
+      },
+      {
+        "id": "one-thousand-plus",
+        "label": "1,000+",
+        "minimum": 1000,
+        "maximum": null,
+        "typeCount": 78485,
+        "tokenCount": 1231060257,
+        "categories": [
+          {
+            "coverageCode": 0,
+            "typeCount": 15280,
+            "tokenCount": 99303539,
+            "drilldown": {
+              "file": "drilldowns/one-thousand-plus-0.json",
+              "records": 50,
+              "bytes": 2557,
+              "sha256": "8a7fd496512074adc7447ec66a95a9800591af2077d62e5ec2df2b1e55454f1b"
+            }
+          },
+          {
+            "coverageCode": 1,
+            "typeCount": 61503,
+            "tokenCount": 1096064595,
+            "drilldown": {
+              "file": "drilldowns/one-thousand-plus-1.json",
+              "records": 50,
+              "bytes": 2618,
+              "sha256": "ef1ebec41bc7b2e5c0fdba5eca185af2a260ff512faa799a5ecc6f32d95caa0b"
+            }
+          },
+          {
+            "coverageCode": 2,
+            "typeCount": 1667,
+            "tokenCount": 33010386,
+            "drilldown": {
+              "file": "drilldowns/one-thousand-plus-2.json",
+              "records": 50,
+              "bytes": 2777,
+              "sha256": "6518f5103cf8624b8edf1bc4363f682e7d2f7be68e52a7aabc9abc66924b881d"
+            }
+          },
+          {
+            "coverageCode": 3,
+            "typeCount": 35,
+            "tokenCount": 2681737,
+            "drilldown": {
+              "file": "drilldowns/one-thousand-plus-3.json",
+              "records": 35,
+              "bytes": 1909,
+              "sha256": "24085cfc10878a2fc680e43e43a6b517c63f1fe397a66c129d7140526e63212a"
+            }
+          }
+        ]
+      }
+    ]
+  }
+}

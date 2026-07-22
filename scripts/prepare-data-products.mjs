@@ -39,6 +39,7 @@ const CHUNKED_PRODUCT_TYPES = new Set([
   'chunked-frequency-list',
   'chunked-derived-frequency-list'
 ]);
+const ANALYSIS_PROFILE_TYPES = new Set(['frequency-band-coverage']);
 
 function fail(message) {
   throw new Error(`Data-product preparation failed: ${message}`);
@@ -193,6 +194,49 @@ function validateDerivation(derivation, description) {
   }
 }
 
+function validateFrequencyBand(band, description, previousBand) {
+  if (!isPlainObject(band) || !isSafeId(band.id) || !normalizeString(band.label)
+    || !Number.isSafeInteger(band.minimum) || band.minimum < 1
+    || (band.maximum !== null && (!Number.isSafeInteger(band.maximum) || band.maximum < band.minimum))) {
+    fail(`${description} is invalid`);
+  }
+  if (previousBand) {
+    if (previousBand.maximum === null || band.minimum !== previousBand.maximum + 1) {
+      fail(`${description} must begin immediately after the preceding frequency band`);
+    }
+  } else if (band.minimum !== 1) {
+    fail(`${description} must begin at frequency 1`);
+  }
+  return band;
+}
+
+function validateAnalysisProfile(profile, description) {
+  if (!isPlainObject(profile) || !isSafeId(profile.id) || !ANALYSIS_PROFILE_TYPES.has(profile.type)
+    || !isSafeId(profile.sourceRole) || !normalizeString(profile.title) || !normalizeString(profile.description)
+    || !Array.isArray(profile.frequencyBands) || profile.frequencyBands.length === 0
+    || !Number.isSafeInteger(profile.summaryMaxBytes) || profile.summaryMaxBytes < 1024
+    || !isPlainObject(profile.drilldown) || !Number.isSafeInteger(profile.drilldown.limit)
+    || profile.drilldown.limit < 1 || profile.drilldown.limit > 100
+    || !Number.isSafeInteger(profile.drilldown.maxBytes) || profile.drilldown.maxBytes < 1024
+    || !isPlainObject(profile.drilldown.ordering)
+    || !normalizeString(profile.drilldown.ordering.field)
+    || !['ascending', 'descending'].includes(profile.drilldown.ordering.direction)
+    || profile.drilldown.ordering.tieBreak !== 'word-ascending') {
+    fail(`${description} is invalid`);
+  }
+  let previousBand = null;
+  const ids = new Set();
+  for (const [index, band] of profile.frequencyBands.entries()) {
+    validateFrequencyBand(band, `${description}.frequencyBands[${index}]`, previousBand);
+    if (ids.has(band.id)) fail(`${description}.frequencyBands uses duplicate ids`);
+    ids.add(band.id);
+    previousBand = band;
+  }
+  if (previousBand?.maximum !== null) {
+    fail(`${description}.frequencyBands must finish with an open-ended band`);
+  }
+}
+
 export function validatePublicationPlan(plan) {
   if (!isPlainObject(plan) || plan.schemaVersion !== 1 || !normalizeString(plan.title)
     || !Array.isArray(plan.genericProducts) || !Array.isArray(plan.contractProducts)) {
@@ -237,6 +281,19 @@ export function validatePublicationPlan(plan) {
         fail(`${description}.views must use unique ids`);
       }
       viewIds.add(view.id);
+    }
+
+    if (product.analysisProfiles !== undefined) {
+      if (!Array.isArray(product.analysisProfiles)) fail(`${description}.analysisProfiles must be an array when present`);
+      const profileIds = new Set();
+      for (const [profileIndex, profile] of product.analysisProfiles.entries()) {
+        validateAnalysisProfile(profile, `${description}.analysisProfiles[${profileIndex}]`);
+        if (profileIds.has(profile.id)) fail(`${description}.analysisProfiles uses duplicate ids`);
+        if (!product.views.some((view) => view.sourceRole === profile.sourceRole)) {
+          fail(`${description}.analysisProfiles[${profileIndex}] must use a source role exposed by a row view`);
+        }
+        profileIds.add(profile.id);
+      }
     }
   }
   return plan;
@@ -622,6 +679,217 @@ async function buildDerivedConlluFrequencyView({ productId, productDirectory, vi
   };
 }
 
+function findFrequencyBandCoverageFields(profile, views) {
+  const matchingViews = views.filter((view) => view.sourceRole === profile.sourceRole);
+  if (matchingViews.length !== 1) {
+    fail(`${profile.id} requires exactly one row view for source role ${profile.sourceRole}`);
+  }
+  const sourceView = matchingViews[0];
+  const wordFields = sourceView.fields.filter((field) => field.type === 'string');
+  const frequencyFields = sourceView.fields.filter((field) => field.type === 'raw-token-count' && field.nullable !== true);
+  const coverageFields = sourceView.fields.filter((field) => field.type === 'coverage-code');
+  if (wordFields.length !== 1 || frequencyFields.length !== 1 || coverageFields.length !== 1) {
+    fail(`${profile.id} requires one word, non-null raw-token-count, and coverage-code field`);
+  }
+  if (profile.drilldown.ordering.field !== frequencyFields[0].id || profile.drilldown.ordering.direction !== 'descending') {
+    fail(`${profile.id} drill-down ordering must use its raw token count in descending order`);
+  }
+  return {
+    sourceView,
+    wordField: wordFields[0],
+    frequencyField: frequencyFields[0],
+    coverageField: coverageFields[0]
+  };
+}
+
+function findFrequencyBand(bands, frequency) {
+  return bands.find((band) => frequency >= band.minimum && (band.maximum === null || frequency <= band.maximum));
+}
+
+function compareDrilldownRecords(left, right) {
+  if (left.frequency !== right.frequency) return right.frequency - left.frequency;
+  return left.word < right.word ? -1 : left.word > right.word ? 1 : 0;
+}
+
+function insertDrilldownRecord(records, record, limit) {
+  let index = records.findIndex((existing) => compareDrilldownRecords(record, existing) < 0);
+  if (index === -1) index = records.length;
+  records.splice(index, 0, record);
+  if (records.length > limit) records.pop();
+}
+
+async function writeJsonWithByteBudget(filename, value, maxBytes, description) {
+  const buffer = Buffer.from(`${JSON.stringify(value, null, 2)}\n`, 'utf8');
+  if (buffer.byteLength > maxBytes) fail(`${description} exceeds its ${maxBytes}-byte budget`);
+  await mkdir(path.dirname(filename), { recursive: true });
+  await writeFile(filename, buffer);
+  return buffer;
+}
+
+async function buildFrequencyBandCoverageProfile({ contract, productId, productDirectory, profile, views, sourceRoot }) {
+  const { sourceView, wordField, frequencyField, coverageField } = findFrequencyBandCoverageFields(profile, views);
+  const filesByRole = new Map(contract.source.files.map((file) => [file.role, file]));
+  const sourceFile = filesByRole.get(profile.sourceRole);
+  if (!sourceFile) fail(`${profile.id} has no source file with role ${profile.sourceRole}`);
+  const { realRoot, sourcePath } = await resolveSourcePath(sourceRoot, sourceFile.path);
+  const sourceDisplayPath = sourceRelativePath(realRoot, sourcePath);
+  const coverageCodes = Object.keys(coverageField.values).map(Number).sort((left, right) => left - right);
+  const bands = profile.frequencyBands.map((band) => ({
+    ...band,
+    typeCount: 0,
+    tokenCount: 0,
+    categories: new Map(coverageCodes.map((coverageCode) => [coverageCode, {
+      coverageCode,
+      typeCount: 0,
+      tokenCount: 0,
+      records: []
+    }]))
+  }));
+  const delimiter = sourceFile.delimiter ?? '\t';
+  const lines = createInterface({
+    input: createReadStream(sourcePath, { encoding: 'utf8' }),
+    crlfDelay: Infinity
+  });
+  let physicalLineNumber = 0;
+  let sourceRows = 0;
+  let totalTokenCount = 0;
+
+  for await (const line of lines) {
+    physicalLineNumber += 1;
+    if (sourceFile.hasHeader === true && physicalLineNumber === 1) continue;
+    sourceRows += 1;
+    const values = parseDelimitedLine(line, delimiter);
+    if (values.length !== sourceFile.columns) {
+      fail(`${sourceDisplayPath} line ${sourceRows} has ${values.length} columns; expected ${sourceFile.columns}`);
+    }
+    const word = normalizeString(values[wordField.sourceColumn]);
+    if (!word) fail(`${sourceDisplayPath} line ${sourceRows} has an empty ${wordField.id} value`);
+    const frequency = parseFieldValue(frequencyField, values[frequencyField.sourceColumn], sourceDisplayPath, sourceRows);
+    const coverageCode = parseFieldValue(coverageField, values[coverageField.sourceColumn], sourceDisplayPath, sourceRows);
+    if (!Number.isSafeInteger(frequency) || frequency < 1 || !Number.isSafeInteger(coverageCode)) {
+      fail(`${sourceDisplayPath} line ${sourceRows} has an invalid frequency-band profile record`);
+    }
+    const band = findFrequencyBand(bands, frequency);
+    if (!band) fail(`${sourceDisplayPath} line ${sourceRows} has a frequency outside the configured bands`);
+    const category = band.categories.get(coverageCode);
+    if (!category) fail(`${sourceDisplayPath} line ${sourceRows} has an unlabelled coverage code`);
+    band.typeCount += 1;
+    band.tokenCount += frequency;
+    category.typeCount += 1;
+    category.tokenCount += frequency;
+    totalTokenCount += frequency;
+    insertDrilldownRecord(category.records, { word, frequency }, profile.drilldown.limit);
+  }
+
+  const expectedTokenTotal = Number(sourceFile.numericTotals?.[frequencyField.sourceColumn]);
+  if (sourceRows !== sourceFile.rows || !Number.isSafeInteger(expectedTokenTotal) || totalTokenCount !== expectedTokenTotal) {
+    fail(`${profile.id} does not reconcile with ${sourceDisplayPath}`);
+  }
+
+  const profileDirectory = path.join(productDirectory, 'analysis', profile.id);
+  const drilldownDirectory = path.join(profileDirectory, 'drilldowns');
+  const drilldownFields = [
+    { id: wordField.id, label: wordField.label, type: 'string' },
+    { id: frequencyField.id, label: frequencyField.label, type: 'raw-token-count', unit: frequencyField.unit }
+  ];
+  const summaryBands = [];
+  for (const band of bands) {
+    const categories = [];
+    for (const coverageCode of coverageCodes) {
+      const category = band.categories.get(coverageCode);
+      const filename = `${band.id}-${coverageCode}.json`;
+      const drilldown = {
+        schemaVersion: 1,
+        productId,
+        profileId: profile.id,
+        bandId: band.id,
+        coverageCode,
+        recordEncoding: 'array',
+        fields: drilldownFields,
+        ordering: profile.drilldown.ordering,
+        records: category.records.map((record) => [record.word, record.frequency])
+      };
+      const buffer = await writeJsonWithByteBudget(
+        path.join(drilldownDirectory, filename),
+        drilldown,
+        profile.drilldown.maxBytes,
+        `${productId}/${profile.id}/${filename}`
+      );
+      categories.push({
+        coverageCode,
+        typeCount: category.typeCount,
+        tokenCount: category.tokenCount,
+        drilldown: {
+          file: `drilldowns/${filename}`,
+          records: category.records.length,
+          bytes: buffer.byteLength,
+          sha256: createHash('sha256').update(buffer).digest('hex')
+        }
+      });
+    }
+    summaryBands.push({
+      id: band.id,
+      label: band.label,
+      minimum: band.minimum,
+      maximum: band.maximum,
+      typeCount: band.typeCount,
+      tokenCount: band.tokenCount,
+      categories
+    });
+  }
+
+  const manifest = {
+    schemaVersion: 1,
+    productId,
+    profileId: profile.id,
+    profileType: profile.type,
+    title: profile.title,
+    description: profile.description,
+    sourceView: {
+      id: sourceView.id,
+      sourceRole: profile.sourceRole,
+      wordField: { id: wordField.id, label: wordField.label },
+      frequencyField: { id: frequencyField.id, label: frequencyField.label, unit: frequencyField.unit },
+      coverageField: { id: coverageField.id, label: coverageField.label, values: coverageField.values }
+    },
+    provenance: {
+      sourceUrl: contract.source.sourceUrl,
+      licence: contract.source.licence,
+      citation: contract.source.citation,
+      sourceFile: publicSourceFile(sourceFile)
+    },
+    drilldown: {
+      limit: profile.drilldown.limit,
+      maxBytes: profile.drilldown.maxBytes,
+      recordEncoding: 'array',
+      fields: drilldownFields,
+      ordering: profile.drilldown.ordering
+    },
+    delivery: {
+      summaryMaxBytes: profile.summaryMaxBytes
+    },
+    summary: {
+      sourceRows,
+      totalTypeCount: sourceRows,
+      totalTokenCount,
+      bands: summaryBands
+    }
+  };
+  await writeJsonWithByteBudget(
+    path.join(profileDirectory, 'manifest.json'),
+    manifest,
+    profile.summaryMaxBytes,
+    `${productId}/${profile.id}/manifest.json`
+  );
+  return {
+    id: profile.id,
+    type: profile.type,
+    title: profile.title,
+    description: profile.description,
+    manifest: `analysis/${profile.id}/manifest.json`
+  };
+}
+
 function validateGenericDataset(dataset, filename) {
   if (!isPlainObject(dataset) || dataset.schemaVersion !== 1 || !isSafeId(dataset.id)
     || !normalizeString(dataset.title) || !normalizeString(dataset.author)
@@ -732,6 +1000,22 @@ async function buildContractProduct({ contract, contractProduct, sourceRepositor
     fail(`${contract.id} must publish at least one view for every reviewed machine-readable source file`);
   }
 
+  const analysisProfiles = [];
+  for (const profile of contractProduct.analysisProfiles ?? []) {
+    if (profile.type === 'frequency-band-coverage') {
+      analysisProfiles.push(await buildFrequencyBandCoverageProfile({
+        contract,
+        productId: contract.id,
+        productDirectory,
+        profile,
+        views: contractProduct.views,
+        sourceRoot
+      }));
+    } else {
+      fail(`${contract.id} has an unsupported analysis profile type: ${profile.type}`);
+    }
+  }
+
   const manifest = {
     schemaVersion: 1,
     id: contract.id,
@@ -749,7 +1033,8 @@ async function buildContractProduct({ contract, contractProduct, sourceRepositor
       mode: 'static-chunked-json',
       constraints: contract.delivery?.constraints ?? []
     },
-    views
+    views,
+    ...(analysisProfiles.length === 0 ? {} : { analysisProfiles })
   };
   await writeJson(path.join(productDirectory, 'manifest.json'), manifest);
   return {
