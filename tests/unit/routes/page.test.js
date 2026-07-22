@@ -45,6 +45,7 @@ describe('Page', () => {
     expect(select).toHaveValue('second');
     expect(select.querySelectorAll('option')).toHaveLength(2);
     expect(select).toHaveTextContent('First dataset (2024)');
+    expect(getByRole('link', { name: 'Tyrinėti DML6 žodyno aprėptį pagal dažnumą' })).toHaveAttribute('href', '/zodyno-apreptis');
     expect(getByRole('link', { name: 'openDataProducts' })).toHaveAttribute('href', '/data-products/catalog.json');
   });
 });

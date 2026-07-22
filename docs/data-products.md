@@ -58,6 +58,23 @@ row count, numeric totals, null counts, maximum chunk bytes, and a SHA-256
 descriptor for every chunk. Consumers must use that field list instead of
 assuming the second value is a generic frequency.
 
+## Compact analytical profiles
+
+A comparison manifest can additionally list an `analysisProfiles` entry. Each
+profile has its own small manifest and preserves the source view, source-file
+checksum, category labels, frequency-band definitions, totals, delivery
+budget, and SHA-256 descriptor for every optional drill-down file. The summary
+loads without comparison chunks; a browser requests a bounded drill-down only
+after a visitor selects a band and category.
+
+The first profile is
+`dadurkevicius-dml6-vs-jcl-comparison/analysis/dml6-jcl-coverage-by-frequency-band/`.
+It groups JCL wordforms into the documented intervals `1`, `2–4`, `5–9`,
+`10–99`, `100–999`, and `1,000+`. Every interval keeps the DML6 coverage code
+as a labelled category, exposes form counts and JCL token counts separately,
+and contains at most 50 frequency-ordered examples per category. It is not a
+generic frequency view and must not turn a coverage code into a numeric score.
+
 ## Published collection coverage
 
 - `utka-2018-lemmatized-totals`, `dadurkevicius-2020-jcl-lemmas`, and
@@ -67,7 +84,9 @@ assuming the second value is a generic frequency.
   to the subcorpora.
 - `dadurkevicius-dml6-vs-jcl-comparison` has separate views for type coverage,
   lemma/POS occurrences, and types missing in DML6. Coverage codes are labelled
-  categories, not counts.
+  categories, not counts. Its compact frequency-band coverage profile powers
+  the public dictionary-coverage explorer without downloading the 4.97-million
+  row comparison view.
 - `utka-ccll2-war-ukraine-comparison` keeps all six normalized token/document
   metrics separate. Source absence is JSON `null`, not zero.
 - `bielinskiene-2019-delfi-1grams` publishes all 1,030,562 raw one-gram rows

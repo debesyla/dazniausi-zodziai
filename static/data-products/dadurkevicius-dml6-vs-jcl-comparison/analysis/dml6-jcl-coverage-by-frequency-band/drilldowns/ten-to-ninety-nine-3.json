@@ -1,0 +1,160 @@
+{
+  "schemaVersion": 1,
+  "productId": "dadurkevicius-dml6-vs-jcl-comparison",
+  "profileId": "dml6-jcl-coverage-by-frequency-band",
+  "bandId": "ten-to-ninety-nine",
+  "coverageCode": 3,
+  "recordEncoding": "array",
+  "fields": [
+    {
+      "id": "word",
+      "label": "Word form",
+      "type": "string"
+    },
+    {
+      "id": "jclTokenCount",
+      "label": "JCL token count",
+      "type": "raw-token-count",
+      "unit": "tokens"
+    }
+  ],
+  "ordering": {
+    "field": "jclTokenCount",
+    "direction": "descending",
+    "tieBreak": "word-ascending"
+  },
+  "records": [
+    [
+      "knyg",
+      97
+    ],
+    [
+      "sutr",
+      97
+    ],
+    [
+      "dgs",
+      96
+    ],
+    [
+      "prk",
+      81
+    ],
+    [
+      "modal",
+      69
+    ],
+    [
+      "prv",
+      62
+    ],
+    [
+      "fot",
+      61
+    ],
+    [
+      "psn",
+      59
+    ],
+    [
+      "geogr",
+      57
+    ],
+    [
+      "parod",
+      57
+    ],
+    [
+      "anat",
+      54
+    ],
+    [
+      "dkt",
+      48
+    ],
+    [
+      "dlv",
+      47
+    ],
+    [
+      "bažn",
+      46
+    ],
+    [
+      "geol",
+      40
+    ],
+    [
+      "sktv",
+      35
+    ],
+    [
+      "šnek",
+      33
+    ],
+    [
+      "prl",
+      31
+    ],
+    [
+      "vksm",
+      30
+    ],
+    [
+      "relig",
+      29
+    ],
+    [
+      "nkt",
+      25
+    ],
+    [
+      "tarm",
+      21
+    ],
+    [
+      "kuop",
+      20
+    ],
+    [
+      "sngr",
+      19
+    ],
+    [
+      "astr",
+      18
+    ],
+    [
+      "bdv",
+      18
+    ],
+    [
+      "istor",
+      17
+    ],
+    [
+      "jst",
+      17
+    ],
+    [
+      "zool",
+      16
+    ],
+    [
+      "juok",
+      15
+    ],
+    [
+      "prž",
+      15
+    ],
+    [
+      "malon",
+      14
+    ],
+    [
+      "įnag",
+      12
+    ]
+  ]
+}
