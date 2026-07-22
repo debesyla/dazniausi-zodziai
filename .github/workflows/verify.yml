@@ -31,6 +31,12 @@ jobs:
       - name: Test
         run: npm test
 
+      - name: Install Chromium for browser tests
+        run: npx playwright install --with-deps chromium
+
+      - name: Test browser downloads
+        run: npm run test:browser
+
       - name: Verify checked-in public data products
         run: npm run products:verify
 
