@@ -29,7 +29,7 @@ const CHUNKED_PRODUCT_TYPES = new Set([
   'chunked-frequency-list',
   'chunked-derived-frequency-list'
 ]);
-const ANALYSIS_PROFILE_TYPES = new Set(['frequency-band-coverage']);
+const ANALYSIS_PROFILE_TYPES = new Set(['frequency-band-coverage', 'normalized-contrast-lookup']);
 
 function fail(message) {
   throw new Error(`Data-product verification failed: ${message}`);
@@ -195,6 +195,22 @@ function findField(fields, id, type) {
   return fields.find((field) => field.id === id && field.type === type);
 }
 
+function normalizeLookupWord(value) {
+  const word = normalizeString(value);
+  return word ? word.normalize('NFC').toLocaleUpperCase('lt-LT') : '';
+}
+
+function publicNormalizedMetricField(field) {
+  return {
+    id: field.id,
+    label: field.label,
+    type: field.type,
+    unit: field.unit,
+    nullable: field.nullable === true,
+    normalization: field.normalization
+  };
+}
+
 async function verifyFrequencyBandCoverageProfile({ productManifest, productDirectory, descriptor }) {
   if (!isPlainObject(descriptor) || descriptor.type !== 'frequency-band-coverage' || !isSafeId(descriptor.id) || !normalizeString(descriptor.title)
     || !normalizeString(descriptor.description) || !normalizeString(descriptor.manifest)) {
@@ -315,6 +331,208 @@ async function verifyFrequencyBandCoverageProfile({ productManifest, productDire
   }
 }
 
+function lookupBucketIdForWord(routingNodes, normalizedWord) {
+  const characters = Array.from(normalizedWord);
+  let nodeId = 0;
+  let characterIndex = 0;
+  for (let steps = 0; steps <= characters.length + routingNodes.length; steps += 1) {
+    const node = routingNodes[nodeId];
+    if (characterIndex === characters.length) return node.terminalBucket;
+    const target = node.children.get(characters[characterIndex]);
+    if (target === undefined) return null;
+    if (target >= 0) return target;
+    nodeId = -target - 1;
+    characterIndex += 1;
+  }
+  fail('lookup routing contains a cycle');
+}
+
+async function verifyNormalizedContrastLookupProfile({ productManifest, productDirectory, descriptor }) {
+  if (!isPlainObject(descriptor) || descriptor.type !== 'normalized-contrast-lookup' || !isSafeId(descriptor.id)
+    || !normalizeString(descriptor.title) || !normalizeString(descriptor.description) || !normalizeString(descriptor.manifest)) {
+    fail(`${productManifest.id} has an invalid normalized-contrast profile descriptor`);
+  }
+  const profilePath = resolveProductPath(productDirectory, descriptor.manifest, `${productManifest.id}/${descriptor.id} profile`);
+  const profileDirectory = path.dirname(profilePath);
+  const profileBuffer = await readFile(profilePath);
+  const profile = parseJson(profileBuffer, `${productManifest.id}/${descriptor.id} profile`);
+  if (!isPlainObject(profile) || profile.schemaVersion !== 1 || profile.productId !== productManifest.id
+    || profile.profileId !== descriptor.id || profile.profileType !== 'normalized-contrast-lookup'
+    || profile.title !== descriptor.title || profile.description !== descriptor.description || !isPlainObject(profile.sourceView)
+    || !Array.isArray(profile.sources) || !isPlainObject(profile.contrast) || !isPlainObject(profile.provenance)
+    || !isPlainObject(profile.delivery) || !isPlainObject(profile.lookup) || !isPlainObject(profile.summary)) {
+    fail(`${productManifest.id}/${descriptor.id} profile is invalid`);
+  }
+  if (!Number.isSafeInteger(profile.delivery.summaryMaxBytes) || profile.delivery.summaryMaxBytes < 1024
+    || profileBuffer.byteLength > profile.delivery.summaryMaxBytes
+    || !Number.isSafeInteger(profile.delivery.lookupBucketMaxBytes) || profile.delivery.lookupBucketMaxBytes < 8192
+    || profile.delivery.lookupBucketMaxBytes > 262144 || !Number.isSafeInteger(profile.delivery.maxSourceRowsPerWord)
+    || profile.delivery.maxSourceRowsPerWord < 1 || profile.delivery.maxSourceRowsPerWord > 16) {
+    fail(`${productManifest.id}/${descriptor.id} profile delivery metadata is invalid`);
+  }
+  if (profile.provenance.sourceUrl !== productManifest.provenance?.sourceUrl
+    || profile.provenance.licence !== productManifest.provenance?.licence
+    || profile.provenance.citation !== productManifest.provenance?.citation
+    || !isPlainObject(profile.provenance.sourceFile)) {
+    fail(`${productManifest.id}/${descriptor.id} profile provenance is invalid`);
+  }
+  const sourceView = productManifest.views?.find((view) => view.id === profile.sourceView.id && view.sourceRole === profile.sourceView.sourceRole);
+  if (!sourceView || profile.sourceView.index !== sourceView.index || !Array.isArray(profile.sourceView.fields)
+    || !isPlainObject(profile.sourceView.wordField) || !isPlainObject(profile.sourceView.summary)) {
+    fail(`${productManifest.id}/${descriptor.id} profile source view is invalid`);
+  }
+  const sourceIndexPath = resolveProductPath(productDirectory, sourceView.index, `${productManifest.id}/${descriptor.id} source index`);
+  const sourceIndex = parseJson(await readFile(sourceIndexPath), `${productManifest.id}/${descriptor.id} source index`);
+  if (!isPlainObject(sourceIndex) || !Array.isArray(sourceIndex.fields) || !isPlainObject(sourceIndex.summary)
+    || !Array.isArray(sourceIndex.chunks) || !sameObject(profile.sourceView.fields, sourceIndex.fields)
+    || !sameObject(profile.sourceView.summary, sourceIndex.summary)
+    || !sameObject(profile.provenance.sourceFile, sourceIndex.sourceFile)) {
+    fail(`${productManifest.id}/${descriptor.id} profile source metadata is invalid`);
+  }
+  const wordField = findField(sourceIndex.fields, profile.sourceView.wordField.id, 'string');
+  if (!wordField || !sameObject(profile.sourceView.wordField, { id: wordField.id, label: wordField.label })) {
+    fail(`${productManifest.id}/${descriptor.id} profile word field is invalid`);
+  }
+  const sourceIds = new Set();
+  const usedMetricFields = new Set();
+  let targetTokens = null;
+  let unit = null;
+  for (const source of profile.sources) {
+    if (!isPlainObject(source) || !isSafeId(source.id) || !normalizeString(source.label)
+      || !isPlainObject(source.tokenField) || !isPlainObject(source.documentField) || sourceIds.has(source.id)) {
+      fail(`${productManifest.id}/${descriptor.id} profile source is invalid`);
+    }
+    const tokenField = findField(sourceIndex.fields, source.tokenField.id, 'normalized-token-count');
+    const documentField = findField(sourceIndex.fields, source.documentField.id, 'normalized-document-count');
+    if (!tokenField || !documentField || tokenField.nullable !== true || documentField.nullable !== true
+      || tokenField.normalization.sourceTokens !== documentField.normalization.sourceTokens
+      || tokenField.normalization.targetTokens !== documentField.normalization.targetTokens
+      || usedMetricFields.has(tokenField.id) || usedMetricFields.has(documentField.id)
+      || !sameObject(source.tokenField, publicNormalizedMetricField(tokenField))
+      || !sameObject(source.documentField, publicNormalizedMetricField(documentField))) {
+      fail(`${productManifest.id}/${descriptor.id} profile metric fields are invalid`);
+    }
+    if (targetTokens === null) targetTokens = tokenField.normalization.targetTokens;
+    if (unit === null) unit = tokenField.unit;
+    if (targetTokens !== tokenField.normalization.targetTokens || unit !== tokenField.unit) {
+      fail(`${productManifest.id}/${descriptor.id} profile uses incompatible token normalization units`);
+    }
+    sourceIds.add(source.id);
+    usedMetricFields.add(tokenField.id);
+    usedMetricFields.add(documentField.id);
+  }
+  if (profile.sources.length < 2 || !Number.isSafeInteger(profile.contrast.minimumRate) || profile.contrast.minimumRate < 1
+    || profile.contrast.unit !== unit || profile.contrast.targetTokens !== targetTokens
+    || profile.contrast.formula !== 'log2(numeratorRate / denominatorRate)' || !Array.isArray(profile.contrast.pairs)
+    || profile.contrast.pairs.length === 0) {
+    fail(`${productManifest.id}/${descriptor.id} profile contrast metadata is invalid`);
+  }
+  const pairIds = new Set();
+  for (const pair of profile.contrast.pairs) {
+    if (!isPlainObject(pair) || !isSafeId(pair.id) || !normalizeString(pair.label)
+      || !isSafeId(pair.numeratorSource) || !isSafeId(pair.denominatorSource)
+      || pair.numeratorSource === pair.denominatorSource || !sourceIds.has(pair.numeratorSource)
+      || !sourceIds.has(pair.denominatorSource) || pairIds.has(pair.id)) {
+      fail(`${productManifest.id}/${descriptor.id} profile contrast pair is invalid`);
+    }
+    pairIds.add(pair.id);
+  }
+  const lookup = profile.lookup;
+  if (lookup.normalization !== 'trim-nfc-uppercase-lt' || lookup.recordEncoding !== 'array'
+    || !Array.isArray(lookup.fields) || !sameObject(lookup.fields, [
+      { id: 'normalizedWord', label: 'Normalized lookup word form', type: 'string' },
+      { id: 'sourceRow', label: 'Zero-based source row', type: 'source-row' }
+    ]) || !isPlainObject(lookup.routing) || lookup.routing.root !== 0 || !Array.isArray(lookup.routing.nodes)
+    || lookup.routing.nodes.length === 0 || !Array.isArray(lookup.routing.buckets)
+    || lookup.routing.buckets.length === 0) {
+    fail(`${productManifest.id}/${descriptor.id} profile lookup metadata is invalid`);
+  }
+  const routingNodes = [];
+  for (const [nodeIndex, node] of lookup.routing.nodes.entries()) {
+    if (!isPlainObject(node) || (node.terminalBucket !== null && !Number.isSafeInteger(node.terminalBucket))
+      || !Array.isArray(node.children)) {
+      fail(`${productManifest.id}/${descriptor.id} profile lookup node ${nodeIndex} is invalid`);
+    }
+    const children = new Map();
+    for (const child of node.children) {
+      if (!Array.isArray(child) || child.length !== 2 || typeof child[0] !== 'string' || child[0].length === 0
+        || Array.from(child[0]).length !== 1 || !Number.isSafeInteger(child[1]) || children.has(child[0])) {
+        fail(`${productManifest.id}/${descriptor.id} profile lookup node ${nodeIndex} child is invalid`);
+      }
+      children.set(child[0], child[1]);
+    }
+    routingNodes.push({ terminalBucket: node.terminalBucket, children });
+  }
+  const bucketCount = lookup.routing.buckets.length;
+  const validTarget = (target) => (target >= 0 ? target < bucketCount : -target - 1 < routingNodes.length);
+  for (const [nodeIndex, node] of routingNodes.entries()) {
+    if ((node.terminalBucket !== null && (!validTarget(node.terminalBucket) || node.terminalBucket < 0))
+      || [...node.children.values()].some((target) => !validTarget(target))) {
+      fail(`${productManifest.id}/${descriptor.id} profile lookup node ${nodeIndex} references an invalid target`);
+    }
+  }
+  const sourceRows = sourceIndex.summary.recordCount;
+  if (!Number.isSafeInteger(sourceRows) || sourceRows < 1 || sourceIndex.summary.sourceRows !== sourceRows) {
+    fail(`${productManifest.id}/${descriptor.id} profile source rows are invalid`);
+  }
+  const seenSourceRows = new Uint8Array(sourceRows);
+  let seenSourceRowCount = 0;
+  let uniqueNormalizedWordForms = 0;
+  let duplicateNormalizedWordForms = 0;
+  let extraDuplicateRows = 0;
+  let maxSourceRowsPerWord = 0;
+  for (const [bucketIndex, bucket] of lookup.routing.buckets.entries()) {
+    if (!isPlainObject(bucket) || bucket.id !== bucketIndex || !normalizeString(bucket.file)
+      || !Number.isSafeInteger(bucket.records) || bucket.records < 1 || !Number.isSafeInteger(bucket.bytes)
+      || bucket.bytes < 1 || bucket.bytes > profile.delivery.lookupBucketMaxBytes
+      || !/^[a-f0-9]{64}$/.test(bucket.sha256)) {
+      fail(`${productManifest.id}/${descriptor.id} profile lookup bucket descriptor is invalid`);
+    }
+    const bucketPath = resolveProductPath(profileDirectory, bucket.file, `${productManifest.id}/${descriptor.id} lookup bucket`);
+    const buffer = await readFile(bucketPath);
+    if (buffer.byteLength !== bucket.bytes || createHash('sha256').update(buffer).digest('hex') !== bucket.sha256) {
+      fail(`${productManifest.id}/${descriptor.id} profile lookup bucket bytes are invalid`);
+    }
+    const content = parseJson(buffer, `${productManifest.id}/${descriptor.id} lookup bucket`);
+    if (!isPlainObject(content) || content.schemaVersion !== 1 || content.productId !== productManifest.id
+      || content.profileId !== descriptor.id || content.bucketId !== bucket.id || content.recordEncoding !== 'array'
+      || !Array.isArray(content.records) || content.records.length !== bucket.records) {
+      fail(`${productManifest.id}/${descriptor.id} profile lookup bucket content is invalid`);
+    }
+    const wordOccurrences = new Map();
+    for (const record of content.records) {
+      if (!Array.isArray(record) || record.length !== 2 || !normalizeString(record[0])
+        || normalizeLookupWord(record[0]) !== record[0] || !Number.isSafeInteger(record[1])
+        || record[1] < 0 || record[1] >= sourceRows || seenSourceRows[record[1]] === 1
+        || lookupBucketIdForWord(routingNodes, record[0]) !== bucket.id) {
+        fail(`${productManifest.id}/${descriptor.id} profile lookup record is invalid`);
+      }
+      seenSourceRows[record[1]] = 1;
+      seenSourceRowCount += 1;
+      wordOccurrences.set(record[0], (wordOccurrences.get(record[0]) ?? 0) + 1);
+    }
+    for (const occurrences of wordOccurrences.values()) {
+      uniqueNormalizedWordForms += 1;
+      maxSourceRowsPerWord = Math.max(maxSourceRowsPerWord, occurrences);
+      if (occurrences > 1) {
+        duplicateNormalizedWordForms += 1;
+        extraDuplicateRows += occurrences - 1;
+      }
+    }
+  }
+  if (seenSourceRowCount !== sourceRows || maxSourceRowsPerWord > profile.delivery.maxSourceRowsPerWord
+    || !sameObject(profile.summary, {
+      lookupRecords: sourceRows,
+      uniqueNormalizedWordForms,
+      duplicateNormalizedWordForms,
+      extraDuplicateRows,
+      maxSourceRowsPerWord,
+      sourceRows
+    })) {
+    fail(`${productManifest.id}/${descriptor.id} profile lookup summary does not reconcile`);
+  }
+}
+
 async function verifyAnalysisProfiles({ productManifest, productDirectory }) {
   if (productManifest.analysisProfiles === undefined) return;
   if (!Array.isArray(productManifest.analysisProfiles)) fail(`${productManifest.id} analysis profiles are invalid`);
@@ -325,7 +543,11 @@ async function verifyAnalysisProfiles({ productManifest, productDirectory }) {
     }
     if (profileIds.has(descriptor.id)) fail(`${productManifest.id} has duplicate analysis-profile ids`);
     profileIds.add(descriptor.id);
-    await verifyFrequencyBandCoverageProfile({ productManifest, productDirectory, descriptor });
+    if (descriptor.type === 'frequency-band-coverage') {
+      await verifyFrequencyBandCoverageProfile({ productManifest, productDirectory, descriptor });
+    } else if (descriptor.type === 'normalized-contrast-lookup') {
+      await verifyNormalizedContrastLookupProfile({ productManifest, productDirectory, descriptor });
+    }
   }
 }
 

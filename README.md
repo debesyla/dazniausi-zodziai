@@ -15,6 +15,8 @@ metadata; larger products are available through the public JSON catalog.
   source-provided part-of-speech composition.
 - Explore DML6 dictionary coverage across transparent JCL frequency bands,
   with separate form and token shares plus bounded example lists.
+- Compare an exact word form across CCLL2, wartime media, and wartime social
+  networks without loading the full 2.26-million-row comparison dataset.
 - Search, filter by part of speech, sort by word/frequency/type, and browse a
   50-row page at a time.
 - Export the complete active filtered and sorted result set as UTF-8 CSV.
