@@ -61,6 +61,8 @@ recreates the checked-in `static/data-products/` artifacts from the pinned
 raw-source snapshot; stage those regenerated JSON files together with their
 contract change. `products:verify` checks every generated manifest and chunk.
 The table's large-list strategy is documented in [docs/scalable-exploration.md](docs/scalable-exploration.md).
+The public visual and interaction baseline is documented in
+[docs/design-system.md](docs/design-system.md).
 
 ## Deployment
 
