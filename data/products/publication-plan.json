@@ -221,6 +221,62 @@
             { "id": "socialDocumentCount", "label": "Wartime social-network normalized document count", "type": "normalized-document-count", "unit": "documents per 100 million source words", "sourceColumn": 6, "nullable": true, "normalization": { "sourceTokens": 2000000, "targetTokens": 100000000 } }
           ]
         }
+      ],
+      "analysisProfiles": [
+        {
+          "id": "ccll2-wartime-normalized-contrast",
+          "type": "normalized-contrast-lookup",
+          "sourceRole": "normalized-comparison",
+          "title": "CCLL2 and wartime lexicon lookup",
+          "description": "An exact word-form lookup over the published comparison source, with source-labelled normalized token and document measures and thresholded pairwise log ratios.",
+          "summaryMaxBytes": 262144,
+          "lookup": {
+            "maxBucketBytes": 131072,
+            "normalization": "trim-nfc-uppercase-lt",
+            "maxSourceRowsPerWord": 2
+          },
+          "sources": [
+            {
+              "id": "ccll2",
+              "label": "CCLL2",
+              "tokenField": "ccll2TokenCount",
+              "documentField": "ccll2DocumentCount"
+            },
+            {
+              "id": "wartime-media",
+              "label": "Karo meto žiniasklaida",
+              "tokenField": "mediaTokenCount",
+              "documentField": "mediaDocumentCount"
+            },
+            {
+              "id": "wartime-social",
+              "label": "Karo meto socialiniai tinklai",
+              "tokenField": "socialTokenCount",
+              "documentField": "socialDocumentCount"
+            }
+          ],
+          "pairs": [
+            {
+              "id": "media-vs-ccll2",
+              "label": "Karo meto žiniasklaida / CCLL2",
+              "numeratorSource": "wartime-media",
+              "denominatorSource": "ccll2"
+            },
+            {
+              "id": "social-vs-ccll2",
+              "label": "Karo meto socialiniai tinklai / CCLL2",
+              "numeratorSource": "wartime-social",
+              "denominatorSource": "ccll2"
+            },
+            {
+              "id": "social-vs-media",
+              "label": "Karo meto socialiniai tinklai / karo meto žiniasklaida",
+              "numeratorSource": "wartime-social",
+              "denominatorSource": "wartime-media"
+            }
+          ],
+          "minimumRate": 100
+        }
       ]
     },
     {

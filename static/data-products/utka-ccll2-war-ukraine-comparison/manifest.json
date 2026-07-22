@@ -66,5 +66,14 @@
         }
       }
     }
+  ],
+  "analysisProfiles": [
+    {
+      "id": "ccll2-wartime-normalized-contrast",
+      "type": "normalized-contrast-lookup",
+      "title": "CCLL2 and wartime lexicon lookup",
+      "description": "An exact word-form lookup over the published comparison source, with source-labelled normalized token and document measures and thresholded pairwise log ratios.",
+      "manifest": "analysis/ccll2-wartime-normalized-contrast/manifest.json"
+    }
   ]
 }
