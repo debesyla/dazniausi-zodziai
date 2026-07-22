@@ -3,6 +3,10 @@
   import type { WordSortKey } from '$lib/utils';
   import { t } from '$lib/translations';
   const { unparse } = pkg;
+  // Keep the Blob URL alive long enough for the browser to start its native
+  // download. Revoking it in the same task can cancel downloads in browsers
+  // that resolve the link asynchronously.
+  const BLOB_URL_REVOKE_DELAY_MS = 1_000;
 
   interface Word {
     word: string;
@@ -65,8 +69,11 @@
     const a = document.createElement('a');
     a.href = url;
     a.download = filename(metadata.id, date);
+    a.style.display = 'none';
+    document.body.append(a);
     a.click();
-    URL.revokeObjectURL(url);
+    a.remove();
+    window.setTimeout(() => URL.revokeObjectURL(url), BLOB_URL_REVOKE_DELAY_MS);
   }
 </script>
 
