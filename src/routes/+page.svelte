@@ -7,7 +7,9 @@
   let catalogLoading = $state(true);
   let catalogError = $state<string | null>(null);
   let selectedDatasetId = $state('');
-  const dataProductsCatalog = `${import.meta.env.BASE_URL}data-products/catalog.json`;
+  const basePath = import.meta.env.BASE_URL.replace(/\/+$/, '');
+  const dataProductsCatalog = `${basePath}/data-products/catalog.json`;
+  const coverageProfile = `${basePath}/zodyno-apreptis`;
 
   let selectedDataset = $derived(catalog?.datasets.find((dataset) => dataset.id === selectedDatasetId));
 
@@ -70,6 +72,7 @@
   <section class="data-products" aria-labelledby="data-products-title">
     <h2 id="data-products-title">{t('dataProductsTitle')}</h2>
     <p>{t('dataProductsDescription')}</p>
+    <p><a href={coverageProfile}>Tyrinėti DML6 žodyno aprėptį pagal dažnumą</a></p>
     <a href={dataProductsCatalog}>{t('openDataProducts')}</a>
   </section>
 </main>

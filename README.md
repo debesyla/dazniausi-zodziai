@@ -13,6 +13,8 @@ metadata; larger products are available through the public JSON catalog.
 - Select a curated dataset from `static/datasets/catalog.json`.
 - Inspect headline totals, top words, rank/frequency, cumulative coverage, and
   source-provided part-of-speech composition.
+- Explore DML6 dictionary coverage across transparent JCL frequency bands,
+  with separate form and token shares plus bounded example lists.
 - Search, filter by part of speech, sort by word/frequency/type, and browse a
   50-row page at a time.
 - Export the complete active filtered and sorted result set as UTF-8 CSV.
