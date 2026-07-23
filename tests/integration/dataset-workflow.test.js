@@ -107,7 +107,7 @@ describe('dataset workflow integration', () => {
 
     await user.click(getByRole('button', { name: 'Atsisiųsti duomenis .csv formatu' }));
     expect(createObjectURL).toHaveBeenCalledOnce();
-    expect(revokeObjectURL).toHaveBeenCalledWith('blob:download');
+    expect(revokeObjectURL).not.toHaveBeenCalled();
 
     await user.type(getByRole('textbox'), 'nėra-tokio-žodžio');
     await waitFor(() => expect(getByText('Nėra žodžių, atitinkančių aktyvius filtrus.')).toBeInTheDocument());
