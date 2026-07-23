@@ -32,6 +32,7 @@ copying the raw source repository into the application source tree.
 | `zemriete-2025-lithuanian-homoforms` | Published chunked lexical JSON | Homoform, lemma, morphology, two separate MATAS-related counts, and type/subtype | The original ZIP and 177,226-row TSV are checksummed; source order is retained because it is not a consistent frequency order |
 | `raskinis-2025-foreign-name-transliterations` | Published chunked lexical JSON | Source left and parenthesized name strings plus a source match count | Every one of 68,167 source lines must match the reviewed pair grammar; source string direction and documented noise remain literal |
 | `birvinskaite-2026-lithuanian-basketball-slang` | Published chunked lexical JSON | Entry, source, senses, definitions, examples, variants, user groups, and compilers | The original ZIP and 2,286-line NVH file are checksummed; parser totals pin 223 entries despite the record page's 233-entry claim |
+| `rimkute-2019-alksnis-syntactic-context` | Published prefix-chunked syntax-context JSON | ALKSNIS dependency-relation and genre totals, non-punctuation lemmas, and bounded sentence contexts | The original ZIP and canonical sorted-member hash are pinned; source sentence-count discrepancy, root rows, punctuation exclusion, direction, and context cap are explicit |
 | `rimkute-morphemic-dictionary` | Published metadata-only JSON | Citation and source-file inventory only | Licensable machine-readable source and reuse terms, tracked in [issue #41](https://github.com/debesyla/dazniausi-zodziai/issues/41) |
 
 The comparison contracts deliberately have no generic `frequency` field. A
@@ -115,6 +116,25 @@ evidence is retained. It must never be ranked or labelled
 as frequency data. Its catalogue page says 233 entries, but the retained NVH
 file contains 223 top-level `entry` records; both numbers are pinned in the
 public derivation metadata so the discrepancy is visible rather than hidden.
+
+## ALKSNIS syntactic-context views
+
+ALKSNIS v3.0 is stored as its original public ZIP archive. The product builder
+lists and sorts its 76 CoNLL-U members, hashes the member path-plus-bytes stream,
+and parses integer-ID rows sentence by sentence. The contract pins 70,047
+integer-ID rows, 57,156 non-punctuation rows, 3,642 delivered sentence IDs,
+and 3,643 as the repository's stated count. It also pins 104 source relation
+labels across all integer rows and 92 after the public punctuation exclusion.
+
+For each retained token, the builder keeps the source relation and its
+dependent/head direction. `HEAD=0` becomes an explicit `root` context with
+`ROOT` values rather than a guessed head. A non-punctuation lemma index records
+source token rows and its retained dependent/head/root roles. The sentence view
+keeps at most 12 source-order contexts per lemma and is prefix-chunked so the
+browser requests it only after a lemma has been selected. Source document,
+genre, sentence ID, and sentence text remain attached to every published
+context. These are source-scoped annotations, not cross-corpus frequency,
+similarity, or statistical-significance claims.
 
 ## Updating a contract
 

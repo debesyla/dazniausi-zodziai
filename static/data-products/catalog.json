@@ -113,6 +113,16 @@
       "recordCount": null
     },
     {
+      "id": "rimkute-2019-alksnis-syntactic-context",
+      "title": "Lithuanian Treebank ALKSNIS v3.0 syntactic contexts",
+      "productType": "chunked-syntactic-context",
+      "publicationStatus": "published",
+      "manifest": "rimkute-2019-alksnis-syntactic-context/manifest.json",
+      "licence": "CC BY 4.0",
+      "viewCount": 4,
+      "recordCount": null
+    },
+    {
       "id": "rimkute-morphemic-dictionary",
       "title": "Dažninis lietuvių kalbos morfemikos žodynas",
       "productType": "metadata-only",

@@ -29,9 +29,11 @@ const CHUNKED_PRODUCT_TYPES = new Set([
   'chunked-comparison',
   'chunked-frequency-list',
   'chunked-derived-frequency-list',
-  'chunked-lexical-collection'
+  'chunked-lexical-collection',
+  'chunked-syntactic-context'
 ]);
 const ANALYSIS_PROFILE_TYPES = new Set(['frequency-band-coverage', 'normalized-contrast-lookup']);
+const SYNTACTIC_CONTEXT_PRODUCT_TYPE = 'chunked-syntactic-context';
 
 function fail(message) {
   throw new Error(`Data-product verification failed: ${message}`);
@@ -90,6 +92,11 @@ function assertSafeInteger(value, description) {
 
 function sameObject(left, right) {
   return JSON.stringify(left) === JSON.stringify(right);
+}
+
+function prefixFor(value, codePoints) {
+  const prefix = Array.from(value.toLocaleLowerCase('lt')).slice(0, codePoints).join('');
+  return prefix || '_';
 }
 
 function validateField(field, description) {
@@ -219,6 +226,8 @@ function validatedDerivedSourceRows({ derivation, fields, totals, lexicalCounts,
       || !Number.isSafeInteger(expected.exampleCount) || expected.exampleCount !== lexicalCounts.exampleCount) {
       fail(`${description} derivation metadata is invalid`);
     }
+  } else if (derivation.type === 'conllu-treebank-syntax-context') {
+    // The syntax-context builder pins its own source-row and output-row totals.
   } else {
     fail(`${description} uses an unsupported derivation type`);
   }
@@ -677,6 +686,18 @@ async function verifyChunkedProduct({ manifest, productDirectory }) {
       if (fieldIds.has(field.id)) fail(`${manifest.id}/${view.id} has duplicate field id ${field.id}`);
       fieldIds.add(field.id);
     }
+    let selectionFieldIndex = -1;
+    if (index.selection !== undefined) {
+      if (!isPlainObject(index.selection) || index.selection.type !== 'lemma-prefix'
+        || !isSafeFieldId(index.selection.field) || !Number.isSafeInteger(index.selection.codePoints)
+        || index.selection.codePoints < 1 || index.selection.codePoints > 3) {
+        fail(`${manifest.id}/${view.id} selection metadata is invalid`);
+      }
+      selectionFieldIndex = fields.findIndex((field) => field.id === index.selection.field);
+      if (selectionFieldIndex < 0 || fields[selectionFieldIndex].type !== 'string') {
+        fail(`${manifest.id}/${view.id} selection metadata names an invalid field`);
+      }
+    }
     const totals = expectedTotals(fields);
     const nullCounts = expectedNullCounts(fields);
     const lexicalCounts = { senseCount: 0, definitionCount: 0, exampleCount: 0 };
@@ -687,6 +708,14 @@ async function verifyChunkedProduct({ manifest, productDirectory }) {
         || descriptor.records < 1 || !Number.isSafeInteger(descriptor.bytes) || descriptor.bytes < 1
         || !/^[a-f0-9]{64}$/.test(descriptor.sha256)) {
         fail(`${manifest.id}/${view.id} has an invalid chunk descriptor`);
+      }
+      if (selectionFieldIndex >= 0 && (!Array.isArray(descriptor.selectionPrefixes) || descriptor.selectionPrefixes.length === 0
+        || descriptor.selectionPrefixes.some((prefix) => !normalizeString(prefix))
+        || new Set(descriptor.selectionPrefixes).size !== descriptor.selectionPrefixes.length)) {
+        fail(`${manifest.id}/${view.id} selection chunk ${chunkIndex} has no prefixes`);
+      }
+      if (selectionFieldIndex < 0 && descriptor.selectionPrefixes !== undefined) {
+        fail(`${manifest.id}/${view.id} has unexpected selection metadata`);
       }
       const chunkPath = resolveProductPath(path.dirname(indexPath), descriptor.file, `${manifest.id}/${view.id} chunk`);
       const buffer = await readFile(chunkPath);
@@ -702,6 +731,10 @@ async function verifyChunkedProduct({ manifest, productDirectory }) {
       }
       for (const [recordIndex, record] of chunk.records.entries()) {
         validateRecord(record, fields, `${manifest.id}/${view.id} chunk ${chunkIndex} record ${recordIndex}`, totals, nullCounts, lexicalCounts);
+        if (selectionFieldIndex >= 0
+          && !descriptor.selectionPrefixes.includes(prefixFor(record[selectionFieldIndex], index.selection.codePoints))) {
+          fail(`${manifest.id}/${view.id} selection chunk ${chunkIndex} has a record outside its prefix`);
+        }
       }
       viewRecords += chunk.records.length;
     }
@@ -731,6 +764,46 @@ async function verifyChunkedProduct({ manifest, productDirectory }) {
     records += viewRecords;
   }
   return { chunkedViews, chunks, records, viewCount: manifest.views.length };
+}
+
+function validateSyntacticContextManifest(manifest) {
+  const syntaxContext = manifest.syntaxContext;
+  if (!isPlainObject(syntaxContext) || !isPlainObject(syntaxContext.overview)
+    || !Array.isArray(syntaxContext.exclusions) || syntaxContext.exclusions.some((value) => !normalizeString(value))
+    || !isPlainObject(syntaxContext.exampleSelection) || !isPlainObject(syntaxContext.lookup)) {
+    fail(`${manifest.id} syntax-context metadata is invalid`);
+  }
+  for (const field of [
+    'repositorySentenceClaim', 'deliveredSentenceIds', 'documents', 'integerTokenRows',
+    'nonPunctuationRows', 'allRelationLabels', 'nonPunctuationRelationLabels', 'rootRows',
+    'nonPunctuationRootRows', 'nonRootDependencyRows'
+  ]) {
+    assertSafeInteger(syntaxContext.overview[field], `${manifest.id} syntax-context overview.${field}`);
+  }
+  if (syntaxContext.overview.repositorySentenceClaim < syntaxContext.overview.deliveredSentenceIds
+    || syntaxContext.overview.nonPunctuationRows > syntaxContext.overview.integerTokenRows
+    || syntaxContext.overview.nonPunctuationRootRows > syntaxContext.overview.rootRows
+    || syntaxContext.overview.nonRootDependencyRows + syntaxContext.overview.nonPunctuationRootRows !== syntaxContext.overview.nonPunctuationRows) {
+    fail(`${manifest.id} syntax-context overview is inconsistent`);
+  }
+  if (!Number.isSafeInteger(syntaxContext.exampleSelection.maxExamplesPerLemma)
+    || syntaxContext.exampleSelection.maxExamplesPerLemma < 1 || syntaxContext.exampleSelection.maxExamplesPerLemma > 50
+    || !normalizeString(syntaxContext.exampleSelection.order)
+    || !Number.isSafeInteger(syntaxContext.exampleSelection.omittedRows) || syntaxContext.exampleSelection.omittedRows < 0) {
+    fail(`${manifest.id} syntax-context example selection is invalid`);
+  }
+  const lookup = syntaxContext.lookup;
+  if (!isSafeId(lookup.lemmaIndexView) || !isSafeId(lookup.contextView)
+    || !Number.isSafeInteger(lookup.lemmaIndexPrefixCodePoints) || lookup.lemmaIndexPrefixCodePoints < 1 || lookup.lemmaIndexPrefixCodePoints > 3
+    || !Number.isSafeInteger(lookup.contextPrefixCodePoints) || lookup.contextPrefixCodePoints < lookup.lemmaIndexPrefixCodePoints || lookup.contextPrefixCodePoints > 3
+    || !Array.isArray(lookup.directions) || lookup.directions.length === 0
+    || lookup.directions.some((direction) => !['dependent', 'head', 'root'].includes(direction))) {
+    fail(`${manifest.id} syntax-context lookup metadata is invalid`);
+  }
+  const viewIds = new Set(manifest.views?.map((view) => view.id));
+  if (!viewIds.has(lookup.lemmaIndexView) || !viewIds.has(lookup.contextView)) {
+    fail(`${manifest.id} syntax-context lookup views are missing`);
+  }
 }
 
 function validateManifest(manifest, catalogEntry) {
@@ -784,6 +857,7 @@ export async function verifyDataProducts({ outputRoot = defaultOutputRoot, stati
       result.chunks += genericResult.chunks;
       result.records += genericResult.records;
     } else if (CHUNKED_PRODUCT_TYPES.has(manifest.productType)) {
+      if (manifest.productType === SYNTACTIC_CONTEXT_PRODUCT_TYPE) validateSyntacticContextManifest(manifest);
       const chunkedResult = await verifyChunkedProduct({ manifest, productDirectory });
       await verifyAnalysisProfiles({ productManifest: manifest, productDirectory });
       if (entry.viewCount !== chunkedResult.viewCount || entry.recordCount !== null) {

@@ -34,7 +34,14 @@
     "format": "zip-conllu",
     "bytes": 24221501,
     "sha256": "2fb910266fd6320c6f6ba615bf44c3dd9efd014f20b9bbc75ea202028479ee03",
-    "archiveMember": "MATAS3.conllu"
+    "archiveMember": "MATAS3.conllu",
+    "conlluSummary": {
+      "uncompressedBytes": 196453759,
+      "sha256": "57a5238ec6d13928aaf0a16a6bdc511f1ae09cd99293994b0f75341a30eaf122",
+      "integerTokenRows": 2137281,
+      "nonPunctuationRows": 1694814,
+      "sentences": 144026
+    }
   },
   "derivation": {
     "type": "conllu-frequency",

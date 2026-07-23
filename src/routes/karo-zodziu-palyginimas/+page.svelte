@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { base } from '$app/paths';
   import {
     contrastPair,
     loadWarContrastProfile,
@@ -18,7 +19,7 @@
   let searched = $state(false);
   let selectedPairId = $state('');
   let requestNumber = 0;
-  const siteRoot = `${import.meta.env.BASE_URL.replace(/\/+$/, '')}/`;
+  const siteRoot = `${base}/`;
 
   let selectedPair = $derived(profile ? contrastPair(profile, selectedPairId) : null);
   let logRatio = $derived(profile && result && selectedPair ? logRatioForPair(profile, result, selectedPair.id) : null);

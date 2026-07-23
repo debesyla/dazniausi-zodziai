@@ -39,9 +39,11 @@ const CHUNKED_PRODUCT_TYPES = new Set([
   'chunked-comparison',
   'chunked-frequency-list',
   'chunked-derived-frequency-list',
-  'chunked-lexical-collection'
+  'chunked-lexical-collection',
+  'chunked-syntactic-context'
 ]);
 const ANALYSIS_PROFILE_TYPES = new Set(['frequency-band-coverage', 'normalized-contrast-lookup']);
+const SYNTACTIC_CONTEXT_PRODUCT_TYPE = 'chunked-syntactic-context';
 
 function fail(message) {
   throw new Error(`Data-product preparation failed: ${message}`);
@@ -302,6 +304,31 @@ function validateAnalysisProfile(profile, description) {
   }
 }
 
+function validateSyntacticContextConfiguration(configuration, description) {
+  if (!isPlainObject(configuration) || !normalizeString(configuration.sourceRole)
+    || !Number.isSafeInteger(configuration.maxExamplesPerLemma) || configuration.maxExamplesPerLemma < 1
+    || configuration.maxExamplesPerLemma > 50
+    || !Number.isSafeInteger(configuration.chunkBytes) || configuration.chunkBytes < 1024
+    || !Number.isSafeInteger(configuration.lemmaIndexPrefixCodePoints) || configuration.lemmaIndexPrefixCodePoints < 1
+    || configuration.lemmaIndexPrefixCodePoints > 3
+    || !Number.isSafeInteger(configuration.contextPrefixCodePoints) || configuration.contextPrefixCodePoints < 1
+    || configuration.contextPrefixCodePoints > 3
+    || configuration.contextPrefixCodePoints < configuration.lemmaIndexPrefixCodePoints
+    || !isPlainObject(configuration.genreLabels) || Object.keys(configuration.genreLabels).length === 0
+    || Object.entries(configuration.genreLabels).some(([key, value]) => !isSafeRelativePath(key) || !normalizeString(value))
+    || !isPlainObject(configuration.expectedSummary)) {
+    fail(`${description}.syntaxContext is invalid`);
+  }
+  for (const field of [
+    'documents', 'sentences', 'integerTokenRows', 'nonPunctuationRows',
+    'allRelationLabels', 'nonPunctuationRelationLabels', 'rootRows',
+    'nonPunctuationRootRows', 'nonRootDependencyRows', 'lemmaCount', 'contextRecordCount',
+    'contextRowsOmittedByLimit', 'lemmaIndexPrefixes', 'contextPrefixes'
+  ]) {
+    asSafeInteger(configuration.expectedSummary[field], `${description}.syntaxContext.expectedSummary.${field}`);
+  }
+}
+
 export function validatePublicationPlan(plan) {
   if (!isPlainObject(plan) || plan.schemaVersion !== 1 || !normalizeString(plan.title)
     || !Array.isArray(plan.genericProducts) || !Array.isArray(plan.contractProducts)) {
@@ -332,6 +359,14 @@ export function validatePublicationPlan(plan) {
         fail(`${description} must declare a metadata-only status and at least one blocking issue URL`);
       }
       if (product.views !== undefined) fail(`${description} must not configure row views`);
+      continue;
+    }
+
+    if (product.productType === SYNTACTIC_CONTEXT_PRODUCT_TYPE) {
+      if (product.publication.status !== 'published' || product.views !== undefined) {
+        fail(`${description} must publish its syntax context without generic row views`);
+      }
+      validateSyntacticContextConfiguration(product.syntaxContext, description);
       continue;
     }
 
@@ -386,7 +421,9 @@ function publicSourceFile(file) {
     ...(file.columns === undefined ? {} : { columns: file.columns }),
     ...(file.delimiter === undefined ? {} : { delimiter: file.delimiter }),
     ...(file.hasHeader === undefined ? {} : { hasHeader: file.hasHeader }),
-    ...(file.archiveMember === undefined ? {} : { archiveMember: file.archiveMember })
+    ...(file.archiveMember === undefined ? {} : { archiveMember: file.archiveMember }),
+    ...(file.archiveDirectory === undefined ? {} : { archiveDirectory: file.archiveDirectory }),
+    ...(file.conlluSummary === undefined ? {} : { conlluSummary: file.conlluSummary })
   };
 }
 
@@ -1679,6 +1716,587 @@ async function buildNormalizedContrastLookupProfile({ contract, productId, produ
   };
 }
 
+function compareStrings(left, right) {
+  return left < right ? -1 : left > right ? 1 : 0;
+}
+
+function prefixFor(value, codePoints) {
+  const prefix = Array.from(value.toLocaleLowerCase('lt')).slice(0, codePoints).join('');
+  return prefix || '_';
+}
+
+async function runUnzip(args, description) {
+  const child = spawn('unzip', args, { stdio: ['ignore', 'pipe', 'pipe'] });
+  const stdout = [];
+  let stderr = '';
+  child.stdout.on('data', (chunk) => stdout.push(chunk));
+  child.stderr.setEncoding('utf8');
+  child.stderr.on('data', (chunk) => { stderr += chunk; });
+  const exitCode = await new Promise((resolve, reject) => {
+    child.once('error', reject);
+    child.once('close', resolve);
+  });
+  if (exitCode !== 0) fail(`could not read ${description}: ${stderr.trim()}`);
+  return Buffer.concat(stdout);
+}
+
+function assertTreebankSourceFile(sourceFile, configuration) {
+  if (sourceFile.format !== 'zip-conllu-treebank' || !isSafeRelativePath(sourceFile.archiveDirectory)
+    || !isPlainObject(sourceFile.conlluSummary)) {
+    fail(`${configuration.sourceRole} requires a zip-conllu-treebank source file and reviewed summary`);
+  }
+  for (const field of [
+    'documents', 'sentences', 'repositorySentenceClaim', 'integerTokenRows',
+    'nonPunctuationRows', 'allRelationLabels', 'nonPunctuationRelationLabels',
+    'rootRows', 'nonPunctuationRootRows', 'nonRootDependencyRows', 'uncompressedBytes'
+  ]) {
+    asSafeInteger(sourceFile.conlluSummary[field], `${configuration.sourceRole} source ${field}`);
+  }
+  if (!/^[a-f0-9]{64}$/.test(sourceFile.conlluSummary.membersSha256)) {
+    fail(`${configuration.sourceRole} source conlluSummary.membersSha256 must be a SHA-256 checksum`);
+  }
+}
+
+function parseConlluDocument({ text, sourceDisplayPath, member, onSentence }) {
+  let comments = [];
+  let rows = [];
+  let sentenceNumber = 0;
+  const finishSentence = () => {
+    if (rows.length === 0) {
+      comments = [];
+      return;
+    }
+    sentenceNumber += 1;
+    const sourceSentenceId = normalizeString(comments.find((line) => line.startsWith('# sent_id = '))?.slice('# sent_id = '.length));
+    if (!sourceSentenceId) fail(`${sourceDisplayPath} archive member ${member} sentence ${sentenceNumber} has no sent_id`);
+    const tokens = new Map();
+    for (const row of rows) {
+      const values = row.split('\t');
+      if (values.length !== 10) fail(`${sourceDisplayPath} archive member ${member} has a malformed CoNLL-U row`);
+      if (!/^\d+$/.test(values[0])) continue;
+      const [id, form, lemma, universalPos, , , head, relation] = values;
+      if (!normalizeString(form) || !normalizeString(lemma) || !normalizeString(universalPos)
+        || !normalizeString(head) || !normalizeString(relation) || !/^(?:0|[1-9]\d*)$/.test(head)) {
+        fail(`${sourceDisplayPath} archive member ${member} has an incomplete CoNLL-U token row`);
+      }
+      tokens.set(Number(id), {
+        id: Number(id),
+        form: form.trim(),
+        lemma: lemma.trim(),
+        universalPos: universalPos.trim(),
+        head: Number(head),
+        relation: relation.trim()
+      });
+    }
+    if (tokens.size === 0) fail(`${sourceDisplayPath} archive member ${member} sentence ${sourceSentenceId} has no integer-ID tokens`);
+    const suppliedText = normalizeString(comments.find((line) => line.startsWith('# text = '))?.slice('# text = '.length));
+    const sentenceText = suppliedText || [...tokens.values()].sort((left, right) => left.id - right.id).map((token) => token.form).join(' ');
+    onSentence({ sourceSentenceId, tokens, sentenceText });
+    comments = [];
+    rows = [];
+  };
+
+  for (const line of text.split(/\r?\n/)) {
+    if (line === '') {
+      finishSentence();
+    } else if (line.startsWith('#')) {
+      comments.push(line);
+    } else {
+      rows.push(line);
+    }
+  }
+  finishSentence();
+}
+
+async function buildDerivedRecordsView({
+  productId, productDirectory, sourceFile, view, records, sourceRows, selection
+}) {
+  const viewDirectory = path.join(productDirectory, 'views', view.id);
+  const chunksDirectory = path.join(viewDirectory, 'chunks');
+  await mkdir(chunksDirectory, { recursive: true });
+
+  const suffix = ']}\n';
+  const chunks = [];
+  const numericTotals = fieldTotals(view.fields);
+  const nullCounts = fieldNullCounts(view.fields);
+  let chunkNumber = 0;
+  let recordJsons = [];
+  let recordsBytes = 0;
+  let chunkSelectionPrefixes = [];
+
+  async function flushChunk() {
+    if (recordJsons.length === 0) return;
+    const serialized = `${chunkPrefix(productId, view.id, chunkNumber)}${recordJsons.join(',')}${suffix}`;
+    const buffer = Buffer.from(serialized, 'utf8');
+    if (buffer.byteLength > view.chunkBytes) {
+      fail(`${productId}/${view.id} chunk ${chunkNumber} exceeds its ${view.chunkBytes}-byte budget`);
+    }
+    const filename = `${String(chunkNumber + 1).padStart(6, '0')}.json`;
+    await writeFile(path.join(chunksDirectory, filename), buffer);
+    chunks.push({
+      file: `chunks/${filename}`,
+      records: recordJsons.length,
+      bytes: buffer.byteLength,
+      sha256: createHash('sha256').update(buffer).digest('hex'),
+      ...(chunkSelectionPrefixes.length === 0 ? {} : { selectionPrefixes: chunkSelectionPrefixes })
+    });
+    chunkNumber += 1;
+    recordJsons = [];
+    recordsBytes = 0;
+    chunkSelectionPrefixes = [];
+  }
+
+  for (const record of records) {
+    if (!Array.isArray(record) || record.length !== view.fields.length) {
+      fail(`${productId}/${view.id} produced an invalid record shape`);
+    }
+    for (const [index, field] of view.fields.entries()) {
+      const value = record[index];
+      if (NUMERIC_FIELD_TYPES.has(field.type)) {
+        if (!Number.isSafeInteger(value) || value < 0) fail(`${productId}/${view.id} produced an invalid ${field.id} value`);
+        if (SUMMARIZED_FIELD_TYPES.has(field.type)) numericTotals[field.id] += value;
+      } else if (!normalizeString(value)) {
+        fail(`${productId}/${view.id} produced an empty ${field.id} value`);
+      }
+    }
+    const recordSelectionPrefix = selection?.prefixForRecord(record);
+    if (selection && !normalizeString(recordSelectionPrefix)) {
+      fail(`${productId}/${view.id} produced an empty selection prefix`);
+    }
+    if (recordJsons.length > 0 && selection?.packPrefixes !== true
+      && recordSelectionPrefix !== chunkSelectionPrefixes[0]) await flushChunk();
+    const recordJson = JSON.stringify(record);
+    const candidateBytes = Buffer.byteLength(chunkPrefix(productId, view.id, chunkNumber)) + recordsBytes
+      + (recordJsons.length === 0 ? 0 : 1) + Buffer.byteLength(recordJson) + Buffer.byteLength(suffix);
+    if (candidateBytes > view.chunkBytes && recordJsons.length > 0) await flushChunk();
+    const currentBytes = Buffer.byteLength(chunkPrefix(productId, view.id, chunkNumber)) + recordsBytes
+      + (recordJsons.length === 0 ? 0 : 1) + Buffer.byteLength(recordJson) + Buffer.byteLength(suffix);
+    if (currentBytes > view.chunkBytes) fail(`${productId}/${view.id} produced an oversize record`);
+    if (selection && !chunkSelectionPrefixes.includes(recordSelectionPrefix)) {
+      chunkSelectionPrefixes.push(recordSelectionPrefix);
+    }
+    recordJsons.push(recordJson);
+    recordsBytes += (recordJsons.length === 1 ? 0 : 1) + Buffer.byteLength(recordJson);
+  }
+  await flushChunk();
+  if (chunks.length === 0) fail(`${productId}/${view.id} produced no records`);
+
+  const summary = {
+    sourceRows,
+    recordCount: records.length,
+    numericTotals,
+    nullCounts
+  };
+  const index = {
+    schemaVersion: 1,
+    productId,
+    viewId: view.id,
+    recordEncoding: 'array',
+    fields: view.fields,
+    ordering: view.ordering,
+    sourceFile: publicSourceFile(sourceFile),
+    derivation: {
+      type: 'conllu-treebank-syntax-context',
+      expectedSummary: { sourceRows, recordCount: records.length }
+    },
+    ...(selection === undefined ? {} : {
+      selection: {
+        type: 'lemma-prefix',
+        field: selection.field,
+        codePoints: selection.codePoints
+      }
+    }),
+    maxChunkBytes: view.chunkBytes,
+    summary,
+    chunks
+  };
+  await writeJson(path.join(viewDirectory, 'index.json'), index);
+  return {
+    id: view.id,
+    title: view.title,
+    description: view.description,
+    index: `views/${view.id}/index.json`,
+    sourceRole: view.sourceRole,
+    recordEncoding: 'array',
+    summary
+  };
+}
+
+function derivedField(id, label, type, unit) {
+  return { id, label, type, ...(unit === undefined ? {} : { unit }), derived: true };
+}
+
+async function buildSyntacticContextProduct({ contract, contractProduct, sourceRepository, sourceRoot, outputRoot }) {
+  const configuration = contractProduct.syntaxContext;
+  const sourceFiles = contract.source.files.filter((file) => file.role === configuration.sourceRole);
+  if (sourceFiles.length !== 1 || contract.source.files.length !== 1) {
+    fail(`${contract.id} syntax context must use exactly one reviewed source archive`);
+  }
+  const sourceFile = sourceFiles[0];
+  assertTreebankSourceFile(sourceFile, configuration);
+  const { realRoot, sourcePath } = await resolveSourcePath(sourceRoot, sourceFile.path);
+  const sourceDisplayPath = sourceRelativePath(realRoot, sourcePath);
+  const archiveListing = decodeUtf8(await runUnzip(['-Z1', sourcePath], sourceDisplayPath), `${sourceDisplayPath} archive listing`);
+  const archivePrefix = `${sourceFile.archiveDirectory}/`;
+  const members = archiveListing.split(/\r?\n/)
+    .filter((member) => member.endsWith('.conllu'))
+    .sort(compareStrings);
+  if (members.length === 0 || members.some((member) => !member.startsWith(archivePrefix))) {
+    fail(`${sourceDisplayPath} has no reviewed CoNLL-U members under ${sourceFile.archiveDirectory}`);
+  }
+
+  const sourceSummary = sourceFile.conlluSummary;
+  const expectedGenres = new Map(Object.entries(configuration.genreLabels));
+  const observedGenres = new Map();
+  const relationCounts = new Map();
+  const allRelationLabels = new Set();
+  const lemmaStats = new Map();
+  const contextRecordsByLemma = new Map();
+  const membersHash = createHash('sha256');
+  let uncompressedBytes = 0;
+  let sentences = 0;
+  let integerTokenRows = 0;
+  let nonPunctuationRows = 0;
+  let rootRows = 0;
+  let nonPunctuationRootRows = 0;
+  let nonRootDependencyRows = 0;
+  let contextRowsOmittedByLimit = 0;
+  let contextSequence = 0;
+
+  function lemmaEntry(lemma) {
+    const existing = lemmaStats.get(lemma);
+    if (existing) return existing;
+    const created = { lemma, tokenCount: 0, headEdgeCount: 0, dependentEdgeCount: 0, rootEdgeCount: 0 };
+    lemmaStats.set(lemma, created);
+    return created;
+  }
+
+  function addContext(lemma, record) {
+    const entries = contextRecordsByLemma.get(lemma) ?? [];
+    if (entries.length >= configuration.maxExamplesPerLemma) {
+      contextRowsOmittedByLimit += 1;
+      return;
+    }
+    entries.push({ record, sequence: contextSequence });
+    contextSequence += 1;
+    contextRecordsByLemma.set(lemma, entries);
+  }
+
+  for (const member of members) {
+    const relativeMember = member.slice(archivePrefix.length);
+    const segments = relativeMember.split('/');
+    const genreId = segments.slice(0, -1).join('/');
+    const document = relativeMember;
+    const genre = expectedGenres.get(genreId);
+    if (!genre || segments.length < 2) fail(`${sourceDisplayPath} archive member ${member} has an unreviewed genre`);
+    const genreSummary = observedGenres.get(genreId) ?? {
+      genreId,
+      genre,
+      documents: 0,
+      sentences: 0,
+      integerTokenRows: 0,
+      nonPunctuationRows: 0,
+      relationshipRows: 0
+    };
+    genreSummary.documents += 1;
+    observedGenres.set(genreId, genreSummary);
+
+    const buffer = await runUnzip(['-p', sourcePath, member], `${sourceDisplayPath} archive member ${member}`);
+    membersHash.update(Buffer.from(member, 'utf8'));
+    membersHash.update(Buffer.from([0]));
+    membersHash.update(buffer);
+    membersHash.update(Buffer.from([0]));
+    uncompressedBytes += buffer.byteLength;
+    parseConlluDocument({
+      text: decodeUtf8(buffer, `${sourceDisplayPath} archive member ${member}`),
+      sourceDisplayPath,
+      member,
+      onSentence: ({ sourceSentenceId, tokens, sentenceText }) => {
+        sentences += 1;
+        genreSummary.sentences += 1;
+        for (const token of tokens.values()) {
+          integerTokenRows += 1;
+          genreSummary.integerTokenRows += 1;
+          allRelationLabels.add(token.relation);
+          if (token.head === 0) rootRows += 1;
+        }
+        for (const dependent of tokens.values()) {
+          if (dependent.universalPos === 'PUNCT') continue;
+          nonPunctuationRows += 1;
+          genreSummary.nonPunctuationRows += 1;
+          genreSummary.relationshipRows += 1;
+          relationCounts.set(dependent.relation, (relationCounts.get(dependent.relation) ?? 0) + 1);
+          const dependentEntry = lemmaEntry(dependent.lemma);
+          dependentEntry.tokenCount += 1;
+          dependentEntry.dependentEdgeCount += 1;
+          const baseRecord = {
+            relation: dependent.relation,
+            dependentLemma: dependent.lemma,
+            dependentForm: dependent.form,
+            genreId,
+            genre,
+            document,
+            sourceSentenceId,
+            sentenceText
+          };
+          if (dependent.head === 0) {
+            nonPunctuationRootRows += 1;
+            dependentEntry.rootEdgeCount += 1;
+            addContext(dependent.lemma, [
+              dependent.lemma, 'root', baseRecord.relation, baseRecord.dependentLemma, baseRecord.dependentForm,
+              'ROOT', 'ROOT', baseRecord.genreId, baseRecord.genre, baseRecord.document,
+              baseRecord.sourceSentenceId, baseRecord.sentenceText
+            ]);
+            continue;
+          }
+          nonRootDependencyRows += 1;
+          const head = tokens.get(dependent.head);
+          if (!head) fail(`${sourceDisplayPath} archive member ${member} sentence ${sourceSentenceId} has a missing dependency head`);
+          const contextRecord = [
+            dependent.lemma, 'dependent', baseRecord.relation, baseRecord.dependentLemma, baseRecord.dependentForm,
+            head.lemma, head.form, baseRecord.genreId, baseRecord.genre, baseRecord.document,
+            baseRecord.sourceSentenceId, baseRecord.sentenceText
+          ];
+          addContext(dependent.lemma, contextRecord);
+          if (head.universalPos !== 'PUNCT') {
+            const headEntry = lemmaEntry(head.lemma);
+            headEntry.headEdgeCount += 1;
+            addContext(head.lemma, [
+              head.lemma, 'head', baseRecord.relation, baseRecord.dependentLemma, baseRecord.dependentForm,
+              head.lemma, head.form, baseRecord.genreId, baseRecord.genre, baseRecord.document,
+              baseRecord.sourceSentenceId, baseRecord.sentenceText
+            ]);
+          }
+        }
+      }
+    });
+  }
+
+  const nonPunctuationRelationLabels = relationCounts.size;
+  const observedSourceSummary = {
+    documents: members.length,
+    sentences,
+    repositorySentenceClaim: sourceSummary.repositorySentenceClaim,
+    integerTokenRows,
+    nonPunctuationRows,
+    allRelationLabels: allRelationLabels.size,
+    nonPunctuationRelationLabels,
+    rootRows,
+    nonPunctuationRootRows,
+    nonRootDependencyRows,
+    uncompressedBytes
+  };
+  for (const [field, actual] of Object.entries(observedSourceSummary)) {
+    if (sourceSummary[field] !== actual) fail(`${sourceDisplayPath} reviewed treebank ${field} does not match the source archive`);
+  }
+  if (membersHash.digest('hex') !== sourceSummary.membersSha256) {
+    fail(`${sourceDisplayPath} reviewed treebank members do not match the source archive`);
+  }
+  if (observedGenres.size !== expectedGenres.size || [...expectedGenres.keys()].some((genreId) => !observedGenres.has(genreId))) {
+    fail(`${sourceDisplayPath} treebank genres do not match the publication plan`);
+  }
+
+  const lemmaRecords = [...lemmaStats.values()]
+    .sort((left, right) => compareStrings(left.lemma, right.lemma))
+    .map((entry) => [
+      entry.lemma, entry.tokenCount, entry.headEdgeCount, entry.dependentEdgeCount,
+      entry.rootEdgeCount
+    ]);
+  const relationRecords = [...relationCounts.entries()]
+    .map(([relation, count]) => [relation, count])
+    .sort((left, right) => right[1] - left[1] || compareStrings(left[0], right[0]));
+  const genreRecords = [...observedGenres.values()]
+    .sort((left, right) => compareStrings(left.genreId, right.genreId))
+    .map((entry) => [
+      entry.genreId, entry.genre, entry.documents, entry.sentences, entry.integerTokenRows,
+      entry.nonPunctuationRows, entry.relationshipRows
+    ]);
+  const contextRecords = [...contextRecordsByLemma.entries()]
+    .flatMap(([lemma, entries]) => entries.map(({ record, sequence }) => ({ lemma, record, sequence })))
+    .sort((left, right) => compareStrings(prefixFor(left.lemma, configuration.contextPrefixCodePoints), prefixFor(right.lemma, configuration.contextPrefixCodePoints))
+      || compareStrings(left.lemma, right.lemma) || left.sequence - right.sequence)
+    .map((entry) => entry.record);
+  const expectedSummary = configuration.expectedSummary;
+  const observedProductSummary = {
+    documents: members.length,
+    sentences,
+    integerTokenRows,
+    nonPunctuationRows,
+    allRelationLabels: allRelationLabels.size,
+    nonPunctuationRelationLabels,
+    rootRows,
+    nonPunctuationRootRows,
+    nonRootDependencyRows,
+    lemmaCount: lemmaRecords.length,
+    contextRecordCount: contextRecords.length,
+    contextRowsOmittedByLimit,
+    lemmaIndexPrefixes: new Set(lemmaRecords.map((record) => prefixFor(record[0], configuration.lemmaIndexPrefixCodePoints))).size,
+    contextPrefixes: new Set(contextRecords.map((record) => prefixFor(record[0], configuration.contextPrefixCodePoints))).size
+  };
+  for (const [field, actual] of Object.entries(observedProductSummary)) {
+    if (expectedSummary[field] !== actual) fail(`${sourceDisplayPath} syntax context ${field} does not match the publication plan`);
+  }
+
+  const productDirectory = path.join(outputRoot, contract.id);
+  const chunkBytes = configuration.chunkBytes;
+  const views = await Promise.all([
+    buildDerivedRecordsView({
+      productId: contract.id,
+      productDirectory,
+      sourceFile,
+      sourceRows: nonPunctuationRows,
+      view: {
+        id: 'relations-by-frequency', sourceRole: configuration.sourceRole,
+        title: 'ALKSNIS dependency relations',
+        description: 'Frequency of source dependency-relation labels across non-punctuation token rows, including source roots.',
+        ordering: { field: 'count', direction: 'descending' }, chunkBytes,
+        fields: [
+          derivedField('relation', 'Source dependency relation', 'string'),
+          derivedField('count', 'Annotated non-punctuation token rows', 'raw-token-count', 'tokens')
+        ]
+      },
+      records: relationRecords
+    }),
+    buildDerivedRecordsView({
+      productId: contract.id,
+      productDirectory,
+      sourceFile,
+      sourceRows: members.length,
+      view: {
+        id: 'genres-by-source-order', sourceRole: configuration.sourceRole,
+        title: 'ALKSNIS source genres',
+        description: 'Document, sentence, token, and non-punctuation relation totals for each source genre.',
+        ordering: { field: 'genreId', direction: 'ascending' }, chunkBytes,
+        fields: [
+          derivedField('genreId', 'Source genre identifier', 'string'),
+          derivedField('genre', 'Source genre', 'string'),
+          derivedField('documents', 'Documents', 'raw-token-count', 'documents'),
+          derivedField('sentences', 'Sentence IDs', 'raw-token-count', 'sentences'),
+          derivedField('integerTokenRows', 'Integer-ID token rows', 'raw-token-count', 'tokens'),
+          derivedField('nonPunctuationRows', 'Non-punctuation token rows', 'raw-token-count', 'tokens'),
+          derivedField('relationshipRows', 'Annotated relationship rows', 'raw-token-count', 'tokens')
+        ]
+      },
+      records: genreRecords
+    }),
+    buildDerivedRecordsView({
+      productId: contract.id,
+      productDirectory,
+      sourceFile,
+      sourceRows: nonPunctuationRows,
+      selection: {
+        field: 'lemma', codePoints: configuration.lemmaIndexPrefixCodePoints,
+        prefixForRecord: (record) => prefixFor(record[0], configuration.lemmaIndexPrefixCodePoints),
+        packPrefixes: true
+      },
+      view: {
+        id: 'lemmas-by-source-order', sourceRole: configuration.sourceRole,
+        title: 'ALKSNIS lemma context index',
+        description: 'Every non-punctuation source lemma, with its annotated token count and the number of retained dependency roles.',
+        ordering: { field: 'lemma', direction: 'ascending' }, chunkBytes,
+        fields: [
+          derivedField('lemma', 'Source lemma', 'string'),
+          derivedField('tokenCount', 'Non-punctuation token rows', 'raw-token-count', 'tokens'),
+          derivedField('headEdgeCount', 'Rows where the lemma is a non-punctuation head', 'raw-token-count', 'relationships'),
+          derivedField('dependentEdgeCount', 'Rows where the lemma is the dependent', 'raw-token-count', 'relationships'),
+          derivedField('rootEdgeCount', 'Rows where the lemma has source head 0', 'raw-token-count', 'relationships')
+        ]
+      },
+      records: lemmaRecords
+    }),
+    buildDerivedRecordsView({
+      productId: contract.id,
+      productDirectory,
+      sourceFile,
+      sourceRows: contextRecords.length,
+      selection: {
+        field: 'lemma', codePoints: configuration.contextPrefixCodePoints,
+        prefixForRecord: (record) => prefixFor(record[0], configuration.contextPrefixCodePoints),
+        packPrefixes: true
+      },
+      view: {
+        id: 'sentence-contexts-by-lemma', sourceRole: configuration.sourceRole,
+        title: 'ALKSNIS sentence contexts',
+        description: 'Up to the reviewed source-order limit of dependency contexts per non-punctuation lemma; fetch by selected lemma prefix.',
+        ordering: { field: 'lemma', direction: 'ascending' }, chunkBytes,
+        fields: [
+          derivedField('lemma', 'Selected source lemma', 'string'),
+          derivedField('direction', 'Selected lemma role', 'string'),
+          derivedField('relation', 'Source dependency relation', 'string'),
+          derivedField('dependentLemma', 'Dependent source lemma', 'string'),
+          derivedField('dependentForm', 'Dependent source form', 'string'),
+          derivedField('headLemma', 'Head source lemma or ROOT', 'string'),
+          derivedField('headForm', 'Head source form or ROOT', 'string'),
+          derivedField('genreId', 'Source genre identifier', 'string'),
+          derivedField('genre', 'Source genre', 'string'),
+          derivedField('document', 'Source CoNLL-U document', 'string'),
+          derivedField('sourceSentenceId', 'Source sentence identifier', 'string'),
+          derivedField('sentenceText', 'Source sentence text', 'string')
+        ]
+      },
+      records: contextRecords
+    })
+  ]);
+
+  const manifest = {
+    schemaVersion: 1,
+    id: contract.id,
+    title: contract.title,
+    productType: SYNTACTIC_CONTEXT_PRODUCT_TYPE,
+    publication: contractProduct.publication,
+    provenance: {
+      sourceRepository,
+      sourceUrl: contract.source.sourceUrl,
+      licence: contract.source.licence,
+      citation: contract.source.citation,
+      files: contract.source.files.map(publicSourceFile)
+    },
+    delivery: {
+      mode: 'static-prefix-chunked-syntax-context-json',
+      constraints: contract.delivery?.constraints ?? []
+    },
+    syntaxContext: {
+      overview: {
+        repositorySentenceClaim: sourceSummary.repositorySentenceClaim,
+        deliveredSentenceIds: sentences,
+        documents: members.length,
+        integerTokenRows,
+        nonPunctuationRows,
+        allRelationLabels: allRelationLabels.size,
+        nonPunctuationRelationLabels,
+        rootRows,
+        nonPunctuationRootRows,
+        nonRootDependencyRows
+      },
+      exclusions: ['UPOS=PUNCT is excluded from the lemma index, relation summary, and contexts.'],
+      exampleSelection: {
+        maxExamplesPerLemma: configuration.maxExamplesPerLemma,
+        order: 'Archive member, sentence, and token source order.',
+        omittedRows: contextRowsOmittedByLimit
+      },
+      lookup: {
+        lemmaIndexView: 'lemmas-by-source-order',
+        lemmaIndexPrefixCodePoints: configuration.lemmaIndexPrefixCodePoints,
+        contextView: 'sentence-contexts-by-lemma',
+        contextPrefixCodePoints: configuration.contextPrefixCodePoints,
+        directions: ['dependent', 'head', 'root']
+      }
+    },
+    views
+  };
+  await writeJson(path.join(productDirectory, 'manifest.json'), manifest);
+  return {
+    id: contract.id,
+    title: contract.title,
+    productType: manifest.productType,
+    publicationStatus: 'published',
+    manifest: `${contract.id}/manifest.json`,
+    licence: contract.source.licence,
+    viewCount: views.length,
+    recordCount: null
+  };
+}
+
 function validateGenericDataset(dataset, filename) {
   if (!isPlainObject(dataset) || dataset.schemaVersion !== 1 || !isSafeId(dataset.id)
     || !normalizeString(dataset.title) || !normalizeString(dataset.author)
@@ -1769,6 +2387,10 @@ async function buildContractProduct({ contract, contractProduct, sourceRepositor
       viewCount: 0,
       recordCount: null
     };
+  }
+
+  if (contractProduct.productType === SYNTACTIC_CONTEXT_PRODUCT_TYPE) {
+    return buildSyntacticContextProduct({ contract, contractProduct, sourceRepository, sourceRoot, outputRoot });
   }
 
   const sourceFilesWithRoles = contract.source.files.filter((file) => normalizeString(file.role));

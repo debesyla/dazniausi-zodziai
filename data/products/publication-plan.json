@@ -30,11 +30,25 @@
           "sourceRole": "aggregate",
           "title": "All CCLL word forms, frequency order",
           "description": "The complete corpus wordform list, ordered by descending raw token count.",
-          "ordering": { "field": "count", "direction": "descending" },
+          "ordering": {
+            "field": "count",
+            "direction": "descending"
+          },
           "chunkBytes": 65536,
           "fields": [
-            { "id": "word", "label": "Word form", "type": "string", "sourceColumn": 0 },
-            { "id": "count", "label": "Token count", "type": "raw-token-count", "unit": "tokens", "sourceColumn": 1 }
+            {
+              "id": "word",
+              "label": "Word form",
+              "type": "string",
+              "sourceColumn": 0
+            },
+            {
+              "id": "count",
+              "label": "Token count",
+              "type": "raw-token-count",
+              "unit": "tokens",
+              "sourceColumn": 1
+            }
           ]
         },
         {
@@ -42,11 +56,25 @@
           "sourceRole": "aggregate-alphabetical-index",
           "title": "All CCLL word forms, alphabetical order",
           "description": "The same complete corpus wordform list, ordered alphabetically by the source.",
-          "ordering": { "field": "word", "direction": "ascending" },
+          "ordering": {
+            "field": "word",
+            "direction": "ascending"
+          },
           "chunkBytes": 65536,
           "fields": [
-            { "id": "word", "label": "Word form", "type": "string", "sourceColumn": 0 },
-            { "id": "count", "label": "Token count", "type": "raw-token-count", "unit": "tokens", "sourceColumn": 1 }
+            {
+              "id": "word",
+              "label": "Word form",
+              "type": "string",
+              "sourceColumn": 0
+            },
+            {
+              "id": "count",
+              "label": "Token count",
+              "type": "raw-token-count",
+              "unit": "tokens",
+              "sourceColumn": 1
+            }
           ]
         },
         {
@@ -54,11 +82,25 @@
           "sourceRole": "subcorpus-fiction",
           "title": "CCLL fiction word forms",
           "description": "Word forms in the fiction subcorpus, ordered by descending raw token count.",
-          "ordering": { "field": "count", "direction": "descending" },
+          "ordering": {
+            "field": "count",
+            "direction": "descending"
+          },
           "chunkBytes": 65536,
           "fields": [
-            { "id": "word", "label": "Word form", "type": "string", "sourceColumn": 0 },
-            { "id": "count", "label": "Token count", "type": "raw-token-count", "unit": "tokens", "sourceColumn": 1 }
+            {
+              "id": "word",
+              "label": "Word form",
+              "type": "string",
+              "sourceColumn": 0
+            },
+            {
+              "id": "count",
+              "label": "Token count",
+              "type": "raw-token-count",
+              "unit": "tokens",
+              "sourceColumn": 1
+            }
           ]
         },
         {
@@ -66,11 +108,25 @@
           "sourceRole": "subcorpus-non-fiction",
           "title": "CCLL non-fiction word forms",
           "description": "Word forms in the non-fiction subcorpus, ordered by descending raw token count.",
-          "ordering": { "field": "count", "direction": "descending" },
+          "ordering": {
+            "field": "count",
+            "direction": "descending"
+          },
           "chunkBytes": 65536,
           "fields": [
-            { "id": "word", "label": "Word form", "type": "string", "sourceColumn": 0 },
-            { "id": "count", "label": "Token count", "type": "raw-token-count", "unit": "tokens", "sourceColumn": 1 }
+            {
+              "id": "word",
+              "label": "Word form",
+              "type": "string",
+              "sourceColumn": 0
+            },
+            {
+              "id": "count",
+              "label": "Token count",
+              "type": "raw-token-count",
+              "unit": "tokens",
+              "sourceColumn": 1
+            }
           ]
         },
         {
@@ -78,11 +134,25 @@
           "sourceRole": "subcorpus-administrative",
           "title": "CCLL administrative word forms",
           "description": "Word forms in the administrative subcorpus, ordered by descending raw token count.",
-          "ordering": { "field": "count", "direction": "descending" },
+          "ordering": {
+            "field": "count",
+            "direction": "descending"
+          },
           "chunkBytes": 65536,
           "fields": [
-            { "id": "word", "label": "Word form", "type": "string", "sourceColumn": 0 },
-            { "id": "count", "label": "Token count", "type": "raw-token-count", "unit": "tokens", "sourceColumn": 1 }
+            {
+              "id": "word",
+              "label": "Word form",
+              "type": "string",
+              "sourceColumn": 0
+            },
+            {
+              "id": "count",
+              "label": "Token count",
+              "type": "raw-token-count",
+              "unit": "tokens",
+              "sourceColumn": 1
+            }
           ]
         },
         {
@@ -90,11 +160,25 @@
           "sourceRole": "subcorpus-periodicals",
           "title": "CCLL periodicals word forms",
           "description": "Word forms in the periodicals subcorpus, ordered by descending raw token count.",
-          "ordering": { "field": "count", "direction": "descending" },
+          "ordering": {
+            "field": "count",
+            "direction": "descending"
+          },
           "chunkBytes": 65536,
           "fields": [
-            { "id": "word", "label": "Word form", "type": "string", "sourceColumn": 0 },
-            { "id": "count", "label": "Token count", "type": "raw-token-count", "unit": "tokens", "sourceColumn": 1 }
+            {
+              "id": "word",
+              "label": "Word form",
+              "type": "string",
+              "sourceColumn": 0
+            },
+            {
+              "id": "count",
+              "label": "Token count",
+              "type": "raw-token-count",
+              "unit": "tokens",
+              "sourceColumn": 1
+            }
           ]
         },
         {
@@ -102,11 +186,25 @@
           "sourceRole": "subcorpus-speech",
           "title": "CCLL spoken word forms",
           "description": "Word forms in the spoken subcorpus, ordered by descending raw token count.",
-          "ordering": { "field": "count", "direction": "descending" },
+          "ordering": {
+            "field": "count",
+            "direction": "descending"
+          },
           "chunkBytes": 65536,
           "fields": [
-            { "id": "word", "label": "Word form", "type": "string", "sourceColumn": 0 },
-            { "id": "count", "label": "Token count", "type": "raw-token-count", "unit": "tokens", "sourceColumn": 1 }
+            {
+              "id": "word",
+              "label": "Word form",
+              "type": "string",
+              "sourceColumn": 0
+            },
+            {
+              "id": "count",
+              "label": "Token count",
+              "type": "raw-token-count",
+              "unit": "tokens",
+              "sourceColumn": 1
+            }
           ]
         }
       ]
@@ -125,11 +223,25 @@
           "sourceRole": "types-coverage",
           "title": "JCL types and DML6 coverage",
           "description": "A raw JCL token count paired with a categorical DML6 coverage code. The code is not a frequency.",
-          "ordering": { "field": "jclTokenCount", "direction": "descending" },
+          "ordering": {
+            "field": "jclTokenCount",
+            "direction": "descending"
+          },
           "chunkBytes": 262144,
           "fields": [
-            { "id": "word", "label": "Word form", "type": "string", "sourceColumn": 0 },
-            { "id": "jclTokenCount", "label": "JCL token count", "type": "raw-token-count", "unit": "tokens", "sourceColumn": 1 },
+            {
+              "id": "word",
+              "label": "Word form",
+              "type": "string",
+              "sourceColumn": 0
+            },
+            {
+              "id": "jclTokenCount",
+              "label": "JCL token count",
+              "type": "raw-token-count",
+              "unit": "tokens",
+              "sourceColumn": 1
+            },
             {
               "id": "dml6CoverageCode",
               "label": "DML6 coverage",
@@ -150,12 +262,31 @@
           "sourceRole": "lemma-occurrences",
           "title": "DML6 lemmas and JCL occurrences",
           "description": "JCL occurrences for a DML6 lemma and source part-of-speech code.",
-          "ordering": { "field": "jclLemmaOccurrenceCount", "direction": "descending" },
+          "ordering": {
+            "field": "jclLemmaOccurrenceCount",
+            "direction": "descending"
+          },
           "chunkBytes": 262144,
           "fields": [
-            { "id": "lemma", "label": "Lemma", "type": "string", "sourceColumn": 0 },
-            { "id": "partOfSpeechCode", "label": "Source part-of-speech code", "type": "source-pos-code", "sourceColumn": 1 },
-            { "id": "jclLemmaOccurrenceCount", "label": "JCL occurrence count", "type": "raw-token-count", "unit": "tokens", "sourceColumn": 2 }
+            {
+              "id": "lemma",
+              "label": "Lemma",
+              "type": "string",
+              "sourceColumn": 0
+            },
+            {
+              "id": "partOfSpeechCode",
+              "label": "Source part-of-speech code",
+              "type": "source-pos-code",
+              "sourceColumn": 1
+            },
+            {
+              "id": "jclLemmaOccurrenceCount",
+              "label": "JCL occurrence count",
+              "type": "raw-token-count",
+              "unit": "tokens",
+              "sourceColumn": 2
+            }
           ]
         },
         {
@@ -163,11 +294,25 @@
           "sourceRole": "missing-types",
           "title": "JCL types missing from DML6",
           "description": "The source's filtered list of types not found in DML6, with their raw JCL token counts.",
-          "ordering": { "field": "jclTokenCount", "direction": "descending" },
+          "ordering": {
+            "field": "jclTokenCount",
+            "direction": "descending"
+          },
           "chunkBytes": 262144,
           "fields": [
-            { "id": "word", "label": "Word form", "type": "string", "sourceColumn": 0 },
-            { "id": "jclTokenCount", "label": "JCL token count", "type": "raw-token-count", "unit": "tokens", "sourceColumn": 1 }
+            {
+              "id": "word",
+              "label": "Word form",
+              "type": "string",
+              "sourceColumn": 0
+            },
+            {
+              "id": "jclTokenCount",
+              "label": "JCL token count",
+              "type": "raw-token-count",
+              "unit": "tokens",
+              "sourceColumn": 1
+            }
           ]
         }
       ],
@@ -180,17 +325,51 @@
           "description": "Counts of JCL word forms and their raw token mass in transparent frequency bands, split by labelled DML6 coverage category.",
           "summaryMaxBytes": 32768,
           "frequencyBands": [
-            { "id": "one", "label": "1", "minimum": 1, "maximum": 1 },
-            { "id": "two-to-four", "label": "2–4", "minimum": 2, "maximum": 4 },
-            { "id": "five-to-nine", "label": "5–9", "minimum": 5, "maximum": 9 },
-            { "id": "ten-to-ninety-nine", "label": "10–99", "minimum": 10, "maximum": 99 },
-            { "id": "one-hundred-to-nine-hundred-ninety-nine", "label": "100–999", "minimum": 100, "maximum": 999 },
-            { "id": "one-thousand-plus", "label": "1,000+", "minimum": 1000, "maximum": null }
+            {
+              "id": "one",
+              "label": "1",
+              "minimum": 1,
+              "maximum": 1
+            },
+            {
+              "id": "two-to-four",
+              "label": "2–4",
+              "minimum": 2,
+              "maximum": 4
+            },
+            {
+              "id": "five-to-nine",
+              "label": "5–9",
+              "minimum": 5,
+              "maximum": 9
+            },
+            {
+              "id": "ten-to-ninety-nine",
+              "label": "10–99",
+              "minimum": 10,
+              "maximum": 99
+            },
+            {
+              "id": "one-hundred-to-nine-hundred-ninety-nine",
+              "label": "100–999",
+              "minimum": 100,
+              "maximum": 999
+            },
+            {
+              "id": "one-thousand-plus",
+              "label": "1,000+",
+              "minimum": 1000,
+              "maximum": null
+            }
           ],
           "drilldown": {
             "limit": 50,
             "maxBytes": 16384,
-            "ordering": { "field": "jclTokenCount", "direction": "descending", "tieBreak": "word-ascending" }
+            "ordering": {
+              "field": "jclTokenCount",
+              "direction": "descending",
+              "tieBreak": "word-ascending"
+            }
           }
         }
       ]
@@ -209,16 +388,90 @@
           "sourceRole": "normalized-comparison",
           "title": "CCLL2, wartime media, and social-network metrics",
           "description": "Token and document counts normalized by the source to 100 million source words. Metrics remain separate and nullable.",
-          "ordering": { "field": "word", "direction": "ascending" },
+          "ordering": {
+            "field": "word",
+            "direction": "ascending"
+          },
           "chunkBytes": 262144,
           "fields": [
-            { "id": "word", "label": "Word form", "type": "string", "sourceColumn": 0 },
-            { "id": "ccll2TokenCount", "label": "CCLL2 normalized token count", "type": "normalized-token-count", "unit": "tokens per 100 million source words", "sourceColumn": 1, "nullable": true, "normalization": { "sourceTokens": 162000000, "targetTokens": 100000000 } },
-            { "id": "ccll2DocumentCount", "label": "CCLL2 normalized document count", "type": "normalized-document-count", "unit": "documents per 100 million source words", "sourceColumn": 2, "nullable": true, "normalization": { "sourceTokens": 162000000, "targetTokens": 100000000 } },
-            { "id": "mediaTokenCount", "label": "Wartime media normalized token count", "type": "normalized-token-count", "unit": "tokens per 100 million source words", "sourceColumn": 3, "nullable": true, "normalization": { "sourceTokens": 36000000, "targetTokens": 100000000 } },
-            { "id": "mediaDocumentCount", "label": "Wartime media normalized document count", "type": "normalized-document-count", "unit": "documents per 100 million source words", "sourceColumn": 4, "nullable": true, "normalization": { "sourceTokens": 36000000, "targetTokens": 100000000 } },
-            { "id": "socialTokenCount", "label": "Wartime social-network normalized token count", "type": "normalized-token-count", "unit": "tokens per 100 million source words", "sourceColumn": 5, "nullable": true, "normalization": { "sourceTokens": 2000000, "targetTokens": 100000000 } },
-            { "id": "socialDocumentCount", "label": "Wartime social-network normalized document count", "type": "normalized-document-count", "unit": "documents per 100 million source words", "sourceColumn": 6, "nullable": true, "normalization": { "sourceTokens": 2000000, "targetTokens": 100000000 } }
+            {
+              "id": "word",
+              "label": "Word form",
+              "type": "string",
+              "sourceColumn": 0
+            },
+            {
+              "id": "ccll2TokenCount",
+              "label": "CCLL2 normalized token count",
+              "type": "normalized-token-count",
+              "unit": "tokens per 100 million source words",
+              "sourceColumn": 1,
+              "nullable": true,
+              "normalization": {
+                "sourceTokens": 162000000,
+                "targetTokens": 100000000
+              }
+            },
+            {
+              "id": "ccll2DocumentCount",
+              "label": "CCLL2 normalized document count",
+              "type": "normalized-document-count",
+              "unit": "documents per 100 million source words",
+              "sourceColumn": 2,
+              "nullable": true,
+              "normalization": {
+                "sourceTokens": 162000000,
+                "targetTokens": 100000000
+              }
+            },
+            {
+              "id": "mediaTokenCount",
+              "label": "Wartime media normalized token count",
+              "type": "normalized-token-count",
+              "unit": "tokens per 100 million source words",
+              "sourceColumn": 3,
+              "nullable": true,
+              "normalization": {
+                "sourceTokens": 36000000,
+                "targetTokens": 100000000
+              }
+            },
+            {
+              "id": "mediaDocumentCount",
+              "label": "Wartime media normalized document count",
+              "type": "normalized-document-count",
+              "unit": "documents per 100 million source words",
+              "sourceColumn": 4,
+              "nullable": true,
+              "normalization": {
+                "sourceTokens": 36000000,
+                "targetTokens": 100000000
+              }
+            },
+            {
+              "id": "socialTokenCount",
+              "label": "Wartime social-network normalized token count",
+              "type": "normalized-token-count",
+              "unit": "tokens per 100 million source words",
+              "sourceColumn": 5,
+              "nullable": true,
+              "normalization": {
+                "sourceTokens": 2000000,
+                "targetTokens": 100000000
+              }
+            },
+            {
+              "id": "socialDocumentCount",
+              "label": "Wartime social-network normalized document count",
+              "type": "normalized-document-count",
+              "unit": "documents per 100 million source words",
+              "sourceColumn": 6,
+              "nullable": true,
+              "normalization": {
+                "sourceTokens": 2000000,
+                "targetTokens": 100000000
+              }
+            }
           ]
         }
       ],
@@ -293,11 +546,25 @@
           "sourceRole": "all-by-frequency",
           "title": "Delfi.lt corpus one-grams",
           "description": "Raw one-gram token frequencies from the source, ordered by descending count.",
-          "ordering": { "field": "count", "direction": "descending" },
+          "ordering": {
+            "field": "count",
+            "direction": "descending"
+          },
           "chunkBytes": 262144,
           "fields": [
-            { "id": "word", "label": "One-gram", "type": "string", "sourceColumn": 0 },
-            { "id": "count", "label": "Token count", "type": "raw-token-count", "unit": "tokens", "sourceColumn": 1 }
+            {
+              "id": "word",
+              "label": "One-gram",
+              "type": "string",
+              "sourceColumn": 0
+            },
+            {
+              "id": "count",
+              "label": "Token count",
+              "type": "raw-token-count",
+              "unit": "tokens",
+              "sourceColumn": 1
+            }
           ]
         }
       ]
@@ -316,19 +583,44 @@
           "sourceRole": "matas-conllu",
           "title": "MATAS lemmas by Universal POS",
           "description": "Non-punctuation MATAS tokens aggregated by source lemma and Universal POS, ordered by descending count.",
-          "ordering": { "field": "count", "direction": "descending" },
+          "ordering": {
+            "field": "count",
+            "direction": "descending"
+          },
           "chunkBytes": 65536,
           "derivation": {
             "type": "conllu-frequency",
             "key": "lemma",
-            "excludeUniversalPos": ["PUNCT"],
+            "excludeUniversalPos": [
+              "PUNCT"
+            ],
             "missingUniversalPos": "UNSPECIFIED",
-            "expectedSummary": { "sourceRows": 1694814, "recordCount": 56420, "totalFrequency": 1694814 }
+            "expectedSummary": {
+              "sourceRows": 1694814,
+              "recordCount": 56420,
+              "totalFrequency": 1694814
+            }
           },
           "fields": [
-            { "id": "lemma", "label": "Lemma", "type": "string", "sourceColumn": 2 },
-            { "id": "universalPos", "label": "Universal POS", "type": "source-pos-code", "sourceColumn": 3 },
-            { "id": "count", "label": "Token count", "type": "raw-token-count", "unit": "tokens", "derived": true }
+            {
+              "id": "lemma",
+              "label": "Lemma",
+              "type": "string",
+              "sourceColumn": 2
+            },
+            {
+              "id": "universalPos",
+              "label": "Universal POS",
+              "type": "source-pos-code",
+              "sourceColumn": 3
+            },
+            {
+              "id": "count",
+              "label": "Token count",
+              "type": "raw-token-count",
+              "unit": "tokens",
+              "derived": true
+            }
           ]
         },
         {
@@ -336,19 +628,44 @@
           "sourceRole": "matas-conllu",
           "title": "MATAS word forms by Universal POS",
           "description": "Non-punctuation MATAS tokens aggregated by source form and Universal POS, ordered by descending count.",
-          "ordering": { "field": "count", "direction": "descending" },
+          "ordering": {
+            "field": "count",
+            "direction": "descending"
+          },
           "chunkBytes": 65536,
           "derivation": {
             "type": "conllu-frequency",
             "key": "wordform",
-            "excludeUniversalPos": ["PUNCT"],
+            "excludeUniversalPos": [
+              "PUNCT"
+            ],
             "missingUniversalPos": "UNSPECIFIED",
-            "expectedSummary": { "sourceRows": 1694814, "recordCount": 198062, "totalFrequency": 1694814 }
+            "expectedSummary": {
+              "sourceRows": 1694814,
+              "recordCount": 198062,
+              "totalFrequency": 1694814
+            }
           },
           "fields": [
-            { "id": "word", "label": "Word form", "type": "string", "sourceColumn": 1 },
-            { "id": "universalPos", "label": "Universal POS", "type": "source-pos-code", "sourceColumn": 3 },
-            { "id": "count", "label": "Token count", "type": "raw-token-count", "unit": "tokens", "derived": true }
+            {
+              "id": "word",
+              "label": "Word form",
+              "type": "string",
+              "sourceColumn": 1
+            },
+            {
+              "id": "universalPos",
+              "label": "Universal POS",
+              "type": "source-pos-code",
+              "sourceColumn": 3
+            },
+            {
+              "id": "count",
+              "label": "Token count",
+              "type": "raw-token-count",
+              "unit": "tokens",
+              "derived": true
+            }
           ]
         }
       ]
@@ -367,15 +684,51 @@
           "sourceRole": "homoform-records",
           "title": "Lithuanian homoform analyses",
           "description": "Every source homoform, lemma, morphology, frequency pair, and type/subtype in the original source order.",
-          "ordering": { "field": "source", "direction": "as-stored" },
+          "ordering": {
+            "field": "source",
+            "direction": "as-stored"
+          },
           "chunkBytes": 262144,
           "fields": [
-            { "id": "homoform", "label": "Homoform", "type": "string", "sourceColumn": 0 },
-            { "id": "lemma", "label": "Lemma", "type": "string", "sourceColumn": 1 },
-            { "id": "morphology", "label": "Morphological information", "type": "string", "sourceColumn": 2, "nullable": true },
-            { "id": "matasFrequency", "label": "MATAS frequency", "type": "raw-token-count", "unit": "tokens in MATAS", "sourceColumn": 3 },
-            { "id": "homoformComponentFrequency", "label": "Homoform component frequency", "type": "raw-token-count", "unit": "tokens in the source component", "sourceColumn": 4 },
-            { "id": "homoformType", "label": "Homoform type and subtype", "type": "string", "sourceColumn": 5 }
+            {
+              "id": "homoform",
+              "label": "Homoform",
+              "type": "string",
+              "sourceColumn": 0
+            },
+            {
+              "id": "lemma",
+              "label": "Lemma",
+              "type": "string",
+              "sourceColumn": 1
+            },
+            {
+              "id": "morphology",
+              "label": "Morphological information",
+              "type": "string",
+              "sourceColumn": 2,
+              "nullable": true
+            },
+            {
+              "id": "matasFrequency",
+              "label": "MATAS frequency",
+              "type": "raw-token-count",
+              "unit": "tokens in MATAS",
+              "sourceColumn": 3
+            },
+            {
+              "id": "homoformComponentFrequency",
+              "label": "Homoform component frequency",
+              "type": "raw-token-count",
+              "unit": "tokens in the source component",
+              "sourceColumn": 4
+            },
+            {
+              "id": "homoformType",
+              "label": "Homoform type and subtype",
+              "type": "string",
+              "sourceColumn": 5
+            }
           ]
         }
       ]
@@ -394,16 +747,39 @@
           "sourceRole": "source-name-pairs",
           "title": "Foreign-name transliteration source pairs",
           "description": "Every source-provided pair, kept in source order; sourceMatchCount is not a general word-frequency measure.",
-          "ordering": { "field": "source", "direction": "as-stored" },
+          "ordering": {
+            "field": "source",
+            "direction": "as-stored"
+          },
           "chunkBytes": 262144,
           "derivation": {
             "type": "name-transliteration",
-            "expectedSummary": { "sourceRows": 68167, "recordCount": 68167, "totalFrequency": 133254 }
+            "expectedSummary": {
+              "sourceRows": 68167,
+              "recordCount": 68167,
+              "totalFrequency": 133254
+            }
           },
           "fields": [
-            { "id": "sourceLeftName", "label": "First source name string", "type": "string", "derived": true },
-            { "id": "sourceParenthesizedName", "label": "Parenthesized source name string", "type": "string", "derived": true },
-            { "id": "sourceMatchCount", "label": "Source match count", "type": "raw-token-count", "unit": "matches in the source corpus extraction", "derived": true }
+            {
+              "id": "sourceLeftName",
+              "label": "First source name string",
+              "type": "string",
+              "derived": true
+            },
+            {
+              "id": "sourceParenthesizedName",
+              "label": "Parenthesized source name string",
+              "type": "string",
+              "derived": true
+            },
+            {
+              "id": "sourceMatchCount",
+              "label": "Source match count",
+              "type": "raw-token-count",
+              "unit": "matches in the source corpus extraction",
+              "derived": true
+            }
           ]
         }
       ]
@@ -422,19 +798,78 @@
           "sourceRole": "basketball-slang-entries",
           "title": "Lithuanian basketball slang entries",
           "description": "Every parsed source entry in source order, with nested lexical evidence and the record-page count discrepancy kept in derivation metadata.",
-          "ordering": { "field": "source", "direction": "as-stored" },
+          "ordering": {
+            "field": "source",
+            "direction": "as-stored"
+          },
           "chunkBytes": 262144,
           "derivation": {
             "type": "nvh-lexicon",
             "recordPageEntryCount": 233,
-            "expectedSummary": { "sourceRows": 2286, "recordCount": 223, "senseCount": 224, "definitionCount": 227, "exampleCount": 287 }
+            "expectedSummary": {
+              "sourceRows": 2286,
+              "recordCount": 223,
+              "senseCount": 224,
+              "definitionCount": 227,
+              "exampleCount": 287
+            }
           },
           "fields": [
-            { "id": "entry", "label": "Entry", "type": "string", "derived": true },
-            { "id": "details", "label": "Source and lexical details", "type": "lexical-entry-details", "derived": true }
+            {
+              "id": "entry",
+              "label": "Entry",
+              "type": "string",
+              "derived": true
+            },
+            {
+              "id": "details",
+              "label": "Source and lexical details",
+              "type": "lexical-entry-details",
+              "derived": true
+            }
           ]
         }
       ]
+    },
+    {
+      "contractId": "rimkute-2019-alksnis-syntactic-context",
+      "productType": "chunked-syntactic-context",
+      "publication": {
+        "status": "published",
+        "scope": "Source-scoped dependency-relation totals, genre totals, an index of every non-punctuation source lemma, and bounded sentence contexts derived from the reviewed ALKSNIS v3.0 CoNLL-U documents.",
+        "access": "A compact manifest loads first. Relation and genre totals are separate small views; lemma and context chunks are requested only for the selected source-lemma prefix."
+      },
+      "syntaxContext": {
+        "sourceRole": "alksnis-treebank",
+        "maxExamplesPerLemma": 12,
+        "chunkBytes": 65536,
+        "lemmaIndexPrefixCodePoints": 1,
+        "contextPrefixCodePoints": 3,
+        "genreLabels": {
+          "administraciniai_dokumentai": "Administraciniai dokumentai",
+          "bendroji_periodika": "Bendroji periodika",
+          "grozine_literatura": "Grožinė literatūra",
+          "moksline_literatura/moksl_recenzijos": "Mokslinė literatūra: recenzijos",
+          "moksline_literatura/moksl_santraukos": "Mokslinė literatūra: santraukos",
+          "specialioji_periodika": "Specialioji periodika"
+        },
+        "expectedSummary": {
+          "documents": 76,
+          "sentences": 3642,
+          "integerTokenRows": 70047,
+          "nonPunctuationRows": 57156,
+          "allRelationLabels": 104,
+          "nonPunctuationRelationLabels": 92,
+          "rootRows": 3642,
+          "nonPunctuationRootRows": 2956,
+          "nonRootDependencyRows": 54200,
+          "lemmaCount": 8656,
+          "contextRecordCount": 39828,
+          "contextRowsOmittedByLimit": 67299,
+          "lemmaIndexPrefixes": 47,
+          "contextPrefixes": 1959
+        }
+      }
     },
     {
       "contractId": "rimkute-morphemic-dictionary",

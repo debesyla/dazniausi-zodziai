@@ -138,7 +138,7 @@ export async function verifySourceContracts({ contractPath = defaultContractPath
       if (buffer.byteLength !== file.bytes) fail(`${file.path} byte count mismatch: expected ${file.bytes}, received ${buffer.byteLength}`);
       if (checksum !== file.sha256) fail(`${file.path} checksum mismatch: expected ${file.sha256}, received ${checksum}`);
       if (file.format === 'nvh') verifyNvhFile(file, buffer);
-      else if (!['binary', 'zip-conllu'].includes(file.format)) verifyTextFile(file, buffer);
+      else if (!['binary', 'zip-conllu', 'zip-conllu-treebank'].includes(file.format)) verifyTextFile(file, buffer);
       verifiedFiles += 1;
     }
   }
