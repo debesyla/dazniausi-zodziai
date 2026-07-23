@@ -7,6 +7,7 @@ export type DataProductType =
   | 'chunked-wordform-list'
   | 'chunked-frequency-list'
   | 'chunked-derived-frequency-list'
+  | 'chunked-lexical-collection'
   | 'chunked-comparison'
   | 'metadata-only';
 
@@ -67,6 +68,7 @@ const PRODUCT_TYPES = new Set<DataProductType>([
   'chunked-wordform-list',
   'chunked-frequency-list',
   'chunked-derived-frequency-list',
+  'chunked-lexical-collection',
   'chunked-comparison',
   'metadata-only'
 ]);

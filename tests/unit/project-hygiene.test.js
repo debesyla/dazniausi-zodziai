@@ -40,6 +40,9 @@ describe('project hygiene', () => {
 			'Petkevičius CCLL lemmatised frequency list',
 			'Bielinskienė et al. Delfi.lt 1-gram list',
 			'MATAS v3.0',
+			'Žemrietė Lithuanian homoforms',
+			'Raškinis foreign-name transliteration pairs',
+			'Birvinskaitė Lithuanian basketball slang',
 			'Rimkutė morphemic dictionary',
 			'Utka CCLL word lists',
 			'Utka CCLL2 vs war in Ukraine'
@@ -63,6 +66,9 @@ describe('project hygiene', () => {
 			'utka-ccll2-war-ukraine-comparison',
 			'bielinskiene-2019-delfi-1grams',
 			'rimkute-2024-matas-v3-frequencies',
+			'zemriete-2025-lithuanian-homoforms',
+			'raskinis-2025-foreign-name-transliterations',
+			'birvinskaite-2026-lithuanian-basketball-slang',
 			'rimkute-morphemic-dictionary'
 		]);
 		expect(plan.contractProducts.find((product) => product.contractId === 'rimkute-morphemic-dictionary')).toMatchObject({

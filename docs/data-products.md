@@ -38,6 +38,7 @@ review or test build. The normal command has no hard-coded local source path.
 | `chunked-wordform-list` | Manifest → view `index.json` → chunk files | Arrays; field order is declared in the index | Raw token counts for the CCLL aggregate or one named subcorpus. |
 | `chunked-frequency-list` | Manifest → view `index.json` → chunk files | Arrays; field order is declared in the index | A complete raw frequency list too large for the browser selector, such as the Delfi.lt one-gram list. |
 | `chunked-derived-frequency-list` | Manifest → view `index.json` → chunk files | Arrays; field order is declared in the index | A reproducible aggregation from an annotated source. Derived fields are explicitly marked in the index. |
+| `chunked-lexical-collection` | Manifest → view `index.json` → chunk files | Arrays; field order is declared in the index | A source-specific lexical collection whose fields must not be collapsed into a generic frequency column. |
 | `chunked-comparison` | Manifest → view `index.json` → chunk files | Arrays; field order is declared in the index | Comparison measures whose meaning cannot safely be represented by a generic frequency field. |
 | `metadata-only` | Manifest only | No rows | Source inventory and publication decision for a collection whose rows cannot yet be redistributed. |
 
@@ -75,6 +76,14 @@ assuming the second value is a generic frequency.
 - `rimkute-2024-matas-v3-frequencies` derives separate lemma/POS and
   wordform/POS views from CoNLL-U. Punctuation is excluded and a missing
   source POS is labelled `UNSPECIFIED`.
+- `zemriete-2025-lithuanian-homoforms` publishes every homoform analysis with
+  separate MATAS and component counts in source order.
+- `raskinis-2025-foreign-name-transliterations` publishes every source name
+  pair and match count, without inferring a canonical direction or spelling.
+- `birvinskaite-2026-lithuanian-basketball-slang` publishes every parsed NVH
+  lexical entry with nested source and sense evidence; it is not frequency
+  data, and its 223 stored-file entries remain distinct from the record page's
+  233-entry claim.
 - `rimkute-morphemic-dictionary` has a metadata-only manifest. It deliberately
   contains neither PDF content nor extracted dictionary rows while
   [issue #41](https://github.com/debesyla/dazniausi-zodziai/issues/41) seeks a

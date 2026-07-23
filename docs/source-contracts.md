@@ -29,6 +29,9 @@ copying the raw source repository into the application source tree.
 | `utka-ccll2-war-ukraine-comparison` | Published chunked comparison JSON | Six normalized token/document metrics across three source collections | Null-preserving view with source denominators in every field definition |
 | `bielinskiene-2019-delfi-1grams` | Published chunked frequency JSON | Every raw CSV one-gram and its raw count | CSV quoting, header handling, and integer-valued scientific notation are verified before chunking |
 | `rimkute-2024-matas-v3-frequencies` | Published chunked derived-frequency JSON | Non-punctuation MATAS lemma/POS and wordform/POS frequencies | The original ZIP and its CoNLL-U member are checksummed; derivation totals and record counts are pinned per view |
+| `zemriete-2025-lithuanian-homoforms` | Published chunked lexical JSON | Homoform, lemma, morphology, two separate MATAS-related counts, and type/subtype | The original ZIP and 177,226-row TSV are checksummed; source order is retained because it is not a consistent frequency order |
+| `raskinis-2025-foreign-name-transliterations` | Published chunked lexical JSON | Source left and parenthesized name strings plus a source match count | Every one of 68,167 source lines must match the reviewed pair grammar; source string direction and documented noise remain literal |
+| `birvinskaite-2026-lithuanian-basketball-slang` | Published chunked lexical JSON | Entry, source, senses, definitions, examples, variants, user groups, and compilers | The original ZIP and 2,286-line NVH file are checksummed; parser totals pin 223 entries despite the record page's 233-entry claim |
 | `rimkute-morphemic-dictionary` | Published metadata-only JSON | Citation and source-file inventory only | Licensable machine-readable source and reuse terms, tracked in [issue #41](https://github.com/debesyla/dazniausi-zodziai/issues/41) |
 
 The comparison contracts deliberately have no generic `frequency` field. A
@@ -75,6 +78,26 @@ wordform plus Universal POS. A blank source POS is retained as
 `UNSPECIFIED`, rather than silently dropping the token. The index marks the
 count field as derived and pins the reviewed source-row, output-row, and total
 counts for each view.
+
+## Special lexical collections
+
+The three special lexical products use `chunked-lexical-collection`, rather
+than a generic frequency-list shape. Homoform rows preserve both the source's
+MATAS total and its separate component count; neither is a site-wide rank.
+Foreign-name pairs preserve the source's first and parenthesized strings, and
+their match count is an extraction count from the cited news-source work—not a
+general frequency measure or a spelling decision. The source itself documents
+noise and inconsistent transliteration direction, so the build does not infer
+either.
+
+The basketball collection is parsed from NVH into structured JSON with a
+single source object, one or more senses, and arrays for definitions, examples,
+user groups, variants, and compilers. Blank source fields, blank sense labels,
+and explicitly blank examples are emitted as JSON `null`; all supplied lexical
+evidence is retained. It must never be ranked or labelled
+as frequency data. Its catalogue page says 233 entries, but the retained NVH
+file contains 223 top-level `entry` records; both numbers are pinned in the
+public derivation metadata so the discrepancy is visible rather than hidden.
 
 ## Updating a contract
 

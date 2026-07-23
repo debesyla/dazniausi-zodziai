@@ -303,4 +303,167 @@ describe('public data-product preparation', () => {
     const chunk = JSON.parse(await readFile(path.join(outputRoot, 'onegrams-fixture', 'views', 'all-by-frequency', index.chunks[0].file), 'utf8'));
     expect(chunk.records).toEqual([['ir,', 25], ['kad', 5]]);
   });
+
+  it('publishes source-ordered lexical collections with explicit transliteration and NVH derivations', async () => {
+    const root = await makeDirectory();
+    const sourceRoot = path.join(root, 'sources');
+    const staticRoot = path.join(root, 'static');
+    const outputRoot = path.join(staticRoot, 'data-products');
+    const planPath = path.join(root, 'plan.json');
+    const contractPath = path.join(root, 'contract.json');
+    const transliterations = '2 Aaronas (Aaron)\n1 Maja (Maya)\n';
+    const nvh = [
+      'entry: pirmas',
+      '  source_name: Pirmas šaltinis',
+      '    source_date: 2026-01-01',
+      '    source_URL: https://example.test/first',
+      '  sense: 1',
+      '    definition: Pirmas apibrėžimas.',
+      '    example: Pirmas pavyzdys.',
+      '  user_group: žiūrovai',
+      '  variant: pirmasis',
+      '  entry_compiler: AB',
+      'entry: antras',
+      '  source_name: Antras šaltinis',
+      '    source_date: ',
+      '  sense: ',
+      '    definition: Antras apibrėžimas.',
+      '    example: ',
+      '  entry_compiler: CD',
+      ''
+    ].join('\n');
+    const contract = {
+      schemaVersion: 1,
+      sourceRepository: { repositoryUrl: 'https://example.test/source.git', revision: 'fixture-revision' },
+      contracts: [
+        {
+          id: 'transliteration-fixture',
+          title: 'Transliteration fixture',
+          source: {
+            sourceUrl: 'https://example.test/transliterations',
+            licence: 'CC BY 4.0',
+            citation: 'Fixture transliteration citation',
+            files: [{
+              path: 'transliterations.txt',
+              role: 'source-name-pairs',
+              bytes: Buffer.byteLength(transliterations),
+              rows: 2,
+              sha256: checksum(transliterations),
+              columns: 1
+            }]
+          },
+          delivery: { constraints: ['Keep the source pair direction.'] }
+        },
+        {
+          id: 'nvh-fixture',
+          title: 'NVH fixture',
+          source: {
+            sourceUrl: 'https://example.test/nvh',
+            licence: 'CC BY 4.0',
+            citation: 'Fixture NVH citation',
+            files: [{
+              path: 'lexicon.nvh',
+              role: 'lexical-entries',
+              format: 'nvh',
+              bytes: Buffer.byteLength(nvh),
+              rows: 17,
+              sha256: checksum(nvh)
+            }]
+          },
+          delivery: { constraints: ['Do not rank lexical entries as frequency observations.'] }
+        }
+      ]
+    };
+    const plan = {
+      schemaVersion: 1,
+      title: 'Fixture lexical collections',
+      genericProducts: [],
+      contractProducts: [
+        {
+          contractId: 'transliteration-fixture',
+          productType: 'chunked-lexical-collection',
+          publication: { status: 'published', scope: 'Every fixture pair.', access: 'Chunked JSON.' },
+          views: [{
+            id: 'source-name-pairs',
+            sourceRole: 'source-name-pairs',
+            title: 'Fixture source pairs',
+            description: 'Source order is preserved.',
+            ordering: { field: 'source', direction: 'as-stored' },
+            chunkBytes: 1024,
+            derivation: {
+              type: 'name-transliteration',
+              expectedSummary: { sourceRows: 2, recordCount: 2, totalFrequency: 3 }
+            },
+            fields: [
+              { id: 'sourceLeftName', label: 'First source string', type: 'string', derived: true },
+              { id: 'sourceParenthesizedName', label: 'Parenthesized source string', type: 'string', derived: true },
+              { id: 'sourceMatchCount', label: 'Source match count', type: 'raw-token-count', unit: 'matches', derived: true }
+            ]
+          }]
+        },
+        {
+          contractId: 'nvh-fixture',
+          productType: 'chunked-lexical-collection',
+          publication: { status: 'published', scope: 'Every fixture entry.', access: 'Chunked JSON.' },
+          views: [{
+            id: 'lexical-entries',
+            sourceRole: 'lexical-entries',
+            title: 'Fixture lexical entries',
+            description: 'Source order is preserved.',
+            ordering: { field: 'source', direction: 'as-stored' },
+            chunkBytes: 1024,
+            derivation: {
+              type: 'nvh-lexicon',
+              recordPageEntryCount: 3,
+              expectedSummary: { sourceRows: 17, recordCount: 2, senseCount: 2, definitionCount: 2, exampleCount: 2 }
+            },
+            fields: [
+              { id: 'entry', label: 'Entry', type: 'string', derived: true },
+              { id: 'details', label: 'Lexical details', type: 'lexical-entry-details', derived: true }
+            ]
+          }]
+        }
+      ]
+    };
+
+    await mkdir(sourceRoot, { recursive: true });
+    await Promise.all([
+      writeFile(path.join(sourceRoot, 'transliterations.txt'), transliterations),
+      writeFile(path.join(sourceRoot, 'lexicon.nvh'), nvh),
+      writeJson(planPath, plan),
+      writeJson(contractPath, contract)
+    ]);
+
+    await buildDataProducts({ sourceRoot, staticRoot, outputRoot, planPath, contractPath });
+    await expect(verifyDataProducts({ outputRoot, staticRoot })).resolves.toMatchObject({
+      products: 2,
+      chunkedViews: 2,
+      records: 4
+    });
+
+    const transliterationIndex = JSON.parse(await readFile(path.join(outputRoot, 'transliteration-fixture', 'views', 'source-name-pairs', 'index.json'), 'utf8'));
+    const transliterationChunk = JSON.parse(await readFile(path.join(outputRoot, 'transliteration-fixture', 'views', 'source-name-pairs', transliterationIndex.chunks[0].file), 'utf8'));
+    expect(transliterationChunk.records).toEqual([['Aaronas', 'Aaron', 2], ['Maja', 'Maya', 1]]);
+    expect(transliterationIndex.ordering).toEqual({ field: 'source', direction: 'as-stored' });
+
+    const nvhIndex = JSON.parse(await readFile(path.join(outputRoot, 'nvh-fixture', 'views', 'lexical-entries', 'index.json'), 'utf8'));
+    const nvhChunk = JSON.parse(await readFile(path.join(outputRoot, 'nvh-fixture', 'views', 'lexical-entries', nvhIndex.chunks[0].file), 'utf8'));
+    expect(nvhChunk.records).toEqual([
+      ['pirmas', {
+        source: { name: 'Pirmas šaltinis', date: '2026-01-01', url: 'https://example.test/first' },
+        senses: [{ label: '1', definitions: ['Pirmas apibrėžimas.'], examples: ['Pirmas pavyzdys.'] }],
+        userGroups: ['žiūrovai'],
+        variants: ['pirmasis'],
+        entryCompilers: ['AB']
+      }],
+      ['antras', {
+        source: { name: 'Antras šaltinis', date: null, url: null },
+        senses: [{ label: null, definitions: ['Antras apibrėžimas.'], examples: [null] }],
+        userGroups: [],
+        variants: [],
+        entryCompilers: ['CD']
+      }]
+    ]);
+    expect(nvhIndex.derivation).toMatchObject({ recordPageEntryCount: 3, expectedSummary: { recordCount: 2, exampleCount: 2 } });
+  });
 });
