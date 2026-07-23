@@ -11,6 +11,7 @@
   let selectedDatasetId = $state('');
   const dataProductsCatalog = `${base}/data-products/catalog.json`;
   const methodologyUrl = `${base}/apie`;
+  const coverageProfile = `${base}/zodyno-apreptis`;
 
   let selectedDataset = $derived(catalog?.datasets.find((dataset) => dataset.id === selectedDatasetId));
 
@@ -95,6 +96,7 @@
   <section class="data-products" aria-labelledby="data-products-title">
     <h2 id="data-products-title">{t('dataProductsTitle')}</h2>
     <p>{t('dataProductsDescription')}</p>
+    <p><a href={coverageProfile}>Tyrinėti DML6 žodyno aprėptį pagal dažnumą</a></p>
     <a href={dataProductsCatalog}>{t('openDataProducts')}</a>
   </section>
 </main>

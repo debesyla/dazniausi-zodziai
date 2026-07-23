@@ -25,7 +25,7 @@ copying the raw source repository into the application source tree.
 | Contract | Decision | What it can support | Publication gate |
 | --- | --- | --- | --- |
 | `utka-ccll-wordforms` | Published chunked JSON | Wordform token counts for the aggregate and five named subcorpora | Static manifest, source-order index, and bounded chunks; a future interactive explorer must still meet the budgets below |
-| `dadurkevicius-dml6-vs-jcl-comparison` | Published chunked comparison JSON | JCL token counts, DML6 coverage categories, lemma/POS occurrences, and missing types | Three separate views with explicit fields and labels |
+| `dadurkevicius-dml6-vs-jcl-comparison` | Published chunked comparison JSON and coverage profile | JCL token counts, DML6 coverage categories, lemma/POS occurrences, missing types, and form/token shares by six transparent frequency bands | Three separate views plus a compact, checksum-described profile with on-demand bounded examples |
 | `utka-ccll2-war-ukraine-comparison` | Published chunked comparison JSON | Six normalized token/document metrics across three source collections | Null-preserving view with source denominators in every field definition |
 | `bielinskiene-2019-delfi-1grams` | Published chunked frequency JSON | Every raw CSV one-gram and its raw count | CSV quoting, header handling, and integer-valued scientific notation are verified before chunking |
 | `rimkute-2024-matas-v3-frequencies` | Published chunked derived-frequency JSON | Non-punctuation MATAS lemma/POS and wordform/POS frequencies | The original ZIP and its CoNLL-U member are checksummed; derivation totals and record counts are pinned per view |
@@ -38,6 +38,23 @@ The comparison contracts deliberately have no generic `frequency` field. A
 coverage code is categorical, document counts are not token counts, and a
 normalized count cannot be compared with a raw count without its denominator.
 Missing source metrics remain `null`; they are not converted to zero.
+
+## DML6 coverage profile delivery
+
+The DML6/JCL comparison has a separate public profile for the question “how do
+dictionary coverage categories change across JCL frequency bands?” It has six
+contiguous bands from one occurrence to `1,000+`. Each band reports the number
+of word forms and the JCL token mass for each labelled coverage category.
+Those quantities are intentionally separate: a category's share of forms is
+not necessarily its share of tokens.
+
+The profile manifest is compact and contains no source rows. Selecting a
+band/category fetches at most 50 precomputed examples, ordered by descending
+JCL token count and then wordform. The coverage code is never summed,
+averaged, or treated as a numeric ranking. The builder verifies the source-row
+and token totals before generating the profile; the product verifier checks
+every optional example file's checksum, byte budget, interval, category, and
+order.
 
 ## CCLL delivery and future explorer budget
 

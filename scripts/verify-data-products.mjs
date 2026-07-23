@@ -31,6 +31,7 @@ const CHUNKED_PRODUCT_TYPES = new Set([
   'chunked-derived-frequency-list',
   'chunked-lexical-collection'
 ]);
+const ANALYSIS_PROFILE_TYPES = new Set(['frequency-band-coverage']);
 
 function fail(message) {
   throw new Error(`Data-product verification failed: ${message}`);
@@ -232,6 +233,186 @@ function expectedNullCounts(fields) {
   return Object.fromEntries(fields.filter((field) => field.nullable === true).map((field) => [field.id, 0]));
 }
 
+function validateFrequencyBands(bands, description) {
+  if (!Array.isArray(bands) || bands.length === 0) fail(`${description} is invalid`);
+  const ids = new Set();
+  let previousMaximum = 0;
+  for (const [index, band] of bands.entries()) {
+    if (!isPlainObject(band) || !isSafeId(band.id) || !normalizeString(band.label)
+      || !Number.isSafeInteger(band.minimum) || band.minimum < 1
+      || (band.maximum !== null && (!Number.isSafeInteger(band.maximum) || band.maximum < band.minimum))) {
+      fail(`${description}[${index}] is invalid`);
+    }
+    if (previousMaximum === null) fail(`${description} has a band after an open-ended band`);
+    if (ids.has(band.id) || band.minimum !== previousMaximum + 1) {
+      fail(`${description} must use unique, contiguous bands starting at 1`);
+    }
+    ids.add(band.id);
+    previousMaximum = band.maximum;
+  }
+  if (previousMaximum !== null) fail(`${description} must end with an open-ended band`);
+}
+
+function validateProfileDrilldownFields(fields, description) {
+  if (!Array.isArray(fields) || fields.length !== 2) fail(`${description} is invalid`);
+  const [word, frequency] = fields;
+  if (!isPlainObject(word) || !isSafeFieldId(word.id) || !normalizeString(word.label) || word.type !== 'string'
+    || !isPlainObject(frequency) || !isSafeFieldId(frequency.id) || !normalizeString(frequency.label)
+    || frequency.type !== 'raw-token-count' || !normalizeString(frequency.unit)) {
+    fail(`${description} is invalid`);
+  }
+}
+
+function compareDrilldownRecords(left, right) {
+  if (left[1] !== right[1]) return right[1] - left[1];
+  return left[0] < right[0] ? -1 : left[0] > right[0] ? 1 : 0;
+}
+
+function validateProfileOrdering(ordering, frequencyFieldId, description) {
+  if (!isPlainObject(ordering) || ordering.field !== frequencyFieldId || ordering.direction !== 'descending'
+    || ordering.tieBreak !== 'word-ascending') {
+    fail(`${description} is invalid`);
+  }
+}
+
+function findField(fields, id, type) {
+  return fields.find((field) => field.id === id && field.type === type);
+}
+
+async function verifyFrequencyBandCoverageProfile({ productManifest, productDirectory, descriptor }) {
+  if (!isPlainObject(descriptor) || descriptor.type !== 'frequency-band-coverage' || !isSafeId(descriptor.id) || !normalizeString(descriptor.title)
+    || !normalizeString(descriptor.description) || !normalizeString(descriptor.manifest)) {
+    fail(`${productManifest.id} has an invalid analysis-profile descriptor`);
+  }
+  const profilePath = resolveProductPath(productDirectory, descriptor.manifest, `${productManifest.id}/${descriptor.id} profile`);
+  const profileDirectory = path.dirname(profilePath);
+  const profileBuffer = await readFile(profilePath);
+  const profile = parseJson(profileBuffer, `${productManifest.id}/${descriptor.id} profile`);
+  if (!isPlainObject(profile) || profile.schemaVersion !== 1 || profile.productId !== productManifest.id
+    || profile.profileId !== descriptor.id || profile.profileType !== 'frequency-band-coverage'
+    || profile.title !== descriptor.title || profile.description !== descriptor.description
+    || !isPlainObject(profile.sourceView) || !isSafeId(profile.sourceView.id) || !isSafeId(profile.sourceView.sourceRole)
+    || !isPlainObject(profile.provenance) || !isPlainObject(profile.delivery) || !isPlainObject(profile.drilldown) || !isPlainObject(profile.summary)) {
+    fail(`${productManifest.id}/${descriptor.id} profile is invalid`);
+  }
+  if (!Number.isSafeInteger(profile.delivery.summaryMaxBytes) || profile.delivery.summaryMaxBytes < 1024
+    || profileBuffer.byteLength > profile.delivery.summaryMaxBytes) {
+    fail(`${productManifest.id}/${descriptor.id} profile summary exceeds its delivery budget`);
+  }
+  if (profile.provenance.sourceUrl !== productManifest.provenance?.sourceUrl
+    || profile.provenance.licence !== productManifest.provenance?.licence
+    || profile.provenance.citation !== productManifest.provenance?.citation
+    || !isPlainObject(profile.provenance.sourceFile)) {
+    fail(`${productManifest.id}/${descriptor.id} profile provenance is invalid`);
+  }
+  const sourceView = productManifest.views?.find((view) => view.id === profile.sourceView.id && view.sourceRole === profile.sourceView.sourceRole);
+  if (!sourceView) fail(`${productManifest.id}/${descriptor.id} profile does not reference a published source view`);
+  const sourceIndexPath = resolveProductPath(productDirectory, sourceView.index, `${productManifest.id}/${descriptor.id} source index`);
+  const sourceIndex = parseJson(await readFile(sourceIndexPath), `${productManifest.id}/${descriptor.id} source index`);
+  if (!isPlainObject(sourceIndex) || !Array.isArray(sourceIndex.fields) || !sameObject(profile.provenance.sourceFile, sourceIndex.sourceFile)) {
+    fail(`${productManifest.id}/${descriptor.id} profile source metadata is invalid`);
+  }
+  const wordField = findField(sourceIndex.fields, profile.sourceView.wordField?.id, 'string');
+  const frequencyField = findField(sourceIndex.fields, profile.sourceView.frequencyField?.id, 'raw-token-count');
+  const coverageField = findField(sourceIndex.fields, profile.sourceView.coverageField?.id, 'coverage-code');
+  if (!wordField || !frequencyField || !coverageField || !sameObject(profile.sourceView.wordField, { id: wordField.id, label: wordField.label })
+    || !sameObject(profile.sourceView.frequencyField, { id: frequencyField.id, label: frequencyField.label, unit: frequencyField.unit })
+    || !sameObject(profile.sourceView.coverageField, { id: coverageField.id, label: coverageField.label, values: coverageField.values })) {
+    fail(`${productManifest.id}/${descriptor.id} profile source fields are invalid`);
+  }
+  if (!Number.isSafeInteger(profile.drilldown.limit) || profile.drilldown.limit < 1 || profile.drilldown.limit > 100
+    || !Number.isSafeInteger(profile.drilldown.maxBytes) || profile.drilldown.maxBytes < 1024
+    || profile.drilldown.recordEncoding !== 'array') {
+    fail(`${productManifest.id}/${descriptor.id} profile drill-down metadata is invalid`);
+  }
+  validateProfileDrilldownFields(profile.drilldown.fields, `${productManifest.id}/${descriptor.id} profile drill-down fields`);
+  validateProfileOrdering(profile.drilldown.ordering, frequencyField.id, `${productManifest.id}/${descriptor.id} profile drill-down ordering`);
+  if (!Number.isSafeInteger(profile.summary.sourceRows) || profile.summary.sourceRows < 1
+    || profile.summary.totalTypeCount !== profile.summary.sourceRows
+    || !Number.isSafeInteger(profile.summary.totalTokenCount) || profile.summary.totalTokenCount < 1) {
+    fail(`${productManifest.id}/${descriptor.id} profile summary is invalid`);
+  }
+  if (profile.provenance.sourceFile.rows !== profile.summary.sourceRows) {
+    fail(`${productManifest.id}/${descriptor.id} profile source rows do not reconcile`);
+  }
+  validateFrequencyBands(profile.summary.bands, `${productManifest.id}/${descriptor.id} profile bands`);
+  const coverageCodes = Object.keys(coverageField.values).map(Number).sort((left, right) => left - right);
+  let totalTypeCount = 0;
+  let totalTokenCount = 0;
+  for (const band of profile.summary.bands) {
+    if (!Number.isSafeInteger(band.typeCount) || band.typeCount < 0 || !Number.isSafeInteger(band.tokenCount) || band.tokenCount < 0
+      || !Array.isArray(band.categories) || band.categories.length !== coverageCodes.length) {
+      fail(`${productManifest.id}/${descriptor.id} profile band ${band.id} is invalid`);
+    }
+    const seenCoverageCodes = new Set();
+    let bandTypeCount = 0;
+    let bandTokenCount = 0;
+    for (const category of band.categories) {
+      if (!isPlainObject(category) || !Number.isSafeInteger(category.coverageCode) || !coverageCodes.includes(category.coverageCode)
+        || seenCoverageCodes.has(category.coverageCode) || !Number.isSafeInteger(category.typeCount) || category.typeCount < 0
+        || !Number.isSafeInteger(category.tokenCount) || category.tokenCount < 0 || !isPlainObject(category.drilldown)) {
+        fail(`${productManifest.id}/${descriptor.id} profile category is invalid`);
+      }
+      seenCoverageCodes.add(category.coverageCode);
+      const drilldownDescriptor = category.drilldown;
+      if (!normalizeString(drilldownDescriptor.file) || !Number.isSafeInteger(drilldownDescriptor.records)
+        || drilldownDescriptor.records < 0 || drilldownDescriptor.records > profile.drilldown.limit
+        || !Number.isSafeInteger(drilldownDescriptor.bytes) || drilldownDescriptor.bytes < 1
+        || !/^[a-f0-9]{64}$/.test(drilldownDescriptor.sha256)) {
+        fail(`${productManifest.id}/${descriptor.id} profile drill-down descriptor is invalid`);
+      }
+      const drilldownPath = resolveProductPath(profileDirectory, drilldownDescriptor.file, `${productManifest.id}/${descriptor.id} drill-down`);
+      const buffer = await readFile(drilldownPath);
+      if (buffer.byteLength !== drilldownDescriptor.bytes || buffer.byteLength > profile.drilldown.maxBytes
+        || createHash('sha256').update(buffer).digest('hex') !== drilldownDescriptor.sha256) {
+        fail(`${productManifest.id}/${descriptor.id} profile drill-down bytes are invalid`);
+      }
+      const drilldown = parseJson(buffer, `${productManifest.id}/${descriptor.id} drill-down`);
+      if (!isPlainObject(drilldown) || drilldown.schemaVersion !== 1 || drilldown.productId !== productManifest.id
+        || drilldown.profileId !== descriptor.id || drilldown.bandId !== band.id || drilldown.coverageCode !== category.coverageCode
+        || drilldown.recordEncoding !== 'array' || !sameObject(drilldown.fields, profile.drilldown.fields)
+        || !sameObject(drilldown.ordering, profile.drilldown.ordering) || !Array.isArray(drilldown.records)
+        || drilldown.records.length !== drilldownDescriptor.records) {
+        fail(`${productManifest.id}/${descriptor.id} profile drill-down is invalid`);
+      }
+      let previousRecord = null;
+      for (const record of drilldown.records) {
+        if (!Array.isArray(record) || record.length !== 2 || !normalizeString(record[0])
+          || !Number.isSafeInteger(record[1]) || record[1] < band.minimum
+          || (band.maximum !== null && record[1] > band.maximum)
+          || (previousRecord && compareDrilldownRecords(previousRecord, record) > 0)) {
+          fail(`${productManifest.id}/${descriptor.id} profile drill-down record is invalid`);
+        }
+        previousRecord = record;
+      }
+      bandTypeCount += category.typeCount;
+      bandTokenCount += category.tokenCount;
+    }
+    if (seenCoverageCodes.size !== coverageCodes.length || bandTypeCount !== band.typeCount || bandTokenCount !== band.tokenCount) {
+      fail(`${productManifest.id}/${descriptor.id} profile category totals do not reconcile`);
+    }
+    totalTypeCount += band.typeCount;
+    totalTokenCount += band.tokenCount;
+  }
+  if (totalTypeCount !== profile.summary.totalTypeCount || totalTokenCount !== profile.summary.totalTokenCount) {
+    fail(`${productManifest.id}/${descriptor.id} profile totals do not reconcile`);
+  }
+}
+
+async function verifyAnalysisProfiles({ productManifest, productDirectory }) {
+  if (productManifest.analysisProfiles === undefined) return;
+  if (!Array.isArray(productManifest.analysisProfiles)) fail(`${productManifest.id} analysis profiles are invalid`);
+  const profileIds = new Set();
+  for (const descriptor of productManifest.analysisProfiles) {
+    if (!isPlainObject(descriptor) || !ANALYSIS_PROFILE_TYPES.has(descriptor.type)) {
+      fail(`${productManifest.id} analysis profile is invalid`);
+    }
+    if (profileIds.has(descriptor.id)) fail(`${productManifest.id} has duplicate analysis-profile ids`);
+    profileIds.add(descriptor.id);
+    await verifyFrequencyBandCoverageProfile({ productManifest, productDirectory, descriptor });
+  }
+}
+
 async function verifyGenericProduct({ manifest, productDirectory, staticRoot }) {
   if (!isPlainObject(manifest.content) || manifest.content.format !== 'dazniausi-zodziai-dataset-v1'
     || !normalizeString(manifest.content.file) || !isPlainObject(manifest.content.summary)) {
@@ -373,6 +554,7 @@ export async function verifyDataProducts({ outputRoot = defaultOutputRoot, stati
       result.metadataOnlyProducts += 1;
     } else if (manifest.productType === 'generic-frequency-dataset') {
       const genericResult = await verifyGenericProduct({ manifest, productDirectory, staticRoot: resolvedStaticRoot });
+      await verifyAnalysisProfiles({ productManifest: manifest, productDirectory });
       if (entry.viewCount !== genericResult.viewCount || entry.recordCount !== genericResult.records) {
         fail(`${entry.id} generic catalog counts do not match its content`);
       }
@@ -381,6 +563,7 @@ export async function verifyDataProducts({ outputRoot = defaultOutputRoot, stati
       result.records += genericResult.records;
     } else if (CHUNKED_PRODUCT_TYPES.has(manifest.productType)) {
       const chunkedResult = await verifyChunkedProduct({ manifest, productDirectory });
+      await verifyAnalysisProfiles({ productManifest: manifest, productDirectory });
       if (entry.viewCount !== chunkedResult.viewCount || entry.recordCount !== null) {
         fail(`${entry.id} chunked catalog counts are invalid`);
       }

@@ -103,5 +103,14 @@
         "nullCounts": {}
       }
     }
+  ],
+  "analysisProfiles": [
+    {
+      "id": "dml6-jcl-coverage-by-frequency-band",
+      "type": "frequency-band-coverage",
+      "title": "DML6 coverage by JCL frequency band",
+      "description": "Counts of JCL word forms and their raw token mass in transparent frequency bands, split by labelled DML6 coverage category.",
+      "manifest": "analysis/dml6-jcl-coverage-by-frequency-band/manifest.json"
+    }
   ]
 }
