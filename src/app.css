@@ -45,6 +45,16 @@ input,button,textarea,select {
   font: inherit;
 }
 
+button,
+select,
+input:not([type='checkbox']) {
+  min-height: 44px;
+}
+
+select {
+  height: 44px;
+}
+
 p,h1,h2,h3,h4,h5,h6 {
   overflow-wrap: break-word;
 }

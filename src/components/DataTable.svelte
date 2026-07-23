@@ -86,7 +86,10 @@
 
 <style>
   .table-scroll {
+    max-width: 100%;
+    min-width: 0;
     overflow-x: auto;
+    width: 100%;
   }
 
   table {
