@@ -16,6 +16,8 @@ metadata; larger products are available through the public JSON catalog.
 - Search, filter by part of speech, sort by word/frequency/type, and browse a
   50-row page at a time.
 - Export the complete active filtered and sorted result set as UTF-8 CSV.
+- Explore bounded dependency-relation and sentence contexts from the ALKSNIS
+  v3.0 syntactic treebank at `/sintakse`.
 
 ## Development
 
@@ -77,7 +79,7 @@ Actions** as its source. Pull requests run the separate verification workflow
 in `.github/workflows/verify.yml`. The checked-in public data products are
 verified before each deployment and copied unchanged into the static site.
 Maintainers rebuild them locally from raw source revision
-`5aa69dd8df47c17b21e50ca4b41709159deb1bf0` before updating a product.
+`8ddc7197fa01c3e185bbfc0ac4214ea529ae56c6` before updating a product.
 
 ## Analytics and privacy
 

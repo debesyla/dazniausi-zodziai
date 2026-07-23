@@ -3,7 +3,7 @@
   "contractType": "deferred-source-contracts",
   "sourceRepository": {
     "repositoryUrl": "https://github.com/debesyla/dazniausi-zodziai-sources.git",
-    "revision": "5aa69dd8df47c17b21e50ca4b41709159deb1bf0"
+    "revision": "8ddc7197fa01c3e185bbfc0ac4214ea529ae56c6"
   },
   "contracts": [
     {
@@ -363,6 +363,61 @@
           "Exclude UPOS=PUNCT from both frequency views.",
           "Preserve the Universal POS value; use UNSPECIFIED only where the source field is empty.",
           "Keep lemma and wordform frequencies as separate views."
+        ]
+      }
+    },
+    {
+      "id": "rimkute-2019-alksnis-syntactic-context",
+      "title": "Lithuanian Treebank ALKSNIS v3.0 syntactic contexts",
+      "decision": "publish",
+      "reason": "The reviewed CC BY treebank contains dependency heads, relation labels, sentence identifiers, and source genres. It can support bounded, source-scoped syntax contexts without treating its small annotated sample as a general language-frequency corpus.",
+      "source": {
+        "sourceUrl": "https://clarin-repo.lt/items/a9db057d-de4e-45ee-9645-45f408592d76",
+        "licence": "CC BY 4.0",
+        "citation": "Rimkutė, E., Bielinskienė, A., Kovalevskaitė, J., Boizou, L., Aleksandravičiūtė, G., Brokaitė, K., and Utka, A. 2019. Lithuanian Treebank ALKSNIS. Vytautas Magnus University. CLARIN-LT Repository. https://hdl.handle.net/20.500.11821/21.",
+        "encoding": "utf-8",
+        "entryKind": "syntactic-context",
+        "hasPartOfSpeech": true,
+        "files": [
+          {
+            "path": "alksnis-2019-10-24-lithuanian-treebank/original/Alksnis-3.0.zip",
+            "role": "alksnis-treebank",
+            "format": "zip-conllu-treebank",
+            "bytes": 2713010,
+            "sha256": "95af1a9ba62960d1321f89bc5a6dc9a9fafa71c4c15c62336a469d2896ec84c0",
+            "archiveDirectory": "Alksnis-3.0",
+            "conlluSummary": {
+              "documents": 76,
+              "sentences": 3642,
+              "repositorySentenceClaim": 3643,
+              "integerTokenRows": 70047,
+              "nonPunctuationRows": 57156,
+              "allRelationLabels": 104,
+              "nonPunctuationRelationLabels": 92,
+              "rootRows": 3642,
+              "nonPunctuationRootRows": 2956,
+              "nonRootDependencyRows": 54200,
+              "uncompressedBytes": 6173268,
+              "membersSha256": "33ee2641a906776035ec13d1bc78eb58bdc87c8828da9a4dde91d222a0fa4990"
+            }
+          }
+        ]
+      },
+      "schema": {
+        "key": "source lemma plus a selected dependency role",
+        "derivation": "For every integer-ID non-punctuation CoNLL-U token, retain its source relation, head direction, document, genre, sentence identifier, and sentence text. Roots retain HEAD=0 as ROOT. A selected lemma receives at most the configured source-order examples.",
+        "frequencyField": null
+      },
+      "delivery": {
+        "status": "published-static-json",
+        "mode": "static-prefix-chunked-syntactic-context-json",
+        "constraints": [
+          "Treat ALKSNIS as a finite annotated treebank, not as a generic frequency corpus or a thesaurus.",
+          "Keep source relation labels, dependency direction, source document, genre, and sentence identifier with every displayed context.",
+          "Exclude UPOS=PUNCT from the lemma index, relation summary, and context examples; do not infer a missing linguistic relation.",
+          "Keep roots explicit as HEAD=0 / ROOT rather than inventing a lexical head.",
+          "Do not claim statistically significant genre differences or generic similarity from this source-scoped sample.",
+          "Show at most the documented source-order context limit per lemma and disclose omitted rows."
         ]
       }
     },
