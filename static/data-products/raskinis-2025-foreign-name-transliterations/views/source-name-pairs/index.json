@@ -1,0 +1,126 @@
+{
+  "schemaVersion": 1,
+  "productId": "raskinis-2025-foreign-name-transliterations",
+  "viewId": "source-name-pairs",
+  "recordEncoding": "array",
+  "fields": [
+    {
+      "id": "sourceLeftName",
+      "label": "First source name string",
+      "type": "string",
+      "derived": true
+    },
+    {
+      "id": "sourceParenthesizedName",
+      "label": "Parenthesized source name string",
+      "type": "string",
+      "derived": true
+    },
+    {
+      "id": "sourceMatchCount",
+      "label": "Source match count",
+      "type": "raw-token-count",
+      "unit": "matches in the source corpus extraction",
+      "derived": true
+    }
+  ],
+  "ordering": {
+    "field": "source",
+    "direction": "as-stored"
+  },
+  "sourceFile": {
+    "role": "source-name-pairs",
+    "path": "raskinis-2025-04-23-foreign-name-transliteration/original/data_0.txt",
+    "format": "text",
+    "bytes": 2834637,
+    "sha256": "5b35a574bbc9c1c0f65d8b29a49f7d98acdfa64e54bbc87b326f7c6517db1c27",
+    "rows": 68167,
+    "columns": 1,
+    "archiveMember": "data_0.txt"
+  },
+  "derivation": {
+    "type": "name-transliteration",
+    "expectedSummary": {
+      "sourceRows": 68167,
+      "recordCount": 68167,
+      "totalFrequency": 133254
+    }
+  },
+  "maxChunkBytes": 262144,
+  "summary": {
+    "sourceRows": 68167,
+    "recordCount": 68167,
+    "numericTotals": {
+      "sourceMatchCount": 133254
+    },
+    "nullCounts": {}
+  },
+  "chunks": [
+    {
+      "file": "chunks/000001.json",
+      "records": 6544,
+      "bytes": 262134,
+      "sha256": "605076e3b19123f3f2a9e82dfe6684692492e08d4cca4bcaa6cab74dc66aec93"
+    },
+    {
+      "file": "chunks/000002.json",
+      "records": 6603,
+      "bytes": 262115,
+      "sha256": "43df1cbb110df4c9b68c71173895eecdf3ac8dc839edb828b08da431a11b0d79"
+    },
+    {
+      "file": "chunks/000003.json",
+      "records": 6758,
+      "bytes": 262130,
+      "sha256": "c7a24a368b7e21385953c0de901b4bac8f109c8dac48a6f3cfceb4d92a33abdd"
+    },
+    {
+      "file": "chunks/000004.json",
+      "records": 6486,
+      "bytes": 262104,
+      "sha256": "f5a5f1e06d64d06111f00abae563434d15ae82e2f73d06036fb2311bab8a7fb0"
+    },
+    {
+      "file": "chunks/000005.json",
+      "records": 6611,
+      "bytes": 262113,
+      "sha256": "06b6353ff68ff2787eaf571bc45ce3c2159f6d8a65806a4dcc3d33707bf9a18a"
+    },
+    {
+      "file": "chunks/000006.json",
+      "records": 6741,
+      "bytes": 262104,
+      "sha256": "3ba65c6e60a9ffc3fc8ce6d91c7d8c1c09f3dab6b24a4b57ccf8008720667870"
+    },
+    {
+      "file": "chunks/000007.json",
+      "records": 6529,
+      "bytes": 262137,
+      "sha256": "62c06877180cee28185d971be58f86acd0d212d48643f2eff04727f92da5f0e3"
+    },
+    {
+      "file": "chunks/000008.json",
+      "records": 6646,
+      "bytes": 262130,
+      "sha256": "9fd3b9332ebdb887b024329fb716a64f4532a2977d553f35e87d5f3a2bbbc252"
+    },
+    {
+      "file": "chunks/000009.json",
+      "records": 6633,
+      "bytes": 262135,
+      "sha256": "928c4904a302ff4c7c50a28c825fea3eac36ac3a914e3ef13cb4345c02c28e43"
+    },
+    {
+      "file": "chunks/000010.json",
+      "records": 6639,
+      "bytes": 262124,
+      "sha256": "46e7fa5e3b9fc96cc34e5bae7e39122a18f198f97ec990b76b3052899799ef70"
+    },
+    {
+      "file": "chunks/000011.json",
+      "records": 1977,
+      "bytes": 79694,
+      "sha256": "8486ec5c7503d2b805030283e1c22cc211f5e4e7cd0bc017d374d9bf6c306b53"
+    }
+  ]
+}

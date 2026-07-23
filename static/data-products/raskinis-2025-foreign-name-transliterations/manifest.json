@@ -1,0 +1,64 @@
+{
+  "schemaVersion": 1,
+  "id": "raskinis-2025-foreign-name-transliterations",
+  "title": "Foreign-name transliteration pairs",
+  "productType": "chunked-lexical-collection",
+  "publication": {
+    "status": "published",
+    "scope": "Every reviewed foreign-name pair and source match count from the public source file.",
+    "access": "Static JSON chunks retain the source's left and parenthesized strings without normalizing their direction."
+  },
+  "provenance": {
+    "sourceRepository": {
+      "repositoryUrl": "https://github.com/debesyla/dazniausi-zodziai-sources.git",
+      "revision": "8ddc7197fa01c3e185bbfc0ac4214ea529ae56c6"
+    },
+    "sourceUrl": "https://clarin-repo.lt/items/bf567c29-aa7a-4f0f-ad21-f13ba10e7f7d",
+    "licence": "CC BY 4.0",
+    "citation": "Foreign-name transliteration data. 2025. CLARIN-LT Repository. https://hdl.handle.net/20.500.11821/68.",
+    "files": [
+      {
+        "path": "raskinis-2025-04-23-foreign-name-transliteration/original/data_0.zip",
+        "format": "binary",
+        "bytes": 767551,
+        "sha256": "fa33e4b3169b38f32606406f5b8f65f8eaa47c3d2b790ee0b942e85e379365b4"
+      },
+      {
+        "role": "source-name-pairs",
+        "path": "raskinis-2025-04-23-foreign-name-transliteration/original/data_0.txt",
+        "format": "text",
+        "bytes": 2834637,
+        "sha256": "5b35a574bbc9c1c0f65d8b29a49f7d98acdfa64e54bbc87b326f7c6517db1c27",
+        "rows": 68167,
+        "columns": 1,
+        "archiveMember": "data_0.txt"
+      }
+    ]
+  },
+  "delivery": {
+    "mode": "static-chunked-json",
+    "constraints": [
+      "Expose the two source strings as left and parenthesized fields; do not silently infer a canonical foreign or Lithuanian ordering.",
+      "Treat sourceMatchCount as an extraction match count, not as a general Lithuanian-language frequency.",
+      "Retain the source record order and its documented noise or non-standard transliterations."
+    ]
+  },
+  "views": [
+    {
+      "id": "source-name-pairs",
+      "title": "Foreign-name transliteration source pairs",
+      "description": "Every source-provided pair, kept in source order; sourceMatchCount is not a general word-frequency measure.",
+      "index": "views/source-name-pairs/index.json",
+      "sourceRole": "source-name-pairs",
+      "recordEncoding": "array",
+      "summary": {
+        "sourceRows": 68167,
+        "recordCount": 68167,
+        "numericTotals": {
+          "sourceMatchCount": 133254
+        },
+        "nullCounts": {}
+      }
+    }
+  ]
+}

@@ -13,9 +13,15 @@ metadata; larger products are available through the public JSON catalog.
 - Select a curated dataset from `static/datasets/catalog.json`.
 - Inspect headline totals, top words, rank/frequency, cumulative coverage, and
   source-provided part-of-speech composition.
+- Explore DML6 dictionary coverage across transparent JCL frequency bands,
+  with separate form and token shares plus bounded example lists.
+- Compare an exact word form across CCLL2, wartime media, and wartime social
+  networks without loading the full 2.26-million-row comparison dataset.
 - Search, filter by part of speech, sort by word/frequency/type, and browse a
   50-row page at a time.
 - Export the complete active filtered and sorted result set as UTF-8 CSV.
+- Explore bounded dependency-relation and sentence contexts from the ALKSNIS
+  v3.0 syntactic treebank at `/sintakse`.
 
 ## Development
 
@@ -31,10 +37,17 @@ Run the same checks used for pull requests and GitHub Pages deployment:
 ```bash
 npm run check
 npm test
+npx playwright install chromium firefox webkit # once per machine
+npm run test:browser
+npm run products:verify
 npm run build
 ```
 
-`npm run preview` serves the production build locally.
+`npm run preview` serves the production build locally. The repeatable
+browser-release matrix and deployed-site sign-off steps are in
+[docs/browser-acceptance.md](docs/browser-acceptance.md); use the
+[release-record template](docs/release-record.md) for the final go/no-go
+decision.
 
 ## Dataset maintenance
 
@@ -61,6 +74,10 @@ recreates the checked-in `static/data-products/` artifacts from the pinned
 raw-source snapshot; stage those regenerated JSON files together with their
 contract change. `products:verify` checks every generated manifest and chunk.
 The table's large-list strategy is documented in [docs/scalable-exploration.md](docs/scalable-exploration.md).
+The evidence-based plan for future statistical and contextual explorations is in
+[docs/statistical-exploration-roadmap.md](docs/statistical-exploration-roadmap.md).
+The public visual and interaction baseline is documented in
+[docs/design-system.md](docs/design-system.md).
 
 ## Deployment
 
@@ -70,7 +87,7 @@ Actions** as its source. Pull requests run the separate verification workflow
 in `.github/workflows/verify.yml`. The checked-in public data products are
 verified before each deployment and copied unchanged into the static site.
 Maintainers rebuild them locally from raw source revision
-`5aa69dd8df47c17b21e50ca4b41709159deb1bf0` before updating a product.
+`8ddc7197fa01c3e185bbfc0ac4214ea529ae56c6` before updating a product.
 
 ## Analytics and privacy
 

@@ -11,7 +11,7 @@
   "provenance": {
     "sourceRepository": {
       "repositoryUrl": "https://github.com/debesyla/dazniausi-zodziai-sources.git",
-      "revision": "5aa69dd8df47c17b21e50ca4b41709159deb1bf0"
+      "revision": "8ddc7197fa01c3e185bbfc0ac4214ea529ae56c6"
     },
     "sourceUrl": "https://clarin-repo.lt/items/b03a5f31-cd2b-4035-9c1b-d568e2524e37",
     "licence": "CC BY 4.0",
@@ -102,6 +102,15 @@
         },
         "nullCounts": {}
       }
+    }
+  ],
+  "analysisProfiles": [
+    {
+      "id": "dml6-jcl-coverage-by-frequency-band",
+      "type": "frequency-band-coverage",
+      "title": "DML6 coverage by JCL frequency band",
+      "description": "Counts of JCL word forms and their raw token mass in transparent frequency bands, split by labelled DML6 coverage category.",
+      "manifest": "analysis/dml6-jcl-coverage-by-frequency-band/manifest.json"
     }
   ]
 }

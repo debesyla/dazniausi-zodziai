@@ -1,0 +1,109 @@
+{
+  "schemaVersion": 1,
+  "productId": "rimkute-2019-alksnis-syntactic-context",
+  "viewId": "genres-by-source-order",
+  "recordEncoding": "array",
+  "fields": [
+    {
+      "id": "genreId",
+      "label": "Source genre identifier",
+      "type": "string",
+      "derived": true
+    },
+    {
+      "id": "genre",
+      "label": "Source genre",
+      "type": "string",
+      "derived": true
+    },
+    {
+      "id": "documents",
+      "label": "Documents",
+      "type": "raw-token-count",
+      "unit": "documents",
+      "derived": true
+    },
+    {
+      "id": "sentences",
+      "label": "Sentence IDs",
+      "type": "raw-token-count",
+      "unit": "sentences",
+      "derived": true
+    },
+    {
+      "id": "integerTokenRows",
+      "label": "Integer-ID token rows",
+      "type": "raw-token-count",
+      "unit": "tokens",
+      "derived": true
+    },
+    {
+      "id": "nonPunctuationRows",
+      "label": "Non-punctuation token rows",
+      "type": "raw-token-count",
+      "unit": "tokens",
+      "derived": true
+    },
+    {
+      "id": "relationshipRows",
+      "label": "Annotated relationship rows",
+      "type": "raw-token-count",
+      "unit": "tokens",
+      "derived": true
+    }
+  ],
+  "ordering": {
+    "field": "genreId",
+    "direction": "ascending"
+  },
+  "sourceFile": {
+    "role": "alksnis-treebank",
+    "path": "alksnis-2019-10-24-lithuanian-treebank/original/Alksnis-3.0.zip",
+    "format": "zip-conllu-treebank",
+    "bytes": 2713010,
+    "sha256": "95af1a9ba62960d1321f89bc5a6dc9a9fafa71c4c15c62336a469d2896ec84c0",
+    "archiveDirectory": "Alksnis-3.0",
+    "conlluSummary": {
+      "documents": 76,
+      "sentences": 3642,
+      "repositorySentenceClaim": 3643,
+      "integerTokenRows": 70047,
+      "nonPunctuationRows": 57156,
+      "allRelationLabels": 104,
+      "nonPunctuationRelationLabels": 92,
+      "rootRows": 3642,
+      "nonPunctuationRootRows": 2956,
+      "nonRootDependencyRows": 54200,
+      "uncompressedBytes": 6173268,
+      "membersSha256": "33ee2641a906776035ec13d1bc78eb58bdc87c8828da9a4dde91d222a0fa4990"
+    }
+  },
+  "derivation": {
+    "type": "conllu-treebank-syntax-context",
+    "expectedSummary": {
+      "sourceRows": 76,
+      "recordCount": 6
+    }
+  },
+  "maxChunkBytes": 65536,
+  "summary": {
+    "sourceRows": 76,
+    "recordCount": 6,
+    "numericTotals": {
+      "documents": 76,
+      "sentences": 3642,
+      "integerTokenRows": 70047,
+      "nonPunctuationRows": 57156,
+      "relationshipRows": 57156
+    },
+    "nullCounts": {}
+  },
+  "chunks": [
+    {
+      "file": "chunks/000001.json",
+      "records": 6,
+      "bytes": 623,
+      "sha256": "875b4da9a4d19b3f9de529cab52a46434e3f8fff4d087f2d25fd637c57283dc0"
+    }
+  ]
+}

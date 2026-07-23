@@ -37,6 +37,22 @@ jobs:
       - name: Test
         run: npm test
 
+      - name: Install browser matrix for release tests
+        run: npx playwright install --with-deps chromium firefox webkit
+
+      - name: Test production browser matrix
+        run: npm run test:browser
+
+      - name: Upload browser-test artifacts
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-artifacts
+          path: |
+            playwright-report/
+            test-results/
+          if-no-files-found: ignore
+
       - name: Verify checked-in public data products
         run: npm run products:verify
 

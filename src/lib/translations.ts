@@ -76,6 +76,11 @@ export const translations = {
     
     // Main page
     pageTitle: 'Dažniausi lietuviški žodžiai',
+    exploreData: 'Tyrinėti duomenis',
+    methodologyAndSources: 'Metodika ir šaltiniai',
+    siteNavigation: 'Pagrindinė navigacija',
+    siteIntroduction: 'Tyrinėkite pasirinktų lietuvių kalbos šaltinių žodžių dažnumą. Kiekvieno rinkinio kilmę, licenciją ir ribas rasite metodikos puslapyje.',
+    openMethodology: 'Apie metodiką ir šaltinius',
     selectDataset: 'Pasirinkite duomenis',
     loadingCatalog: 'Kraunamas duomenų katalogas...',
     errorLoadingCatalog: 'Klaida kraunant duomenų katalogą',

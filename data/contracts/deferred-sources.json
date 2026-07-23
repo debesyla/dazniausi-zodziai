@@ -3,7 +3,7 @@
   "contractType": "deferred-source-contracts",
   "sourceRepository": {
     "repositoryUrl": "https://github.com/debesyla/dazniausi-zodziai-sources.git",
-    "revision": "5aa69dd8df47c17b21e50ca4b41709159deb1bf0"
+    "revision": "8ddc7197fa01c3e185bbfc0ac4214ea529ae56c6"
   },
   "contracts": [
     {
@@ -27,9 +27,17 @@
             "rows": 1733157,
             "sha256": "541c4bac1d1741b610fef1d0ba63df11c754f6037b2831a728165e01d352e601",
             "columns": 2,
-            "numericColumns": [1],
-            "numericTotals": { "1": 123451211 },
-            "samples": ["ir\t4452765", "kad\t1260878", "į\t1158672"]
+            "numericColumns": [
+              1
+            ],
+            "numericTotals": {
+              "1": 123451211
+            },
+            "samples": [
+              "ir\t4452765",
+              "kad\t1260878",
+              "į\t1158672"
+            ]
           },
           {
             "path": "utka-2016-11-17-CCLL-Wordlists/original/byalphabet-2022/freq-visas-abc.txt",
@@ -39,9 +47,17 @@
             "sha256": "58baa109d29b8910b888346ad89524efe0b1694c33c277d4f80e6dd52e0c5d84",
             "columns": 2,
             "delimiter": " ",
-            "numericColumns": [1],
-            "numericTotals": { "1": 123451211 },
-            "samples": ["a 302051", "aa 936", "aaa 413"]
+            "numericColumns": [
+              1
+            ],
+            "numericTotals": {
+              "1": 123451211
+            },
+            "samples": [
+              "a 302051",
+              "aa 936",
+              "aaa 413"
+            ]
           },
           {
             "path": "utka-2016-11-17-CCLL-Wordlists/original/byfrequency-2022/freq-grozine-dzn.txt",
@@ -50,9 +66,15 @@
             "rows": 575736,
             "sha256": "0a2650da314d3b6deddb266f30d66dcf201dec39a8303bb283cc9bab0de3f262",
             "columns": 2,
-            "numericColumns": [1],
-            "numericTotals": { "1": 15535386 },
-            "samples": ["ir\t600403"]
+            "numericColumns": [
+              1
+            ],
+            "numericTotals": {
+              "1": 15535386
+            },
+            "samples": [
+              "ir\t600403"
+            ]
           },
           {
             "path": "utka-2016-11-17-CCLL-Wordlists/original/byfrequency-2022/freq-negrozine-dzn.txt",
@@ -61,9 +83,15 @@
             "rows": 644314,
             "sha256": "0684ecbe43ba16b294f0d0ceee442b2ec53a2c6da8d46ea8e63dfea5dffd3fbe",
             "columns": 2,
-            "numericColumns": [1],
-            "numericTotals": { "1": 19993171 },
-            "samples": ["ir\t809226"]
+            "numericColumns": [
+              1
+            ],
+            "numericTotals": {
+              "1": 19993171
+            },
+            "samples": [
+              "ir\t809226"
+            ]
           },
           {
             "path": "utka-2016-11-17-CCLL-Wordlists/original/byfrequency-2022/freq-administracine-dzn.txt",
@@ -72,9 +100,15 @@
             "rows": 229446,
             "sha256": "82a81a00c4cda21041d657690b9b6f80a5b1136dd248f0868ff15fe567ece191",
             "columns": 2,
-            "numericColumns": [1],
-            "numericTotals": { "1": 11190519 },
-            "samples": ["ir\t388801"]
+            "numericColumns": [
+              1
+            ],
+            "numericTotals": {
+              "1": 11190519
+            },
+            "samples": [
+              "ir\t388801"
+            ]
           },
           {
             "path": "utka-2016-11-17-CCLL-Wordlists/original/byfrequency-2022/freq-publicistika-dzn.txt",
@@ -83,9 +117,15 @@
             "rows": 1296174,
             "sha256": "81818db84086cdd9f08478825410ce44ddba84630cb96e095a1bde1aa1aa46ac",
             "columns": 2,
-            "numericColumns": [1],
-            "numericTotals": { "1": 76242095 },
-            "samples": ["ir\t2638014"]
+            "numericColumns": [
+              1
+            ],
+            "numericTotals": {
+              "1": 76242095
+            },
+            "samples": [
+              "ir\t2638014"
+            ]
           },
           {
             "path": "utka-2016-11-17-CCLL-Wordlists/original/byfrequency-2022/freq-sakytine-dzn.txt",
@@ -94,17 +134,34 @@
             "rows": 53878,
             "sha256": "342f3cd227fc6bca6e8e4197a8a1a833b281571650a7b46f71c129f59b54f092",
             "columns": 2,
-            "numericColumns": [1],
-            "numericTotals": { "1": 490040 },
-            "samples": ["ir\t16321"]
+            "numericColumns": [
+              1
+            ],
+            "numericTotals": {
+              "1": 490040
+            },
+            "samples": [
+              "ir\t16321"
+            ]
           }
         ]
       },
       "schema": {
         "key": "word",
         "columns": [
-          { "id": "word", "label": "Word form", "type": "string", "sourceColumn": 0 },
-          { "id": "count", "label": "Token count", "type": "raw-token-count", "sourceColumn": 1, "nullable": false }
+          {
+            "id": "word",
+            "label": "Word form",
+            "type": "string",
+            "sourceColumn": 0
+          },
+          {
+            "id": "count",
+            "label": "Token count",
+            "type": "raw-token-count",
+            "sourceColumn": 1,
+            "nullable": false
+          }
         ],
         "frequencyField": null,
         "sourceOrdering": {
@@ -119,8 +176,18 @@
         "initialChunkBytesBudget": 65536,
         "maxMainThreadRows": 50,
         "interactionP95Milliseconds": 100,
-        "operations": ["search", "sort-by-frequency", "sort-alphabetically", "rank", "paginate", "export"],
-        "indexes": ["frequency-descending", "alphabetical-prefix"],
+        "operations": [
+          "search",
+          "sort-by-frequency",
+          "sort-alphabetically",
+          "rank",
+          "paginate",
+          "export"
+        ],
+        "indexes": [
+          "frequency-descending",
+          "alphabetical-prefix"
+        ],
         "constraints": [
           "Fetch the aggregate or one selected subcorpus only after selection.",
           "Use the published manifest and view index before requesting individual chunks.",
@@ -148,11 +215,34 @@
             "rows": 4968125,
             "sha256": "6a67d41b3004209c535e711b65ec943e338a6ac02b58256ffbb104ac419445e1",
             "columns": 3,
-            "numericColumns": [1, 2],
-            "numericTotals": { "1": 1334845080 },
-            "allowedValues": { "2": [0, 1, 2, 3] },
-            "valueCounts": { "2": { "0": 3715755, "1": 1240106, "2": 12153, "3": 111 } },
-            "samples": ["ir\t40854832\t1", "kad\t11790884\t1", "į\t9317347\t1"]
+            "numericColumns": [
+              1,
+              2
+            ],
+            "numericTotals": {
+              "1": 1334845080
+            },
+            "allowedValues": {
+              "2": [
+                0,
+                1,
+                2,
+                3
+              ]
+            },
+            "valueCounts": {
+              "2": {
+                "0": 3715755,
+                "1": 1240106,
+                "2": 12153,
+                "3": 111
+              }
+            },
+            "samples": [
+              "ir\t40854832\t1",
+              "kad\t11790884\t1",
+              "į\t9317347\t1"
+            ]
           },
           {
             "path": "dadurkevicius-2020-06-30-DML6_vs_JCL/original/DML6_lemmas_vs_JCL.txt",
@@ -161,10 +251,33 @@
             "rows": 85893,
             "sha256": "93e4c3583366d792937d118b662f7d2115d54098bf9bc4097c4bc9ef1040159e",
             "columns": 3,
-            "numericColumns": [2],
-            "numericTotals": { "2": 1607796536 },
-            "allowedValues": { "1": ["A", "C", "I", "M", "N", "O", "P", "Q", "R", "S", "V", "Y"] },
-            "samples": ["a\tI\t3651148", "a\tQ\t3651148", "ą\tQ\t102649"]
+            "numericColumns": [
+              2
+            ],
+            "numericTotals": {
+              "2": 1607796536
+            },
+            "allowedValues": {
+              "1": [
+                "A",
+                "C",
+                "I",
+                "M",
+                "N",
+                "O",
+                "P",
+                "Q",
+                "R",
+                "S",
+                "V",
+                "Y"
+              ]
+            },
+            "samples": [
+              "a\tI\t3651148",
+              "a\tQ\t3651148",
+              "ą\tQ\t102649"
+            ]
           },
           {
             "path": "dadurkevicius-2020-06-30-DML6_vs_JCL/original/JCL_types_missing_in_DML6_(filtered_list).txt",
@@ -173,9 +286,17 @@
             "rows": 254726,
             "sha256": "befafd13559f4f8f633e46f4b15d96a6b4404f3cf0a330b0ddb65b4425707f45",
             "columns": 2,
-            "numericColumns": [1],
-            "numericTotals": { "1": 19727931 },
-            "samples": ["šiek\t175933", "žymos\t161164", "km\t155771"]
+            "numericColumns": [
+              1
+            ],
+            "numericTotals": {
+              "1": 19727931
+            },
+            "samples": [
+              "šiek\t175933",
+              "žymos\t161164",
+              "km\t155771"
+            ]
           }
         ]
       },
@@ -196,7 +317,12 @@
             "label": "DML6 coverage",
             "type": "coverage-code",
             "unit": "category",
-            "values": { "0": "not in DML6", "1": "main entry", "2": "geographic name", "3": "abbreviation" }
+            "values": {
+              "0": "not in DML6",
+              "1": "main entry",
+              "2": "geographic name",
+              "3": "abbreviation"
+            }
           },
           {
             "id": "jclLemmaOccurrenceCount",
@@ -235,10 +361,38 @@
             "rows": 2264779,
             "sha256": "2513dc5dedc0a11e4e2856a54ca27fbc2046aaf3560259c4a9aed66170e9d3ed",
             "columns": 7,
-            "numericColumns": [1, 2, 3, 4, 5, 6],
-            "nullableColumns": [1, 2, 3, 4, 5, 6],
-            "numericTotals": { "1": 99786439, "2": 30661534, "3": 99629711, "4": 62758948, "5": 95981354, "6": 67522568 },
-            "missingCounts": { "1": 151388, "2": 151388, "3": 1663115, "4": 1663115, "5": 2130518, "6": 2130518 },
+            "numericColumns": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ],
+            "nullableColumns": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ],
+            "numericTotals": {
+              "1": 99786439,
+              "2": 30661534,
+              "3": 99629711,
+              "4": 62758948,
+              "5": 95981354,
+              "6": 67522568
+            },
+            "missingCounts": {
+              "1": 151388,
+              "2": 151388,
+              "3": 1663115,
+              "4": 1663115,
+              "5": 2130518,
+              "6": 2130518
+            },
             "samples": [
               "IR\t3414819\t4992\t3099414\t223816\t3572546\t221725",
               "HRS\t1\t1\t\t\t42408\t42408",
@@ -252,12 +406,60 @@
         "comparisonOnly": true,
         "frequencyField": null,
         "metrics": [
-          { "id": "ccll2Count", "label": "CCLL2 normalized token count", "type": "normalized-token-count", "unit": "tokens per 100 million source words", "nullable": true, "sourceTokens": 162000000, "targetTokens": 100000000 },
-          { "id": "ccll2Documents", "label": "CCLL2 normalized document count", "type": "normalized-document-count", "unit": "documents per 100 million source words", "nullable": true, "sourceTokens": 162000000, "targetTokens": 100000000 },
-          { "id": "mediaCount", "label": "Wartime media normalized token count", "type": "normalized-token-count", "unit": "tokens per 100 million source words", "nullable": true, "sourceTokens": 36000000, "targetTokens": 100000000 },
-          { "id": "mediaDocuments", "label": "Wartime media normalized document count", "type": "normalized-document-count", "unit": "documents per 100 million source words", "nullable": true, "sourceTokens": 36000000, "targetTokens": 100000000 },
-          { "id": "socialCount", "label": "Wartime social-network normalized token count", "type": "normalized-token-count", "unit": "tokens per 100 million source words", "nullable": true, "sourceTokens": 2000000, "targetTokens": 100000000 },
-          { "id": "socialDocuments", "label": "Wartime social-network normalized document count", "type": "normalized-document-count", "unit": "documents per 100 million source words", "nullable": true, "sourceTokens": 2000000, "targetTokens": 100000000 }
+          {
+            "id": "ccll2Count",
+            "label": "CCLL2 normalized token count",
+            "type": "normalized-token-count",
+            "unit": "tokens per 100 million source words",
+            "nullable": true,
+            "sourceTokens": 162000000,
+            "targetTokens": 100000000
+          },
+          {
+            "id": "ccll2Documents",
+            "label": "CCLL2 normalized document count",
+            "type": "normalized-document-count",
+            "unit": "documents per 100 million source words",
+            "nullable": true,
+            "sourceTokens": 162000000,
+            "targetTokens": 100000000
+          },
+          {
+            "id": "mediaCount",
+            "label": "Wartime media normalized token count",
+            "type": "normalized-token-count",
+            "unit": "tokens per 100 million source words",
+            "nullable": true,
+            "sourceTokens": 36000000,
+            "targetTokens": 100000000
+          },
+          {
+            "id": "mediaDocuments",
+            "label": "Wartime media normalized document count",
+            "type": "normalized-document-count",
+            "unit": "documents per 100 million source words",
+            "nullable": true,
+            "sourceTokens": 36000000,
+            "targetTokens": 100000000
+          },
+          {
+            "id": "socialCount",
+            "label": "Wartime social-network normalized token count",
+            "type": "normalized-token-count",
+            "unit": "tokens per 100 million source words",
+            "nullable": true,
+            "sourceTokens": 2000000,
+            "targetTokens": 100000000
+          },
+          {
+            "id": "socialDocuments",
+            "label": "Wartime social-network normalized document count",
+            "type": "normalized-document-count",
+            "unit": "documents per 100 million source words",
+            "nullable": true,
+            "sourceTokens": 2000000,
+            "targetTokens": 100000000
+          }
         ]
       },
       "delivery": {
@@ -294,20 +496,41 @@
             "delimiter": ",",
             "hasHeader": true,
             "columns": 2,
-            "numericColumns": [1],
-            "numericTotals": { "1": 72883351 },
-            "samples": ["ir,2.167369e+06", "kad,903754", "yra,446639"]
+            "numericColumns": [
+              1
+            ],
+            "numericTotals": {
+              "1": 72883351
+            },
+            "samples": [
+              "ir,2.167369e+06",
+              "kad,903754",
+              "yra,446639"
+            ]
           }
         ]
       },
       "schema": {
         "key": "word",
         "columns": [
-          { "id": "word", "label": "Word form", "type": "string", "sourceColumn": 0 },
-          { "id": "count", "label": "Token count", "type": "raw-token-count", "sourceColumn": 1, "nullable": false }
+          {
+            "id": "word",
+            "label": "Word form",
+            "type": "string",
+            "sourceColumn": 0
+          },
+          {
+            "id": "count",
+            "label": "Token count",
+            "type": "raw-token-count",
+            "sourceColumn": 1,
+            "nullable": false
+          }
         ],
         "frequencyField": "count",
-        "sourceOrdering": { "frequency": "descending" }
+        "sourceOrdering": {
+          "frequency": "descending"
+        }
       },
       "delivery": {
         "status": "published-static-json",
@@ -367,6 +590,230 @@
       }
     },
     {
+      "id": "zemriete-2025-lithuanian-homoforms",
+      "title": "Lithuanian homoforms",
+      "decision": "publish",
+      "reason": "The public CC BY 4.0 TSV is a complete, structured homoform inventory. Its MATAS frequency and per-component frequency are retained as distinct source metrics rather than recast as one generic word-frequency ranking.",
+      "source": {
+        "sourceUrl": "https://clarin-repo.lt/items/c5e06f7b-364d-46e8-b4e8-6e5d48a0d2c3",
+        "licence": "CC BY 4.0",
+        "citation": "Lithuanian Homoforms. 2025. CLARIN-LT Repository. https://hdl.handle.net/20.500.11821/75.",
+        "encoding": "utf-8",
+        "entryKind": "homoform-analysis",
+        "files": [
+          {
+            "path": "zemriete-2025-11-18-lithuanian-homoforms/original/Homoformos_2025-11-01.zip",
+            "format": "binary",
+            "bytes": 1184321,
+            "sha256": "d15a8a4447dad4e0205210d9e944d6ad287fe628323e701cd5e45b5aac89492c"
+          },
+          {
+            "path": "zemriete-2025-11-18-lithuanian-homoforms/original/Homoformos_2025-11-01.tsv",
+            "role": "homoform-records",
+            "bytes": 17351074,
+            "rows": 177226,
+            "sha256": "a72e2fbb784df0ba6c597a79f23ab885277eab7ecf441ef887aee824fab89d9d",
+            "hasHeader": true,
+            "columns": 17,
+            "numericColumns": [
+              3,
+              4
+            ],
+            "numericTotals": {
+              "3": 2419451,
+              "4": 843500
+            },
+            "nullableColumns": [
+              2
+            ],
+            "missingCounts": {
+              "2": 1
+            },
+            "archiveMember": "Homoformos_2025-11-01.tsv"
+          }
+        ]
+      },
+      "schema": {
+        "key": "homoform plus lemma plus morphology",
+        "frequencyField": null,
+        "metrics": [
+          {
+            "id": "matasFrequency",
+            "label": "MATAS frequency",
+            "type": "raw-token-count",
+            "unit": "tokens in MATAS"
+          },
+          {
+            "id": "homoformComponentFrequency",
+            "label": "Homoform component frequency",
+            "type": "raw-token-count",
+            "unit": "tokens in the source component"
+          }
+        ]
+      },
+      "delivery": {
+        "status": "published-static-json",
+        "mode": "static-chunked-lexical-json",
+        "constraints": [
+          "Keep the source's homoform, lemma, morphology, and type/subtype strings distinct.",
+          "Keep MATAS frequency and component frequency as separate raw source metrics.",
+          "Retain the source record order; it is not a consistently descending frequency ranking."
+        ]
+      }
+    },
+    {
+      "id": "raskinis-2025-foreign-name-transliterations",
+      "title": "Foreign-name transliteration pairs",
+      "decision": "publish",
+      "reason": "The public CC BY 4.0 text file is a complete, reproducibly parseable list of source name pairs and source match counts. Source ordering and pair direction are retained literally because the source record warns about noise and inconsistent transliterations.",
+      "source": {
+        "sourceUrl": "https://clarin-repo.lt/items/bf567c29-aa7a-4f0f-ad21-f13ba10e7f7d",
+        "licence": "CC BY 4.0",
+        "citation": "Foreign-name transliteration data. 2025. CLARIN-LT Repository. https://hdl.handle.net/20.500.11821/68.",
+        "encoding": "utf-8",
+        "entryKind": "source-name-pair",
+        "files": [
+          {
+            "path": "raskinis-2025-04-23-foreign-name-transliteration/original/data_0.zip",
+            "format": "binary",
+            "bytes": 767551,
+            "sha256": "fa33e4b3169b38f32606406f5b8f65f8eaa47c3d2b790ee0b942e85e379365b4"
+          },
+          {
+            "path": "raskinis-2025-04-23-foreign-name-transliteration/original/data_0.txt",
+            "role": "source-name-pairs",
+            "bytes": 2834637,
+            "rows": 68167,
+            "sha256": "5b35a574bbc9c1c0f65d8b29a49f7d98acdfa64e54bbc87b326f7c6517db1c27",
+            "columns": 1,
+            "archiveMember": "data_0.txt"
+          }
+        ]
+      },
+      "schema": {
+        "key": "source-provided name pair",
+        "frequencyField": null,
+        "metrics": [
+          {
+            "id": "sourceMatchCount",
+            "label": "Source match count",
+            "type": "raw-token-count",
+            "unit": "matches in the source corpus extraction"
+          }
+        ]
+      },
+      "delivery": {
+        "status": "published-static-json",
+        "mode": "static-chunked-lexical-json",
+        "constraints": [
+          "Expose the two source strings as left and parenthesized fields; do not silently infer a canonical foreign or Lithuanian ordering.",
+          "Treat sourceMatchCount as an extraction match count, not as a general Lithuanian-language frequency.",
+          "Retain the source record order and its documented noise or non-standard transliterations."
+        ]
+      }
+    },
+    {
+      "id": "birvinskaite-2026-lithuanian-basketball-slang",
+      "title": "Lithuanian basketball slang lexical database",
+      "decision": "publish",
+      "reason": "The public CC BY 4.0 NVH lexical database is fully parseable into entries, source metadata, senses, definitions, examples, variants, and compiler fields. It is a crowdsourced lexicon, not a corpus frequency dataset.",
+      "source": {
+        "sourceUrl": "https://clarin-repo.lt/items/6c15e277-4bc5-4a3f-a0c1-16d00aa8a4f6",
+        "licence": "CC BY 4.0",
+        "citation": "Lithuanian Basketball Slang Lexical Database. 2026. CLARIN-LT Repository. https://hdl.handle.net/20.500.11821/81.",
+        "encoding": "utf-8",
+        "entryKind": "lexical-entry",
+        "files": [
+          {
+            "path": "birvinskaite-2026-02-23-lithuanian-basketball-slang/original/Krepsinio_zargono_leksine_baze_2026-02-23_versija.zip",
+            "format": "binary",
+            "bytes": 16587,
+            "sha256": "73fc11e97a7c82d73b793cd06c8faff37c3f2eaa60cafeb02e6782320e823ee0"
+          },
+          {
+            "path": "birvinskaite-2026-02-23-lithuanian-basketball-slang/original/Krepsinio_zargono_leksine_baze_2026-02-23_versija.nvh",
+            "role": "basketball-slang-entries",
+            "format": "nvh",
+            "bytes": 79501,
+            "rows": 2286,
+            "sha256": "59148e9853d57b4cfd8d73490e3c6f9b3ed94bd67bdb434607086331787419da",
+            "archiveMember": "Krepsinio_zargono_leksine_baze_2026-02-23_versija.nvh"
+          }
+        ]
+      },
+      "schema": {
+        "key": "entry",
+        "frequencyField": null,
+        "recordPageEntryCount": 233,
+        "storedFileEntryCount": 223,
+        "details": "source, senses, definitions, examples, user groups, variants, and entry compilers"
+      },
+      "delivery": {
+        "status": "published-static-json",
+        "mode": "static-chunked-lexical-json",
+        "constraints": [
+          "Do not present entries as corpus-frequency observations or rank them by popularity.",
+          "Preserve source, definition, example, variant, user-group, and compiler information where supplied.",
+          "Report 223 parsed top-level entries from the stored NVH file and preserve the source-record page's separate 233-entry claim."
+        ]
+      }
+    },
+    {
+      "id": "rimkute-2019-alksnis-syntactic-context",
+      "title": "Lithuanian Treebank ALKSNIS v3.0 syntactic contexts",
+      "decision": "publish",
+      "reason": "The reviewed CC BY treebank contains dependency heads, relation labels, sentence identifiers, and source genres. It can support bounded, source-scoped syntax contexts without treating its small annotated sample as a general language-frequency corpus.",
+      "source": {
+        "sourceUrl": "https://clarin-repo.lt/items/a9db057d-de4e-45ee-9645-45f408592d76",
+        "licence": "CC BY 4.0",
+        "citation": "Rimkutė, E., Bielinskienė, A., Kovalevskaitė, J., Boizou, L., Aleksandravičiūtė, G., Brokaitė, K., and Utka, A. 2019. Lithuanian Treebank ALKSNIS. Vytautas Magnus University. CLARIN-LT Repository. https://hdl.handle.net/20.500.11821/21.",
+        "encoding": "utf-8",
+        "entryKind": "syntactic-context",
+        "hasPartOfSpeech": true,
+        "files": [
+          {
+            "path": "alksnis-2019-10-24-lithuanian-treebank/original/Alksnis-3.0.zip",
+            "role": "alksnis-treebank",
+            "format": "zip-conllu-treebank",
+            "bytes": 2713010,
+            "sha256": "95af1a9ba62960d1321f89bc5a6dc9a9fafa71c4c15c62336a469d2896ec84c0",
+            "archiveDirectory": "Alksnis-3.0",
+            "conlluSummary": {
+              "documents": 76,
+              "sentences": 3642,
+              "repositorySentenceClaim": 3643,
+              "integerTokenRows": 70047,
+              "nonPunctuationRows": 57156,
+              "allRelationLabels": 104,
+              "nonPunctuationRelationLabels": 92,
+              "rootRows": 3642,
+              "nonPunctuationRootRows": 2956,
+              "nonRootDependencyRows": 54200,
+              "uncompressedBytes": 6173268,
+              "membersSha256": "33ee2641a906776035ec13d1bc78eb58bdc87c8828da9a4dde91d222a0fa4990"
+            }
+          }
+        ]
+      },
+      "schema": {
+        "key": "source lemma plus a selected dependency role",
+        "derivation": "For every integer-ID non-punctuation CoNLL-U token, retain its source relation, head direction, document, genre, sentence identifier, and sentence text. Roots retain HEAD=0 as ROOT. A selected lemma receives at most the configured source-order examples.",
+        "frequencyField": null
+      },
+      "delivery": {
+        "status": "published-static-json",
+        "mode": "static-prefix-chunked-syntactic-context-json",
+        "constraints": [
+          "Treat ALKSNIS as a finite annotated treebank, not as a generic frequency corpus or a thesaurus.",
+          "Keep source relation labels, dependency direction, source document, genre, and sentence identifier with every displayed context.",
+          "Exclude UPOS=PUNCT from the lemma index, relation summary, and context examples; do not infer a missing linguistic relation.",
+          "Keep roots explicit as HEAD=0 / ROOT rather than inventing a lexical head.",
+          "Do not claim statistically significant genre differences or generic similarity from this source-scoped sample.",
+          "Show at most the documented source-order context limit per lemma and disclose omitted rows."
+        ]
+      }
+    },
+    {
       "id": "rimkute-morphemic-dictionary",
       "title": "Dažninis lietuvių kalbos morfemikos žodynas",
       "decision": "metadata-only",
@@ -376,16 +823,33 @@
         "licence": "unresolved",
         "citation": "Rimkutė, E., Kazlauskienė, A., Raškinis, G. 2011. Dažninis lietuvių kalbos morfemikos žodynas.",
         "files": [
-          { "path": "rimkute-2011-dazninis-morfemikos-zodynas/original/Dažninis lietuvių kalbos morfemikos žodynas (Rimkutė E., Kazlauskienė A., Raškinis G.).pdf", "format": "binary", "bytes": 2404144, "sha256": "982b0080e08b314246d2aa0995248bf10a6b0d9a1424b593d56e410e34547dfa" },
-          { "path": "rimkute-2011-dazninis-morfemikos-zodynas/original/Dažninis lietuvių kalbos morfemikos žodynas. II dalis (Rimkutė Erika, Kazlauskienė Asta etc.).pdf", "format": "binary", "bytes": 1065088, "sha256": "546ada8c3e99cd978b25e4edcadc7958d4f6c0ecf38bc3ee4825db767838cdbc" },
-          { "path": "rimkute-2011-dazninis-morfemikos-zodynas/original/Dažninis lietuvių kalbos morfemikos žodynas. III dalis (Rimkutė Erika, Kazlauskienė Asta etc.).pdf", "format": "binary", "bytes": 2670927, "sha256": "016f23e6bffba91ee53de74871793221177091fd8e950c60901e921efd6f266e" }
+          {
+            "path": "rimkute-2011-dazninis-morfemikos-zodynas/original/Dažninis lietuvių kalbos morfemikos žodynas (Rimkutė E., Kazlauskienė A., Raškinis G.).pdf",
+            "format": "binary",
+            "bytes": 2404144,
+            "sha256": "982b0080e08b314246d2aa0995248bf10a6b0d9a1424b593d56e410e34547dfa"
+          },
+          {
+            "path": "rimkute-2011-dazninis-morfemikos-zodynas/original/Dažninis lietuvių kalbos morfemikos žodynas. II dalis (Rimkutė Erika, Kazlauskienė Asta etc.).pdf",
+            "format": "binary",
+            "bytes": 1065088,
+            "sha256": "546ada8c3e99cd978b25e4edcadc7958d4f6c0ecf38bc3ee4825db767838cdbc"
+          },
+          {
+            "path": "rimkute-2011-dazninis-morfemikos-zodynas/original/Dažninis lietuvių kalbos morfemikos žodynas. III dalis (Rimkutė Erika, Kazlauskienė Asta etc.).pdf",
+            "format": "binary",
+            "bytes": 2670927,
+            "sha256": "016f23e6bffba91ee53de74871793221177091fd8e950c60901e921efd6f266e"
+          }
         ]
       },
       "schema": null,
       "delivery": {
         "status": "metadata-only-published",
         "mode": "manifest-only",
-        "constraints": ["Do not extract, publish, or add the PDFs or dictionary rows to the web catalog until machine-readable provenance and reuse terms are reviewed in issue #41."]
+        "constraints": [
+          "Do not extract, publish, or add the PDFs or dictionary rows to the web catalog until machine-readable provenance and reuse terms are reviewed in issue #41."
+        ]
       }
     }
   ]

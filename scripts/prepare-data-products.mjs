@@ -1,7 +1,7 @@
 import { createHash } from 'node:crypto';
 import { spawn } from 'node:child_process';
 import { createReadStream } from 'node:fs';
-import { mkdir, readFile, realpath, rm, writeFile } from 'node:fs/promises';
+import { appendFile, mkdir, readFile, realpath, rm, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { createInterface } from 'node:readline';
 import { fileURLToPath } from 'node:url';
@@ -17,6 +17,7 @@ const defaultOutputRoot = path.join(defaultStaticRoot, 'data-products');
 const FIELD_TYPES = new Set([
   'string',
   'source-pos-code',
+  'lexical-entry-details',
   'raw-token-count',
   'normalized-token-count',
   'normalized-document-count',
@@ -37,8 +38,12 @@ const CHUNKED_PRODUCT_TYPES = new Set([
   'chunked-wordform-list',
   'chunked-comparison',
   'chunked-frequency-list',
-  'chunked-derived-frequency-list'
+  'chunked-derived-frequency-list',
+  'chunked-lexical-collection',
+  'chunked-syntactic-context'
 ]);
+const ANALYSIS_PROFILE_TYPES = new Set(['frequency-band-coverage', 'normalized-contrast-lookup']);
+const SYNTACTIC_CONTEXT_PRODUCT_TYPE = 'chunked-syntactic-context';
 
 function fail(message) {
   throw new Error(`Data-product preparation failed: ${message}`);
@@ -120,6 +125,9 @@ function validateField(field, description) {
   } else if (!Number.isInteger(field.sourceColumn) || field.sourceColumn < 0) {
     fail(`${description}.sourceColumn must be a non-negative integer`);
   }
+  if (field.type === 'lexical-entry-details' && field.derived !== true) {
+    fail(`${description}.lexical-entry-details must be a derived field`);
+  }
   if (field.nullable !== undefined && typeof field.nullable !== 'boolean') {
     fail(`${description}.nullable must be true or false when provided`);
   }
@@ -148,7 +156,8 @@ function validateField(field, description) {
 function validateView(view, description) {
   if (!isPlainObject(view) || !isSafeId(view.id) || !normalizeString(view.sourceRole) || !normalizeString(view.title)
     || !normalizeString(view.description) || !isPlainObject(view.ordering) || !normalizeString(view.ordering.field)
-    || !['ascending', 'descending'].includes(view.ordering.direction)
+    || !(['ascending', 'descending'].includes(view.ordering.direction)
+      || (view.ordering.field === 'source' && view.ordering.direction === 'as-stored'))
     || !Number.isSafeInteger(view.chunkBytes) || view.chunkBytes < 1024) {
     fail(`${description} is missing required metadata`);
   }
@@ -163,7 +172,9 @@ function validateView(view, description) {
     ids.add(field.id);
     if (field.derived !== true) sourceColumns.add(field.sourceColumn);
   }
-  if (!ids.has(view.ordering.field)) fail(`${description}.ordering.field must name a field`);
+  if (!(view.ordering.field === 'source' && view.ordering.direction === 'as-stored') && !ids.has(view.ordering.field)) {
+    fail(`${description}.ordering.field must name a field unless it declares source order`);
+  }
 }
 
 function validatePublication(publication, description) {
@@ -180,16 +191,141 @@ function validatePublication(publication, description) {
 
 function validateDerivation(derivation, description) {
   if (derivation === undefined) return;
-  if (!isPlainObject(derivation) || derivation.type !== 'conllu-frequency'
-    || !['lemma', 'wordform'].includes(derivation.key)
-    || !Array.isArray(derivation.excludeUniversalPos)
-    || derivation.excludeUniversalPos.some((value) => !normalizeString(value))
-    || !normalizeString(derivation.missingUniversalPos)
-    || !isPlainObject(derivation.expectedSummary)) {
-    fail(`${description}.derivation is invalid`);
+  if (!isPlainObject(derivation) || !isPlainObject(derivation.expectedSummary)) fail(`${description}.derivation is invalid`);
+  if (derivation.type === 'conllu-frequency') {
+    if (!['lemma', 'wordform'].includes(derivation.key)
+      || !Array.isArray(derivation.excludeUniversalPos)
+      || derivation.excludeUniversalPos.some((value) => !normalizeString(value))
+      || !normalizeString(derivation.missingUniversalPos)) {
+      fail(`${description}.derivation is invalid`);
+    }
+    for (const field of ['sourceRows', 'recordCount', 'totalFrequency']) {
+      asSafeInteger(derivation.expectedSummary[field], `${description}.derivation.expectedSummary.${field}`);
+    }
+    return;
   }
-  for (const field of ['sourceRows', 'recordCount', 'totalFrequency']) {
-    asSafeInteger(derivation.expectedSummary[field], `${description}.derivation.expectedSummary.${field}`);
+  if (derivation.type === 'name-transliteration') {
+    for (const field of ['sourceRows', 'recordCount', 'totalFrequency']) {
+      asSafeInteger(derivation.expectedSummary[field], `${description}.derivation.expectedSummary.${field}`);
+    }
+    return;
+  }
+  if (derivation.type === 'nvh-lexicon') {
+    asSafeInteger(derivation.recordPageEntryCount, `${description}.derivation.recordPageEntryCount`);
+    for (const field of ['sourceRows', 'recordCount', 'senseCount', 'definitionCount', 'exampleCount']) {
+      asSafeInteger(derivation.expectedSummary[field], `${description}.derivation.expectedSummary.${field}`);
+    }
+    return;
+  }
+  fail(`${description}.derivation type is not supported`);
+}
+
+function validateFrequencyBand(band, description, previousBand) {
+  if (!isPlainObject(band) || !isSafeId(band.id) || !normalizeString(band.label)
+    || !Number.isSafeInteger(band.minimum) || band.minimum < 1
+    || (band.maximum !== null && (!Number.isSafeInteger(band.maximum) || band.maximum < band.minimum))) {
+    fail(`${description} is invalid`);
+  }
+  if (previousBand) {
+    if (previousBand.maximum === null || band.minimum !== previousBand.maximum + 1) {
+      fail(`${description} must begin immediately after the preceding frequency band`);
+    }
+  } else if (band.minimum !== 1) {
+    fail(`${description} must begin at frequency 1`);
+  }
+  return band;
+}
+
+function validateFrequencyBandCoverageProfile(profile, description) {
+  if (!Array.isArray(profile.frequencyBands) || profile.frequencyBands.length === 0
+    || !isPlainObject(profile.drilldown) || !Number.isSafeInteger(profile.drilldown.limit)
+    || profile.drilldown.limit < 1 || profile.drilldown.limit > 100
+    || !Number.isSafeInteger(profile.drilldown.maxBytes) || profile.drilldown.maxBytes < 1024
+    || !isPlainObject(profile.drilldown.ordering)
+    || !normalizeString(profile.drilldown.ordering.field)
+    || !['ascending', 'descending'].includes(profile.drilldown.ordering.direction)
+    || profile.drilldown.ordering.tieBreak !== 'word-ascending') {
+    fail(`${description} is invalid`);
+  }
+  let previousBand = null;
+  const ids = new Set();
+  for (const [index, band] of profile.frequencyBands.entries()) {
+    validateFrequencyBand(band, `${description}.frequencyBands[${index}]`, previousBand);
+    if (ids.has(band.id)) fail(`${description}.frequencyBands uses duplicate ids`);
+    ids.add(band.id);
+    previousBand = band;
+  }
+  if (previousBand?.maximum !== null) {
+    fail(`${description}.frequencyBands must finish with an open-ended band`);
+  }
+}
+
+function validateNormalizedContrastLookupProfile(profile, description) {
+  if (!isPlainObject(profile.lookup) || !Number.isSafeInteger(profile.lookup.maxBucketBytes)
+    || profile.lookup.maxBucketBytes < 8192 || profile.lookup.maxBucketBytes > 262144
+    || profile.lookup.normalization !== 'trim-nfc-uppercase-lt'
+    || !Number.isSafeInteger(profile.lookup.maxSourceRowsPerWord) || profile.lookup.maxSourceRowsPerWord < 1
+    || profile.lookup.maxSourceRowsPerWord > 16 || !Array.isArray(profile.sources) || profile.sources.length < 2
+    || !Array.isArray(profile.pairs) || profile.pairs.length === 0
+    || !Number.isSafeInteger(profile.minimumRate) || profile.minimumRate < 1) {
+    fail(`${description} is invalid`);
+  }
+  const sourceIds = new Set();
+  for (const [index, source] of profile.sources.entries()) {
+    if (!isPlainObject(source) || !isSafeId(source.id) || !normalizeString(source.label)
+      || !isSafeFieldId(source.tokenField) || !isSafeFieldId(source.documentField)
+      || source.tokenField === source.documentField || sourceIds.has(source.id)) {
+      fail(`${description}.sources[${index}] is invalid`);
+    }
+    sourceIds.add(source.id);
+  }
+  const pairIds = new Set();
+  for (const [index, pair] of profile.pairs.entries()) {
+    if (!isPlainObject(pair) || !isSafeId(pair.id) || !normalizeString(pair.label)
+      || !isSafeId(pair.numeratorSource) || !isSafeId(pair.denominatorSource)
+      || pair.numeratorSource === pair.denominatorSource || !sourceIds.has(pair.numeratorSource)
+      || !sourceIds.has(pair.denominatorSource) || pairIds.has(pair.id)) {
+      fail(`${description}.pairs[${index}] is invalid`);
+    }
+    pairIds.add(pair.id);
+  }
+}
+
+function validateAnalysisProfile(profile, description) {
+  if (!isPlainObject(profile) || !isSafeId(profile.id) || !ANALYSIS_PROFILE_TYPES.has(profile.type)
+    || !isSafeId(profile.sourceRole) || !normalizeString(profile.title) || !normalizeString(profile.description)
+    || !Number.isSafeInteger(profile.summaryMaxBytes) || profile.summaryMaxBytes < 1024) {
+    fail(`${description} is invalid`);
+  }
+  if (profile.type === 'frequency-band-coverage') {
+    validateFrequencyBandCoverageProfile(profile, description);
+  } else if (profile.type === 'normalized-contrast-lookup') {
+    validateNormalizedContrastLookupProfile(profile, description);
+  }
+}
+
+function validateSyntacticContextConfiguration(configuration, description) {
+  if (!isPlainObject(configuration) || !normalizeString(configuration.sourceRole)
+    || !Number.isSafeInteger(configuration.maxExamplesPerLemma) || configuration.maxExamplesPerLemma < 1
+    || configuration.maxExamplesPerLemma > 50
+    || !Number.isSafeInteger(configuration.chunkBytes) || configuration.chunkBytes < 1024
+    || !Number.isSafeInteger(configuration.lemmaIndexPrefixCodePoints) || configuration.lemmaIndexPrefixCodePoints < 1
+    || configuration.lemmaIndexPrefixCodePoints > 3
+    || !Number.isSafeInteger(configuration.contextPrefixCodePoints) || configuration.contextPrefixCodePoints < 1
+    || configuration.contextPrefixCodePoints > 3
+    || configuration.contextPrefixCodePoints < configuration.lemmaIndexPrefixCodePoints
+    || !isPlainObject(configuration.genreLabels) || Object.keys(configuration.genreLabels).length === 0
+    || Object.entries(configuration.genreLabels).some(([key, value]) => !isSafeRelativePath(key) || !normalizeString(value))
+    || !isPlainObject(configuration.expectedSummary)) {
+    fail(`${description}.syntaxContext is invalid`);
+  }
+  for (const field of [
+    'documents', 'sentences', 'integerTokenRows', 'nonPunctuationRows',
+    'allRelationLabels', 'nonPunctuationRelationLabels', 'rootRows',
+    'nonPunctuationRootRows', 'nonRootDependencyRows', 'lemmaCount', 'contextRecordCount',
+    'contextRowsOmittedByLimit', 'lemmaIndexPrefixes', 'contextPrefixes'
+  ]) {
+    asSafeInteger(configuration.expectedSummary[field], `${description}.syntaxContext.expectedSummary.${field}`);
   }
 }
 
@@ -226,6 +362,14 @@ export function validatePublicationPlan(plan) {
       continue;
     }
 
+    if (product.productType === SYNTACTIC_CONTEXT_PRODUCT_TYPE) {
+      if (product.publication.status !== 'published' || product.views !== undefined) {
+        fail(`${description} must publish its syntax context without generic row views`);
+      }
+      validateSyntacticContextConfiguration(product.syntaxContext, description);
+      continue;
+    }
+
     if (product.publication.status !== 'published' || !Array.isArray(product.views) || product.views.length === 0) {
       fail(`${description} must publish at least one row view`);
     }
@@ -237,6 +381,19 @@ export function validatePublicationPlan(plan) {
         fail(`${description}.views must use unique ids`);
       }
       viewIds.add(view.id);
+    }
+
+    if (product.analysisProfiles !== undefined) {
+      if (!Array.isArray(product.analysisProfiles)) fail(`${description}.analysisProfiles must be an array when present`);
+      const profileIds = new Set();
+      for (const [profileIndex, profile] of product.analysisProfiles.entries()) {
+        validateAnalysisProfile(profile, `${description}.analysisProfiles[${profileIndex}]`);
+        if (profileIds.has(profile.id)) fail(`${description}.analysisProfiles uses duplicate ids`);
+        if (!product.views.some((view) => view.sourceRole === profile.sourceRole)) {
+          fail(`${description}.analysisProfiles[${profileIndex}] must use a source role exposed by a row view`);
+        }
+        profileIds.add(profile.id);
+      }
     }
   }
   return plan;
@@ -264,7 +421,9 @@ function publicSourceFile(file) {
     ...(file.columns === undefined ? {} : { columns: file.columns }),
     ...(file.delimiter === undefined ? {} : { delimiter: file.delimiter }),
     ...(file.hasHeader === undefined ? {} : { hasHeader: file.hasHeader }),
-    ...(file.archiveMember === undefined ? {} : { archiveMember: file.archiveMember })
+    ...(file.archiveMember === undefined ? {} : { archiveMember: file.archiveMember }),
+    ...(file.archiveDirectory === undefined ? {} : { archiveDirectory: file.archiveDirectory }),
+    ...(file.conlluSummary === undefined ? {} : { conlluSummary: file.conlluSummary })
   };
 }
 
@@ -293,7 +452,11 @@ function parseNonNegativeSafeInteger(value, description) {
 }
 
 function parseFieldValue(field, value, sourcePath, lineNumber) {
+  if (field.type === 'lexical-entry-details') {
+    fail(`${sourcePath} line ${lineNumber} cannot read a structured lexical field directly from a delimited source`);
+  }
   if (!NUMERIC_FIELD_TYPES.has(field.type)) {
+    if (!normalizeString(value) && field.nullable === true) return null;
     if (!normalizeString(value)) fail(`${sourcePath} line ${lineNumber} has an empty ${field.id} value`);
     return value;
   }
@@ -453,6 +616,282 @@ async function buildChunkedView({ productId, productDirectory, view, sourceFile,
     recordEncoding: 'array',
     summary
   };
+}
+
+async function writeRecordsInChunks({ productId, view, chunksDirectory, records, sourceDisplayPath }) {
+  const suffix = ']}\n';
+  const chunks = [];
+  let chunkNumber = 0;
+  let recordJsons = [];
+  let recordsBytes = 0;
+
+  async function flushChunk() {
+    if (recordJsons.length === 0) return;
+    const serialized = `${chunkPrefix(productId, view.id, chunkNumber)}${recordJsons.join(',')}${suffix}`;
+    const buffer = Buffer.from(serialized, 'utf8');
+    if (buffer.byteLength > view.chunkBytes) {
+      fail(`${productId}/${view.id} chunk ${chunkNumber} exceeds its ${view.chunkBytes}-byte budget`);
+    }
+    const filename = `${String(chunkNumber + 1).padStart(6, '0')}.json`;
+    await writeFile(path.join(chunksDirectory, filename), buffer);
+    chunks.push({
+      file: `chunks/${filename}`,
+      records: recordJsons.length,
+      bytes: buffer.byteLength,
+      sha256: createHash('sha256').update(buffer).digest('hex')
+    });
+    chunkNumber += 1;
+    recordJsons = [];
+    recordsBytes = 0;
+  }
+
+  for (const record of records) {
+    const recordJson = JSON.stringify(record);
+    const candidateBytes = Buffer.byteLength(chunkPrefix(productId, view.id, chunkNumber)) + recordsBytes
+      + (recordJsons.length === 0 ? 0 : 1) + Buffer.byteLength(recordJson) + Buffer.byteLength(suffix);
+    if (candidateBytes > view.chunkBytes && recordJsons.length > 0) await flushChunk();
+    const currentBytes = Buffer.byteLength(chunkPrefix(productId, view.id, chunkNumber)) + recordsBytes
+      + (recordJsons.length === 0 ? 0 : 1) + Buffer.byteLength(recordJson) + Buffer.byteLength(suffix);
+    if (currentBytes > view.chunkBytes) {
+      fail(`${sourceDisplayPath} produced a record that cannot fit in the ${view.chunkBytes}-byte chunk budget`);
+    }
+    recordJsons.push(recordJson);
+    recordsBytes += (recordJsons.length === 1 ? 0 : 1) + Buffer.byteLength(recordJson);
+  }
+  await flushChunk();
+  return chunks;
+}
+
+function assertDerivedFieldLayout(view, expectedFields) {
+  if (view.fields.length !== expectedFields.length) {
+    fail(`${view.id} has an unexpected derived-field layout`);
+  }
+  for (const [index, expected] of expectedFields.entries()) {
+    const field = view.fields[index];
+    if (field.id !== expected.id || field.type !== expected.type || field.derived !== true) {
+      fail(`${view.id} has an unexpected derived-field layout`);
+    }
+  }
+}
+
+function buildDerivedViewIndex({ productId, view, sourceFile, summary, chunks }) {
+  return {
+    schemaVersion: 1,
+    productId,
+    viewId: view.id,
+    recordEncoding: 'array',
+    fields: view.fields,
+    ordering: view.ordering,
+    sourceFile: publicSourceFile(sourceFile),
+    derivation: view.derivation,
+    maxChunkBytes: view.chunkBytes,
+    summary,
+    chunks
+  };
+}
+
+function publicViewDescriptor(view, summary) {
+  return {
+    id: view.id,
+    title: view.title,
+    description: view.description,
+    index: `views/${view.id}/index.json`,
+    sourceRole: view.sourceRole,
+    recordEncoding: 'array',
+    summary
+  };
+}
+
+async function buildDerivedNameTransliterationView({ productId, productDirectory, view, sourceFile, sourceRoot }) {
+  if (view.derivation?.type !== 'name-transliteration' || sourceFile.hasHeader === true || sourceFile.columns !== 1) {
+    fail(`${view.id} requires a one-column, headerless name-transliteration source`);
+  }
+  assertDerivedFieldLayout(view, [
+    { id: 'sourceLeftName', type: 'string' },
+    { id: 'sourceParenthesizedName', type: 'string' },
+    { id: 'sourceMatchCount', type: 'raw-token-count' }
+  ]);
+  const { realRoot, sourcePath } = await resolveSourcePath(sourceRoot, sourceFile.path);
+  const sourceDisplayPath = sourceRelativePath(realRoot, sourcePath);
+  const viewDirectory = path.join(productDirectory, 'views', view.id);
+  const chunksDirectory = path.join(viewDirectory, 'chunks');
+  await mkdir(chunksDirectory, { recursive: true });
+
+  const records = [];
+  const lines = createInterface({
+    input: createReadStream(sourcePath, { encoding: 'utf8' }),
+    crlfDelay: Infinity
+  });
+  let sourceRows = 0;
+  let sourceMatchTotal = 0;
+  for await (const line of lines) {
+    sourceRows += 1;
+    const match = line.match(/^\s*(\d+)\s+(.+?)\s+\((.+)\)\s*$/);
+    if (!match) fail(`${sourceDisplayPath} line ${sourceRows} does not match the reviewed name-pair pattern`);
+    const sourceLeftName = normalizeString(match[2]);
+    const sourceParenthesizedName = normalizeString(match[3]);
+    const sourceMatchCount = parseNonNegativeSafeInteger(match[1], `${sourceDisplayPath} line ${sourceRows} sourceMatchCount`);
+    if (!sourceLeftName || !sourceParenthesizedName) {
+      fail(`${sourceDisplayPath} line ${sourceRows} has an empty name string`);
+    }
+    sourceMatchTotal += sourceMatchCount;
+    records.push([sourceLeftName, sourceParenthesizedName, sourceMatchCount]);
+  }
+  const expected = view.derivation.expectedSummary;
+  if (sourceRows !== sourceFile.rows || sourceRows !== expected.sourceRows
+    || records.length !== expected.recordCount || sourceMatchTotal !== expected.totalFrequency) {
+    fail(`${sourceDisplayPath} ${view.id} does not match its reviewed derived summary`);
+  }
+  const chunks = await writeRecordsInChunks({ productId, view, chunksDirectory, records, sourceDisplayPath });
+  if (chunks.length === 0) fail(`${sourceDisplayPath} produced no records`);
+  const summary = {
+    sourceRows,
+    recordCount: records.length,
+    numericTotals: { sourceMatchCount: sourceMatchTotal },
+    nullCounts: {}
+  };
+  await writeJson(path.join(viewDirectory, 'index.json'), buildDerivedViewIndex({ productId, view, sourceFile, summary, chunks }));
+  return publicViewDescriptor(view, summary);
+}
+
+function decodeUtf8(buffer, description) {
+  try {
+    return new TextDecoder('utf-8', { fatal: true }).decode(buffer);
+  } catch {
+    fail(`${description} is not valid UTF-8`);
+  }
+}
+
+function sourceLines(text) {
+  const lines = text.split(/\r?\n/);
+  return lines.at(-1) === '' ? lines.slice(0, -1) : lines;
+}
+
+async function buildDerivedNvhLexiconView({ productId, productDirectory, view, sourceFile, sourceRoot }) {
+  if (view.derivation?.type !== 'nvh-lexicon' || sourceFile.format !== 'nvh') {
+    fail(`${view.id} requires an NVH lexical-database source`);
+  }
+  assertDerivedFieldLayout(view, [
+    { id: 'entry', type: 'string' },
+    { id: 'details', type: 'lexical-entry-details' }
+  ]);
+  const { realRoot, sourcePath } = await resolveSourcePath(sourceRoot, sourceFile.path);
+  const sourceDisplayPath = sourceRelativePath(realRoot, sourcePath);
+  const viewDirectory = path.join(productDirectory, 'views', view.id);
+  const chunksDirectory = path.join(viewDirectory, 'chunks');
+  await mkdir(chunksDirectory, { recursive: true });
+
+  const lines = sourceLines(decodeUtf8(await readFile(sourcePath), sourceDisplayPath));
+  const records = [];
+  let current = null;
+  let currentSense = null;
+  let senseCount = 0;
+  let definitionCount = 0;
+  let exampleCount = 0;
+
+  function finishEntry() {
+    if (!current) return;
+    if (!current.source || current.senses.length === 0 || current.entryCompilers.length === 0) {
+      fail(`${sourceDisplayPath} entry ${JSON.stringify(current.entry)} is missing reviewed lexical metadata`);
+    }
+    const source = {
+      name: current.source.name || null,
+      date: current.source.date || null,
+      url: current.source.url || null
+    };
+    const details = {
+      source,
+      senses: current.senses,
+      userGroups: current.userGroups,
+      variants: current.variants,
+      entryCompilers: current.entryCompilers
+    };
+    senseCount += details.senses.length;
+    definitionCount += details.senses.reduce((total, sense) => total + sense.definitions.length, 0);
+    exampleCount += details.senses.reduce((total, sense) => total + sense.examples.length, 0);
+    records.push([current.entry, details]);
+    current = null;
+    currentSense = null;
+  }
+
+  for (const [lineIndex, line] of lines.entries()) {
+    const lineNumber = lineIndex + 1;
+    const match = line.match(/^( *)([A-Za-z_]+):(.*)$/);
+    if (!match) fail(`${sourceDisplayPath} line ${lineNumber} has an unsupported NVH structure`);
+    const indentation = match[1].length;
+    const key = match[2];
+    const value = normalizeString(match[3]);
+    if (indentation === 0) {
+      if (key !== 'entry' || !value) fail(`${sourceDisplayPath} line ${lineNumber} has an invalid entry`);
+      finishEntry();
+      current = {
+        entry: value,
+        source: null,
+        senses: [],
+        userGroups: [],
+        variants: [],
+        entryCompilers: []
+      };
+      continue;
+    }
+    if (!current) fail(`${sourceDisplayPath} line ${lineNumber} appears before an entry`);
+    if (indentation === 2) {
+      if (key === 'source_name') {
+        if (current.source) fail(`${sourceDisplayPath} line ${lineNumber} has an invalid source name`);
+        current.source = { name: value, date: '', url: '', dateSeen: false, urlSeen: false };
+      } else if (key === 'sense') {
+        currentSense = { label: value || null, definitions: [], examples: [] };
+        current.senses.push(currentSense);
+      } else if (key === 'user_group') {
+        if (value) current.userGroups.push(value);
+      } else if (key === 'variant') {
+        if (value) current.variants.push(value);
+      } else if (key === 'entry_compiler') {
+        if (value) current.entryCompilers.push(value);
+      } else {
+        fail(`${sourceDisplayPath} line ${lineNumber} has an unsupported entry field ${key}`);
+      }
+      continue;
+    }
+    if (indentation === 4) {
+      if (key === 'source_date') {
+        if (!current.source || current.source.dateSeen) fail(`${sourceDisplayPath} line ${lineNumber} has an invalid source date`);
+        current.source.date = value;
+        current.source.dateSeen = true;
+      } else if (key === 'source_URL') {
+        if (!current.source || current.source.urlSeen) fail(`${sourceDisplayPath} line ${lineNumber} has an invalid source URL`);
+        current.source.url = value;
+        current.source.urlSeen = true;
+      } else if (key === 'definition') {
+        if (!currentSense || !value) fail(`${sourceDisplayPath} line ${lineNumber} has an invalid definition`);
+        currentSense.definitions.push(value);
+      } else if (key === 'example') {
+        if (!currentSense) fail(`${sourceDisplayPath} line ${lineNumber} has an invalid example`);
+        currentSense.examples.push(value || null);
+      } else {
+        fail(`${sourceDisplayPath} line ${lineNumber} has an unsupported nested field ${key}`);
+      }
+      continue;
+    }
+    fail(`${sourceDisplayPath} line ${lineNumber} has unsupported indentation`);
+  }
+  finishEntry();
+
+  const expected = view.derivation.expectedSummary;
+  if (lines.length !== sourceFile.rows || lines.length !== expected.sourceRows || records.length !== expected.recordCount
+    || senseCount !== expected.senseCount || definitionCount !== expected.definitionCount || exampleCount !== expected.exampleCount) {
+    fail(`${sourceDisplayPath} ${view.id} does not match its reviewed derived summary`);
+  }
+  const chunks = await writeRecordsInChunks({ productId, view, chunksDirectory, records, sourceDisplayPath });
+  if (chunks.length === 0) fail(`${sourceDisplayPath} produced no records`);
+  const summary = {
+    sourceRows: lines.length,
+    recordCount: records.length,
+    numericTotals: {},
+    nullCounts: {}
+  };
+  await writeJson(path.join(viewDirectory, 'index.json'), buildDerivedViewIndex({ productId, view, sourceFile, summary, chunks }));
+  return publicViewDescriptor(view, summary);
 }
 
 function assertDerivedConlluView(view, sourceFile) {
@@ -622,6 +1061,1242 @@ async function buildDerivedConlluFrequencyView({ productId, productDirectory, vi
   };
 }
 
+function findFrequencyBandCoverageFields(profile, views) {
+  const matchingViews = views.filter((view) => view.sourceRole === profile.sourceRole);
+  if (matchingViews.length !== 1) {
+    fail(`${profile.id} requires exactly one row view for source role ${profile.sourceRole}`);
+  }
+  const sourceView = matchingViews[0];
+  const wordFields = sourceView.fields.filter((field) => field.type === 'string');
+  const frequencyFields = sourceView.fields.filter((field) => field.type === 'raw-token-count' && field.nullable !== true);
+  const coverageFields = sourceView.fields.filter((field) => field.type === 'coverage-code');
+  if (wordFields.length !== 1 || frequencyFields.length !== 1 || coverageFields.length !== 1) {
+    fail(`${profile.id} requires one word, non-null raw-token-count, and coverage-code field`);
+  }
+  if (profile.drilldown.ordering.field !== frequencyFields[0].id || profile.drilldown.ordering.direction !== 'descending') {
+    fail(`${profile.id} drill-down ordering must use its raw token count in descending order`);
+  }
+  return {
+    sourceView,
+    wordField: wordFields[0],
+    frequencyField: frequencyFields[0],
+    coverageField: coverageFields[0]
+  };
+}
+
+function findFrequencyBand(bands, frequency) {
+  return bands.find((band) => frequency >= band.minimum && (band.maximum === null || frequency <= band.maximum));
+}
+
+function compareDrilldownRecords(left, right) {
+  if (left.frequency !== right.frequency) return right.frequency - left.frequency;
+  return left.word < right.word ? -1 : left.word > right.word ? 1 : 0;
+}
+
+function insertDrilldownRecord(records, record, limit) {
+  let index = records.findIndex((existing) => compareDrilldownRecords(record, existing) < 0);
+  if (index === -1) index = records.length;
+  records.splice(index, 0, record);
+  if (records.length > limit) records.pop();
+}
+
+async function writeJsonWithByteBudget(filename, value, maxBytes, description) {
+  const buffer = Buffer.from(`${JSON.stringify(value, null, 2)}\n`, 'utf8');
+  if (buffer.byteLength > maxBytes) fail(`${description} exceeds its ${maxBytes}-byte budget`);
+  await mkdir(path.dirname(filename), { recursive: true });
+  await writeFile(filename, buffer);
+  return buffer;
+}
+
+async function buildFrequencyBandCoverageProfile({ contract, productId, productDirectory, profile, views, sourceRoot }) {
+  const { sourceView, wordField, frequencyField, coverageField } = findFrequencyBandCoverageFields(profile, views);
+  const filesByRole = new Map(contract.source.files.map((file) => [file.role, file]));
+  const sourceFile = filesByRole.get(profile.sourceRole);
+  if (!sourceFile) fail(`${profile.id} has no source file with role ${profile.sourceRole}`);
+  const { realRoot, sourcePath } = await resolveSourcePath(sourceRoot, sourceFile.path);
+  const sourceDisplayPath = sourceRelativePath(realRoot, sourcePath);
+  const coverageCodes = Object.keys(coverageField.values).map(Number).sort((left, right) => left - right);
+  const bands = profile.frequencyBands.map((band) => ({
+    ...band,
+    typeCount: 0,
+    tokenCount: 0,
+    categories: new Map(coverageCodes.map((coverageCode) => [coverageCode, {
+      coverageCode,
+      typeCount: 0,
+      tokenCount: 0,
+      records: []
+    }]))
+  }));
+  const delimiter = sourceFile.delimiter ?? '\t';
+  const lines = createInterface({
+    input: createReadStream(sourcePath, { encoding: 'utf8' }),
+    crlfDelay: Infinity
+  });
+  let physicalLineNumber = 0;
+  let sourceRows = 0;
+  let totalTokenCount = 0;
+
+  for await (const line of lines) {
+    physicalLineNumber += 1;
+    if (sourceFile.hasHeader === true && physicalLineNumber === 1) continue;
+    sourceRows += 1;
+    const values = parseDelimitedLine(line, delimiter);
+    if (values.length !== sourceFile.columns) {
+      fail(`${sourceDisplayPath} line ${sourceRows} has ${values.length} columns; expected ${sourceFile.columns}`);
+    }
+    const word = normalizeString(values[wordField.sourceColumn]);
+    if (!word) fail(`${sourceDisplayPath} line ${sourceRows} has an empty ${wordField.id} value`);
+    const frequency = parseFieldValue(frequencyField, values[frequencyField.sourceColumn], sourceDisplayPath, sourceRows);
+    const coverageCode = parseFieldValue(coverageField, values[coverageField.sourceColumn], sourceDisplayPath, sourceRows);
+    if (!Number.isSafeInteger(frequency) || frequency < 1 || !Number.isSafeInteger(coverageCode)) {
+      fail(`${sourceDisplayPath} line ${sourceRows} has an invalid frequency-band profile record`);
+    }
+    const band = findFrequencyBand(bands, frequency);
+    if (!band) fail(`${sourceDisplayPath} line ${sourceRows} has a frequency outside the configured bands`);
+    const category = band.categories.get(coverageCode);
+    if (!category) fail(`${sourceDisplayPath} line ${sourceRows} has an unlabelled coverage code`);
+    band.typeCount += 1;
+    band.tokenCount += frequency;
+    category.typeCount += 1;
+    category.tokenCount += frequency;
+    totalTokenCount += frequency;
+    insertDrilldownRecord(category.records, { word, frequency }, profile.drilldown.limit);
+  }
+
+  const expectedTokenTotal = Number(sourceFile.numericTotals?.[frequencyField.sourceColumn]);
+  if (sourceRows !== sourceFile.rows || !Number.isSafeInteger(expectedTokenTotal) || totalTokenCount !== expectedTokenTotal) {
+    fail(`${profile.id} does not reconcile with ${sourceDisplayPath}`);
+  }
+
+  const profileDirectory = path.join(productDirectory, 'analysis', profile.id);
+  const drilldownDirectory = path.join(profileDirectory, 'drilldowns');
+  const drilldownFields = [
+    { id: wordField.id, label: wordField.label, type: 'string' },
+    { id: frequencyField.id, label: frequencyField.label, type: 'raw-token-count', unit: frequencyField.unit }
+  ];
+  const summaryBands = [];
+  for (const band of bands) {
+    const categories = [];
+    for (const coverageCode of coverageCodes) {
+      const category = band.categories.get(coverageCode);
+      const filename = `${band.id}-${coverageCode}.json`;
+      const drilldown = {
+        schemaVersion: 1,
+        productId,
+        profileId: profile.id,
+        bandId: band.id,
+        coverageCode,
+        recordEncoding: 'array',
+        fields: drilldownFields,
+        ordering: profile.drilldown.ordering,
+        records: category.records.map((record) => [record.word, record.frequency])
+      };
+      const buffer = await writeJsonWithByteBudget(
+        path.join(drilldownDirectory, filename),
+        drilldown,
+        profile.drilldown.maxBytes,
+        `${productId}/${profile.id}/${filename}`
+      );
+      categories.push({
+        coverageCode,
+        typeCount: category.typeCount,
+        tokenCount: category.tokenCount,
+        drilldown: {
+          file: `drilldowns/${filename}`,
+          records: category.records.length,
+          bytes: buffer.byteLength,
+          sha256: createHash('sha256').update(buffer).digest('hex')
+        }
+      });
+    }
+    summaryBands.push({
+      id: band.id,
+      label: band.label,
+      minimum: band.minimum,
+      maximum: band.maximum,
+      typeCount: band.typeCount,
+      tokenCount: band.tokenCount,
+      categories
+    });
+  }
+
+  const manifest = {
+    schemaVersion: 1,
+    productId,
+    profileId: profile.id,
+    profileType: profile.type,
+    title: profile.title,
+    description: profile.description,
+    sourceView: {
+      id: sourceView.id,
+      sourceRole: profile.sourceRole,
+      wordField: { id: wordField.id, label: wordField.label },
+      frequencyField: { id: frequencyField.id, label: frequencyField.label, unit: frequencyField.unit },
+      coverageField: { id: coverageField.id, label: coverageField.label, values: coverageField.values }
+    },
+    provenance: {
+      sourceUrl: contract.source.sourceUrl,
+      licence: contract.source.licence,
+      citation: contract.source.citation,
+      sourceFile: publicSourceFile(sourceFile)
+    },
+    drilldown: {
+      limit: profile.drilldown.limit,
+      maxBytes: profile.drilldown.maxBytes,
+      recordEncoding: 'array',
+      fields: drilldownFields,
+      ordering: profile.drilldown.ordering
+    },
+    delivery: {
+      summaryMaxBytes: profile.summaryMaxBytes
+    },
+    summary: {
+      sourceRows,
+      totalTypeCount: sourceRows,
+      totalTokenCount,
+      bands: summaryBands
+    }
+  };
+  await writeJsonWithByteBudget(
+    path.join(profileDirectory, 'manifest.json'),
+    manifest,
+    profile.summaryMaxBytes,
+    `${productId}/${profile.id}/manifest.json`
+  );
+  return {
+    id: profile.id,
+    type: profile.type,
+    title: profile.title,
+    description: profile.description,
+    manifest: `analysis/${profile.id}/manifest.json`
+  };
+}
+
+function normalizeLookupWord(value) {
+  const word = normalizeString(value);
+  return word ? word.normalize('NFC').toLocaleUpperCase('lt-LT') : '';
+}
+
+function publicNormalizedMetricField(field) {
+  return {
+    id: field.id,
+    label: field.label,
+    type: field.type,
+    unit: field.unit,
+    nullable: field.nullable === true,
+    normalization: field.normalization
+  };
+}
+
+function findNormalizedContrastLookupFields(profile, views) {
+  const matchingViews = views.filter((view) => view.sourceRole === profile.sourceRole);
+  if (matchingViews.length !== 1) {
+    fail(`${profile.id} requires exactly one row view for source role ${profile.sourceRole}`);
+  }
+  const sourceView = matchingViews[0];
+  const wordFields = sourceView.fields.filter((field) => field.type === 'string');
+  if (wordFields.length !== 1) fail(`${profile.id} requires exactly one word field`);
+  const fieldsById = new Map(sourceView.fields.map((field) => [field.id, field]));
+  const usedFields = new Set();
+  const sources = profile.sources.map((source) => {
+    const tokenField = fieldsById.get(source.tokenField);
+    const documentField = fieldsById.get(source.documentField);
+    if (!tokenField || !documentField || tokenField.type !== 'normalized-token-count'
+      || documentField.type !== 'normalized-document-count' || tokenField.nullable !== true
+      || documentField.nullable !== true || tokenField.normalization.sourceTokens !== documentField.normalization.sourceTokens
+      || tokenField.normalization.targetTokens !== documentField.normalization.targetTokens
+      || usedFields.has(tokenField.id) || usedFields.has(documentField.id)) {
+      fail(`${profile.id} sources must name distinct nullable normalized token and document fields`);
+    }
+    usedFields.add(tokenField.id);
+    usedFields.add(documentField.id);
+    return {
+      id: source.id,
+      label: source.label,
+      tokenField,
+      documentField
+    };
+  });
+  const targetTokens = sources[0].tokenField.normalization.targetTokens;
+  if (sources.some((source) => source.tokenField.normalization.targetTokens !== targetTokens)) {
+    fail(`${profile.id} source token measures must share a target denominator`);
+  }
+  return { sourceView, wordField: wordFields[0], sources, targetTokens };
+}
+
+function createLookupNode(id, prefix) {
+  return {
+    id,
+    prefix,
+    depth: Array.from(prefix).length,
+    childStats: new Map(),
+    transitions: new Map(),
+    terminalStats: null,
+    terminalGroup: null
+  };
+}
+
+function addLookupStats(existing, payloadBytes) {
+  if (!existing) return { records: 1, payloadBytes };
+  existing.records += 1;
+  existing.payloadBytes += payloadBytes;
+  return existing;
+}
+
+function lookupPayloadBytes(normalizedWord, sourceRow) {
+  return Buffer.byteLength(JSON.stringify([normalizedWord, sourceRow]), 'utf8') + 1;
+}
+
+async function scanLookupRoutingNodes({ sourceFile, sourcePath, sourceDisplayPath, wordField, pendingNodes }) {
+  const nodesByDepth = new Map();
+  for (const node of pendingNodes) {
+    const entries = nodesByDepth.get(node.depth) ?? new Map();
+    if (entries.has(node.prefix)) fail(`lookup routing has a duplicate pending prefix ${node.prefix}`);
+    entries.set(node.prefix, node);
+    nodesByDepth.set(node.depth, entries);
+  }
+  const lines = createInterface({
+    input: createReadStream(sourcePath, { encoding: 'utf8' }),
+    crlfDelay: Infinity
+  });
+  const delimiter = sourceFile.delimiter ?? '\t';
+  let physicalLineNumber = 0;
+  let sourceRows = 0;
+  for await (const line of lines) {
+    physicalLineNumber += 1;
+    if (sourceFile.hasHeader === true && physicalLineNumber === 1) continue;
+    const values = parseDelimitedLine(line, delimiter);
+    if (values.length !== sourceFile.columns) {
+      fail(`${sourceDisplayPath} line ${sourceRows + 1} has ${values.length} columns; expected ${sourceFile.columns}`);
+    }
+    const normalizedWord = normalizeLookupWord(values[wordField.sourceColumn]);
+    if (!normalizedWord) fail(`${sourceDisplayPath} line ${sourceRows + 1} has an empty ${wordField.id} value`);
+    const characters = Array.from(normalizedWord);
+    for (const [depth, nodes] of nodesByDepth) {
+      if (characters.length < depth) continue;
+      const node = nodes.get(characters.slice(0, depth).join(''));
+      if (!node) continue;
+      const payloadBytes = lookupPayloadBytes(normalizedWord, sourceRows);
+      if (characters.length === depth) {
+        node.terminalStats = addLookupStats(node.terminalStats, payloadBytes);
+      } else {
+        const character = characters[depth];
+        node.childStats.set(character, addLookupStats(node.childStats.get(character), payloadBytes));
+      }
+      break;
+    }
+    sourceRows += 1;
+  }
+  if (sourceRows !== sourceFile.rows) {
+    fail(`${sourceDisplayPath} row count does not match the source contract while building lookup routing`);
+  }
+}
+
+function routeLookupBucket(root, normalizedWord) {
+  let node = root;
+  const characters = Array.from(normalizedWord);
+  let index = 0;
+  while (true) {
+    if (index === characters.length) return node.terminalGroup?.bucket ?? null;
+    const transition = node.transitions.get(characters[index]);
+    if (!transition) return null;
+    if (transition.kind === 'bucket') return transition.bucket;
+    node = transition.node;
+    index += 1;
+  }
+}
+
+async function buildLookupRouting({ sourceFile, sourcePath, sourceDisplayPath, wordField, profile }) {
+  const payloadBudget = profile.lookup.maxBucketBytes - 2048;
+  if (payloadBudget < 1024) fail(`${profile.id} lookup bucket budget leaves no usable payload`);
+  const root = createLookupNode(0, '');
+  const nodes = [root];
+  const leafGroups = [];
+  let pendingNodes = [root];
+
+  while (pendingNodes.length > 0) {
+    await scanLookupRoutingNodes({ sourceFile, sourcePath, sourceDisplayPath, wordField, pendingNodes });
+    const nextNodes = [];
+    for (const node of pendingNodes) {
+      if (node.terminalStats) {
+        if (node.terminalStats.payloadBytes > payloadBudget) {
+          fail(`${profile.id} cannot bound the exact lookup bucket for ${node.prefix}`);
+        }
+        const group = { node, type: 'terminal', character: null, stats: node.terminalStats, bucket: null };
+        node.terminalGroup = group;
+        leafGroups.push(group);
+      }
+      for (const [character, stats] of [...node.childStats.entries()].sort(([left], [right]) => left.localeCompare(right, 'lt'))) {
+        if (stats.payloadBytes <= payloadBudget) {
+          const group = { node, type: 'child', character, stats, bucket: null };
+          node.transitions.set(character, { kind: 'bucket', bucket: null, group });
+          leafGroups.push(group);
+          continue;
+        }
+        const child = createLookupNode(nodes.length, `${node.prefix}${character}`);
+        nodes.push(child);
+        node.transitions.set(character, { kind: 'node', node: child });
+        nextNodes.push(child);
+      }
+      node.childStats.clear();
+    }
+    pendingNodes = nextNodes;
+  }
+
+  const buckets = [];
+  for (const group of [...leafGroups].sort((left, right) => right.stats.payloadBytes - left.stats.payloadBytes || left.node.prefix.localeCompare(right.node.prefix, 'lt'))) {
+    let bucket = buckets.find((candidate) => candidate.payloadBytes + group.stats.payloadBytes <= payloadBudget);
+    if (!bucket) {
+      bucket = { id: buckets.length, groups: [], payloadBytes: 0, records: 0 };
+      buckets.push(bucket);
+    }
+    bucket.groups.push(group);
+    bucket.payloadBytes += group.stats.payloadBytes;
+    bucket.records += group.stats.records;
+    group.bucket = bucket;
+    if (group.type === 'terminal') {
+      group.node.terminalGroup = group;
+    } else {
+      const transition = group.node.transitions.get(group.character);
+      transition.bucket = bucket;
+    }
+  }
+
+  if (buckets.length === 0) fail(`${profile.id} lookup produced no buckets`);
+  return { root, nodes, buckets };
+}
+
+async function writeCompactJsonWithByteBudget(filename, value, maxBytes, description) {
+  const buffer = Buffer.from(`${JSON.stringify(value)}\n`, 'utf8');
+  if (buffer.byteLength > maxBytes) fail(`${description} exceeds its ${maxBytes}-byte budget`);
+  await mkdir(path.dirname(filename), { recursive: true });
+  await writeFile(filename, buffer);
+  return buffer;
+}
+
+async function writeNormalizedContrastLookupBuckets({
+  productId,
+  productDirectory,
+  profile,
+  sourceFile,
+  sourcePath,
+  sourceDisplayPath,
+  sourceView,
+  wordField,
+  routing
+}) {
+  const profileDirectory = path.join(productDirectory, 'analysis', profile.id);
+  const bucketDirectory = path.join(profileDirectory, 'buckets');
+  const temporaryDirectory = path.join(productDirectory, `.lookup-staging-${profile.id}`);
+  const delimiter = sourceFile.delimiter ?? '\t';
+  const bucketBuffers = new Map();
+  const bufferLimit = 32768;
+  const temporaryFile = (bucket) => path.join(temporaryDirectory, `${String(bucket.id + 1).padStart(6, '0')}.jsonl`);
+
+  async function flushBucket(bucket) {
+    const buffered = bucketBuffers.get(bucket.id);
+    if (!buffered?.text) return;
+    await appendFile(temporaryFile(bucket), buffered.text, 'utf8');
+    bucketBuffers.delete(bucket.id);
+  }
+
+  await rm(temporaryDirectory, { recursive: true, force: true });
+  await mkdir(temporaryDirectory, { recursive: true });
+  const numericTotals = fieldTotals(sourceView.fields);
+  const nullCounts = fieldNullCounts(sourceView.fields);
+  let sourceRows = 0;
+  try {
+    const lines = createInterface({
+      input: createReadStream(sourcePath, { encoding: 'utf8' }),
+      crlfDelay: Infinity
+    });
+    let physicalLineNumber = 0;
+    for await (const line of lines) {
+      physicalLineNumber += 1;
+      if (sourceFile.hasHeader === true && physicalLineNumber === 1) continue;
+      const values = parseDelimitedLine(line, delimiter);
+      if (values.length !== sourceFile.columns) {
+        fail(`${sourceDisplayPath} line ${sourceRows + 1} has ${values.length} columns; expected ${sourceFile.columns}`);
+      }
+      const record = sourceView.fields.map((field) => parseFieldValue(field, values[field.sourceColumn], sourceDisplayPath, sourceRows + 1));
+      for (const [index, field] of sourceView.fields.entries()) {
+        const value = record[index];
+        if (value === null) {
+          nullCounts[field.id] += 1;
+        } else if (SUMMARIZED_FIELD_TYPES.has(field.type)) {
+          numericTotals[field.id] += value;
+        }
+      }
+      const normalizedWord = normalizeLookupWord(record[sourceView.fields.indexOf(wordField)]);
+      if (!normalizedWord) fail(`${sourceDisplayPath} line ${sourceRows + 1} has an empty ${wordField.id} value`);
+      const bucket = routeLookupBucket(routing.root, normalizedWord);
+      if (!bucket) fail(`${profile.id} has no lookup route for ${normalizedWord}`);
+      const recordJson = JSON.stringify([normalizedWord, sourceRows]);
+      const appended = `${recordJson}\n`;
+      const bytes = Buffer.byteLength(appended, 'utf8');
+      const buffered = bucketBuffers.get(bucket.id) ?? { text: '', bytes: 0 };
+      if (buffered.bytes + bytes > bufferLimit && buffered.text) {
+        bucketBuffers.set(bucket.id, buffered);
+        await flushBucket(bucket);
+      }
+      const next = bucketBuffers.get(bucket.id) ?? { text: '', bytes: 0 };
+      next.text += appended;
+      next.bytes += bytes;
+      bucketBuffers.set(bucket.id, next);
+      sourceRows += 1;
+    }
+    for (const bucket of routing.buckets) await flushBucket(bucket);
+    const sourceSummary = { sourceRows, recordCount: sourceRows, numericTotals, nullCounts };
+    assertContractSummary(sourceFile, sourceView.fields, sourceSummary, sourceDisplayPath);
+
+    const descriptors = [];
+    let uniqueNormalizedWordForms = 0;
+    let duplicateNormalizedWordForms = 0;
+    let extraDuplicateRows = 0;
+    let maxSourceRowsPerWord = 0;
+    for (const bucket of routing.buckets) {
+      const records = (await readFile(temporaryFile(bucket), 'utf8')).trimEnd().split('\n').map((line) => parseJson(line, `${profile.id} lookup bucket staging record`));
+      if (records.length !== bucket.records) {
+        fail(`${profile.id} lookup bucket ${bucket.id} does not reconcile with its routing count`);
+      }
+      const wordOccurrences = new Map();
+      for (const record of records) {
+        if (!Array.isArray(record) || record.length !== 2 || !normalizeLookupWord(record[0])
+          || !Number.isSafeInteger(record[1]) || record[1] < 0 || record[1] >= sourceRows) {
+          fail(`${profile.id} lookup bucket ${bucket.id} has an invalid lookup record`);
+        }
+        const normalizedWord = normalizeLookupWord(record[0]);
+        if (normalizedWord !== record[0]) fail(`${profile.id} lookup bucket ${bucket.id} has a non-normalized lookup word`);
+        wordOccurrences.set(normalizedWord, (wordOccurrences.get(normalizedWord) ?? 0) + 1);
+      }
+      for (const occurrences of wordOccurrences.values()) {
+        uniqueNormalizedWordForms += 1;
+        maxSourceRowsPerWord = Math.max(maxSourceRowsPerWord, occurrences);
+        if (occurrences > 1) {
+          duplicateNormalizedWordForms += 1;
+          extraDuplicateRows += occurrences - 1;
+        }
+      }
+      if (maxSourceRowsPerWord > profile.lookup.maxSourceRowsPerWord) {
+        fail(`${profile.id} lookup has more source rows per word than its declared bound`);
+      }
+      const filename = `${String(bucket.id + 1).padStart(6, '0')}.json`;
+      const buffer = await writeCompactJsonWithByteBudget(
+        path.join(bucketDirectory, filename),
+        {
+          schemaVersion: 1,
+          productId,
+          profileId: profile.id,
+          bucketId: bucket.id,
+          recordEncoding: 'array',
+          records
+        },
+        profile.lookup.maxBucketBytes,
+        `${productId}/${profile.id}/buckets/${filename}`
+      );
+      descriptors.push({
+        id: bucket.id,
+        file: `buckets/${filename}`,
+        records: records.length,
+        bytes: buffer.byteLength,
+        sha256: createHash('sha256').update(buffer).digest('hex')
+      });
+    }
+    return {
+      sourceSummary,
+      lookupSummary: {
+        lookupRecords: sourceRows,
+        uniqueNormalizedWordForms,
+        duplicateNormalizedWordForms,
+        extraDuplicateRows,
+        maxSourceRowsPerWord
+      },
+      bucketDescriptors: descriptors
+    };
+  } finally {
+    await rm(temporaryDirectory, { recursive: true, force: true });
+  }
+}
+
+async function buildNormalizedContrastLookupProfile({ contract, productId, productDirectory, profile, views, sourceRoot }) {
+  const { sourceView, wordField, sources, targetTokens } = findNormalizedContrastLookupFields(profile, views);
+  const filesByRole = new Map(contract.source.files.map((file) => [file.role, file]));
+  const sourceFile = filesByRole.get(profile.sourceRole);
+  if (!sourceFile) fail(`${profile.id} has no source file with role ${profile.sourceRole}`);
+  const { realRoot, sourcePath } = await resolveSourcePath(sourceRoot, sourceFile.path);
+  const sourceDisplayPath = sourceRelativePath(realRoot, sourcePath);
+  const routing = await buildLookupRouting({ sourceFile, sourcePath, sourceDisplayPath, wordField, profile });
+  const { sourceSummary, lookupSummary, bucketDescriptors } = await writeNormalizedContrastLookupBuckets({
+    productId,
+    productDirectory,
+    profile,
+    sourceFile,
+    sourcePath,
+    sourceDisplayPath,
+    sourceView,
+    wordField,
+    routing
+  });
+  const routingNodes = routing.nodes.map((node) => ({
+    terminalBucket: node.terminalGroup?.bucket?.id ?? null,
+    children: [...node.transitions.entries()]
+      .sort(([left], [right]) => left.localeCompare(right, 'lt'))
+      .map(([character, transition]) => [character, transition.kind === 'bucket' ? transition.bucket.id : -transition.node.id - 1])
+  }));
+  const profileDirectory = path.join(productDirectory, 'analysis', profile.id);
+  const manifest = {
+    schemaVersion: 1,
+    productId,
+    profileId: profile.id,
+    profileType: profile.type,
+    title: profile.title,
+    description: profile.description,
+    sourceView: {
+      id: sourceView.id,
+      sourceRole: profile.sourceRole,
+      index: `views/${sourceView.id}/index.json`,
+      fields: sourceView.fields,
+      wordField: { id: wordField.id, label: wordField.label },
+      summary: sourceSummary
+    },
+    sources: sources.map((source) => ({
+      id: source.id,
+      label: source.label,
+      tokenField: publicNormalizedMetricField(source.tokenField),
+      documentField: publicNormalizedMetricField(source.documentField)
+    })),
+    contrast: {
+      minimumRate: profile.minimumRate,
+      unit: sources[0].tokenField.unit,
+      targetTokens,
+      formula: 'log2(numeratorRate / denominatorRate)',
+      pairs: profile.pairs
+    },
+    provenance: {
+      sourceUrl: contract.source.sourceUrl,
+      licence: contract.source.licence,
+      citation: contract.source.citation,
+      sourceFile: publicSourceFile(sourceFile)
+    },
+    delivery: {
+      summaryMaxBytes: profile.summaryMaxBytes,
+      lookupBucketMaxBytes: profile.lookup.maxBucketBytes,
+      maxSourceRowsPerWord: profile.lookup.maxSourceRowsPerWord
+    },
+    lookup: {
+      normalization: profile.lookup.normalization,
+      recordEncoding: 'array',
+      fields: [
+        { id: 'normalizedWord', label: 'Normalized lookup word form', type: 'string' },
+        { id: 'sourceRow', label: 'Zero-based source row', type: 'source-row' }
+      ],
+      routing: {
+        root: 0,
+        nodes: routingNodes,
+        buckets: bucketDescriptors
+      }
+    },
+    summary: {
+      ...lookupSummary,
+      sourceRows: sourceSummary.sourceRows
+    }
+  };
+  await writeCompactJsonWithByteBudget(
+    path.join(profileDirectory, 'manifest.json'),
+    manifest,
+    profile.summaryMaxBytes,
+    `${productId}/${profile.id}/manifest.json`
+  );
+  return {
+    id: profile.id,
+    type: profile.type,
+    title: profile.title,
+    description: profile.description,
+    manifest: `analysis/${profile.id}/manifest.json`
+  };
+}
+
+function compareStrings(left, right) {
+  return left < right ? -1 : left > right ? 1 : 0;
+}
+
+function prefixFor(value, codePoints) {
+  const prefix = Array.from(value.toLocaleLowerCase('lt')).slice(0, codePoints).join('');
+  return prefix || '_';
+}
+
+async function runUnzip(args, description) {
+  const child = spawn('unzip', args, { stdio: ['ignore', 'pipe', 'pipe'] });
+  const stdout = [];
+  let stderr = '';
+  child.stdout.on('data', (chunk) => stdout.push(chunk));
+  child.stderr.setEncoding('utf8');
+  child.stderr.on('data', (chunk) => { stderr += chunk; });
+  const exitCode = await new Promise((resolve, reject) => {
+    child.once('error', reject);
+    child.once('close', resolve);
+  });
+  if (exitCode !== 0) fail(`could not read ${description}: ${stderr.trim()}`);
+  return Buffer.concat(stdout);
+}
+
+function assertTreebankSourceFile(sourceFile, configuration) {
+  if (sourceFile.format !== 'zip-conllu-treebank' || !isSafeRelativePath(sourceFile.archiveDirectory)
+    || !isPlainObject(sourceFile.conlluSummary)) {
+    fail(`${configuration.sourceRole} requires a zip-conllu-treebank source file and reviewed summary`);
+  }
+  for (const field of [
+    'documents', 'sentences', 'repositorySentenceClaim', 'integerTokenRows',
+    'nonPunctuationRows', 'allRelationLabels', 'nonPunctuationRelationLabels',
+    'rootRows', 'nonPunctuationRootRows', 'nonRootDependencyRows', 'uncompressedBytes'
+  ]) {
+    asSafeInteger(sourceFile.conlluSummary[field], `${configuration.sourceRole} source ${field}`);
+  }
+  if (!/^[a-f0-9]{64}$/.test(sourceFile.conlluSummary.membersSha256)) {
+    fail(`${configuration.sourceRole} source conlluSummary.membersSha256 must be a SHA-256 checksum`);
+  }
+}
+
+function parseConlluDocument({ text, sourceDisplayPath, member, onSentence }) {
+  let comments = [];
+  let rows = [];
+  let sentenceNumber = 0;
+  const finishSentence = () => {
+    if (rows.length === 0) {
+      comments = [];
+      return;
+    }
+    sentenceNumber += 1;
+    const sourceSentenceId = normalizeString(comments.find((line) => line.startsWith('# sent_id = '))?.slice('# sent_id = '.length));
+    if (!sourceSentenceId) fail(`${sourceDisplayPath} archive member ${member} sentence ${sentenceNumber} has no sent_id`);
+    const tokens = new Map();
+    for (const row of rows) {
+      const values = row.split('\t');
+      if (values.length !== 10) fail(`${sourceDisplayPath} archive member ${member} has a malformed CoNLL-U row`);
+      if (!/^\d+$/.test(values[0])) continue;
+      const [id, form, lemma, universalPos, , , head, relation] = values;
+      if (!normalizeString(form) || !normalizeString(lemma) || !normalizeString(universalPos)
+        || !normalizeString(head) || !normalizeString(relation) || !/^(?:0|[1-9]\d*)$/.test(head)) {
+        fail(`${sourceDisplayPath} archive member ${member} has an incomplete CoNLL-U token row`);
+      }
+      tokens.set(Number(id), {
+        id: Number(id),
+        form: form.trim(),
+        lemma: lemma.trim(),
+        universalPos: universalPos.trim(),
+        head: Number(head),
+        relation: relation.trim()
+      });
+    }
+    if (tokens.size === 0) fail(`${sourceDisplayPath} archive member ${member} sentence ${sourceSentenceId} has no integer-ID tokens`);
+    const suppliedText = normalizeString(comments.find((line) => line.startsWith('# text = '))?.slice('# text = '.length));
+    const sentenceText = suppliedText || [...tokens.values()].sort((left, right) => left.id - right.id).map((token) => token.form).join(' ');
+    onSentence({ sourceSentenceId, tokens, sentenceText });
+    comments = [];
+    rows = [];
+  };
+
+  for (const line of text.split(/\r?\n/)) {
+    if (line === '') {
+      finishSentence();
+    } else if (line.startsWith('#')) {
+      comments.push(line);
+    } else {
+      rows.push(line);
+    }
+  }
+  finishSentence();
+}
+
+async function buildDerivedRecordsView({
+  productId, productDirectory, sourceFile, view, records, sourceRows, selection
+}) {
+  const viewDirectory = path.join(productDirectory, 'views', view.id);
+  const chunksDirectory = path.join(viewDirectory, 'chunks');
+  await mkdir(chunksDirectory, { recursive: true });
+
+  const suffix = ']}\n';
+  const chunks = [];
+  const numericTotals = fieldTotals(view.fields);
+  const nullCounts = fieldNullCounts(view.fields);
+  let chunkNumber = 0;
+  let recordJsons = [];
+  let recordsBytes = 0;
+  let chunkSelectionPrefixes = [];
+
+  async function flushChunk() {
+    if (recordJsons.length === 0) return;
+    const serialized = `${chunkPrefix(productId, view.id, chunkNumber)}${recordJsons.join(',')}${suffix}`;
+    const buffer = Buffer.from(serialized, 'utf8');
+    if (buffer.byteLength > view.chunkBytes) {
+      fail(`${productId}/${view.id} chunk ${chunkNumber} exceeds its ${view.chunkBytes}-byte budget`);
+    }
+    const filename = `${String(chunkNumber + 1).padStart(6, '0')}.json`;
+    await writeFile(path.join(chunksDirectory, filename), buffer);
+    chunks.push({
+      file: `chunks/${filename}`,
+      records: recordJsons.length,
+      bytes: buffer.byteLength,
+      sha256: createHash('sha256').update(buffer).digest('hex'),
+      ...(chunkSelectionPrefixes.length === 0 ? {} : { selectionPrefixes: chunkSelectionPrefixes })
+    });
+    chunkNumber += 1;
+    recordJsons = [];
+    recordsBytes = 0;
+    chunkSelectionPrefixes = [];
+  }
+
+  for (const record of records) {
+    if (!Array.isArray(record) || record.length !== view.fields.length) {
+      fail(`${productId}/${view.id} produced an invalid record shape`);
+    }
+    for (const [index, field] of view.fields.entries()) {
+      const value = record[index];
+      if (NUMERIC_FIELD_TYPES.has(field.type)) {
+        if (!Number.isSafeInteger(value) || value < 0) fail(`${productId}/${view.id} produced an invalid ${field.id} value`);
+        if (SUMMARIZED_FIELD_TYPES.has(field.type)) numericTotals[field.id] += value;
+      } else if (!normalizeString(value)) {
+        fail(`${productId}/${view.id} produced an empty ${field.id} value`);
+      }
+    }
+    const recordSelectionPrefix = selection?.prefixForRecord(record);
+    if (selection && !normalizeString(recordSelectionPrefix)) {
+      fail(`${productId}/${view.id} produced an empty selection prefix`);
+    }
+    if (recordJsons.length > 0 && selection?.packPrefixes !== true
+      && recordSelectionPrefix !== chunkSelectionPrefixes[0]) await flushChunk();
+    const recordJson = JSON.stringify(record);
+    const candidateBytes = Buffer.byteLength(chunkPrefix(productId, view.id, chunkNumber)) + recordsBytes
+      + (recordJsons.length === 0 ? 0 : 1) + Buffer.byteLength(recordJson) + Buffer.byteLength(suffix);
+    if (candidateBytes > view.chunkBytes && recordJsons.length > 0) await flushChunk();
+    const currentBytes = Buffer.byteLength(chunkPrefix(productId, view.id, chunkNumber)) + recordsBytes
+      + (recordJsons.length === 0 ? 0 : 1) + Buffer.byteLength(recordJson) + Buffer.byteLength(suffix);
+    if (currentBytes > view.chunkBytes) fail(`${productId}/${view.id} produced an oversize record`);
+    if (selection && !chunkSelectionPrefixes.includes(recordSelectionPrefix)) {
+      chunkSelectionPrefixes.push(recordSelectionPrefix);
+    }
+    recordJsons.push(recordJson);
+    recordsBytes += (recordJsons.length === 1 ? 0 : 1) + Buffer.byteLength(recordJson);
+  }
+  await flushChunk();
+  if (chunks.length === 0) fail(`${productId}/${view.id} produced no records`);
+
+  const summary = {
+    sourceRows,
+    recordCount: records.length,
+    numericTotals,
+    nullCounts
+  };
+  const index = {
+    schemaVersion: 1,
+    productId,
+    viewId: view.id,
+    recordEncoding: 'array',
+    fields: view.fields,
+    ordering: view.ordering,
+    sourceFile: publicSourceFile(sourceFile),
+    derivation: {
+      type: 'conllu-treebank-syntax-context',
+      expectedSummary: { sourceRows, recordCount: records.length }
+    },
+    ...(selection === undefined ? {} : {
+      selection: {
+        type: 'lemma-prefix',
+        field: selection.field,
+        codePoints: selection.codePoints
+      }
+    }),
+    maxChunkBytes: view.chunkBytes,
+    summary,
+    chunks
+  };
+  await writeJson(path.join(viewDirectory, 'index.json'), index);
+  return {
+    id: view.id,
+    title: view.title,
+    description: view.description,
+    index: `views/${view.id}/index.json`,
+    sourceRole: view.sourceRole,
+    recordEncoding: 'array',
+    summary
+  };
+}
+
+function derivedField(id, label, type, unit) {
+  return { id, label, type, ...(unit === undefined ? {} : { unit }), derived: true };
+}
+
+async function buildSyntacticContextProduct({ contract, contractProduct, sourceRepository, sourceRoot, outputRoot }) {
+  const configuration = contractProduct.syntaxContext;
+  const sourceFiles = contract.source.files.filter((file) => file.role === configuration.sourceRole);
+  if (sourceFiles.length !== 1 || contract.source.files.length !== 1) {
+    fail(`${contract.id} syntax context must use exactly one reviewed source archive`);
+  }
+  const sourceFile = sourceFiles[0];
+  assertTreebankSourceFile(sourceFile, configuration);
+  const { realRoot, sourcePath } = await resolveSourcePath(sourceRoot, sourceFile.path);
+  const sourceDisplayPath = sourceRelativePath(realRoot, sourcePath);
+  const archiveListing = decodeUtf8(await runUnzip(['-Z1', sourcePath], sourceDisplayPath), `${sourceDisplayPath} archive listing`);
+  const archivePrefix = `${sourceFile.archiveDirectory}/`;
+  const members = archiveListing.split(/\r?\n/)
+    .filter((member) => member.endsWith('.conllu'))
+    .sort(compareStrings);
+  if (members.length === 0 || members.some((member) => !member.startsWith(archivePrefix))) {
+    fail(`${sourceDisplayPath} has no reviewed CoNLL-U members under ${sourceFile.archiveDirectory}`);
+  }
+
+  const sourceSummary = sourceFile.conlluSummary;
+  const expectedGenres = new Map(Object.entries(configuration.genreLabels));
+  const observedGenres = new Map();
+  const relationCounts = new Map();
+  const allRelationLabels = new Set();
+  const lemmaStats = new Map();
+  const contextRecordsByLemma = new Map();
+  const membersHash = createHash('sha256');
+  let uncompressedBytes = 0;
+  let sentences = 0;
+  let integerTokenRows = 0;
+  let nonPunctuationRows = 0;
+  let rootRows = 0;
+  let nonPunctuationRootRows = 0;
+  let nonRootDependencyRows = 0;
+  let contextRowsOmittedByLimit = 0;
+  let contextSequence = 0;
+
+  function lemmaEntry(lemma) {
+    const existing = lemmaStats.get(lemma);
+    if (existing) return existing;
+    const created = { lemma, tokenCount: 0, headEdgeCount: 0, dependentEdgeCount: 0, rootEdgeCount: 0 };
+    lemmaStats.set(lemma, created);
+    return created;
+  }
+
+  function addContext(lemma, record) {
+    const entries = contextRecordsByLemma.get(lemma) ?? [];
+    if (entries.length >= configuration.maxExamplesPerLemma) {
+      contextRowsOmittedByLimit += 1;
+      return;
+    }
+    entries.push({ record, sequence: contextSequence });
+    contextSequence += 1;
+    contextRecordsByLemma.set(lemma, entries);
+  }
+
+  for (const member of members) {
+    const relativeMember = member.slice(archivePrefix.length);
+    const segments = relativeMember.split('/');
+    const genreId = segments.slice(0, -1).join('/');
+    const document = relativeMember;
+    const genre = expectedGenres.get(genreId);
+    if (!genre || segments.length < 2) fail(`${sourceDisplayPath} archive member ${member} has an unreviewed genre`);
+    const genreSummary = observedGenres.get(genreId) ?? {
+      genreId,
+      genre,
+      documents: 0,
+      sentences: 0,
+      integerTokenRows: 0,
+      nonPunctuationRows: 0,
+      relationshipRows: 0
+    };
+    genreSummary.documents += 1;
+    observedGenres.set(genreId, genreSummary);
+
+    const buffer = await runUnzip(['-p', sourcePath, member], `${sourceDisplayPath} archive member ${member}`);
+    membersHash.update(Buffer.from(member, 'utf8'));
+    membersHash.update(Buffer.from([0]));
+    membersHash.update(buffer);
+    membersHash.update(Buffer.from([0]));
+    uncompressedBytes += buffer.byteLength;
+    parseConlluDocument({
+      text: decodeUtf8(buffer, `${sourceDisplayPath} archive member ${member}`),
+      sourceDisplayPath,
+      member,
+      onSentence: ({ sourceSentenceId, tokens, sentenceText }) => {
+        sentences += 1;
+        genreSummary.sentences += 1;
+        for (const token of tokens.values()) {
+          integerTokenRows += 1;
+          genreSummary.integerTokenRows += 1;
+          allRelationLabels.add(token.relation);
+          if (token.head === 0) rootRows += 1;
+        }
+        for (const dependent of tokens.values()) {
+          if (dependent.universalPos === 'PUNCT') continue;
+          nonPunctuationRows += 1;
+          genreSummary.nonPunctuationRows += 1;
+          genreSummary.relationshipRows += 1;
+          relationCounts.set(dependent.relation, (relationCounts.get(dependent.relation) ?? 0) + 1);
+          const dependentEntry = lemmaEntry(dependent.lemma);
+          dependentEntry.tokenCount += 1;
+          dependentEntry.dependentEdgeCount += 1;
+          const baseRecord = {
+            relation: dependent.relation,
+            dependentLemma: dependent.lemma,
+            dependentForm: dependent.form,
+            genreId,
+            genre,
+            document,
+            sourceSentenceId,
+            sentenceText
+          };
+          if (dependent.head === 0) {
+            nonPunctuationRootRows += 1;
+            dependentEntry.rootEdgeCount += 1;
+            addContext(dependent.lemma, [
+              dependent.lemma, 'root', baseRecord.relation, baseRecord.dependentLemma, baseRecord.dependentForm,
+              'ROOT', 'ROOT', baseRecord.genreId, baseRecord.genre, baseRecord.document,
+              baseRecord.sourceSentenceId, baseRecord.sentenceText
+            ]);
+            continue;
+          }
+          nonRootDependencyRows += 1;
+          const head = tokens.get(dependent.head);
+          if (!head) fail(`${sourceDisplayPath} archive member ${member} sentence ${sourceSentenceId} has a missing dependency head`);
+          const contextRecord = [
+            dependent.lemma, 'dependent', baseRecord.relation, baseRecord.dependentLemma, baseRecord.dependentForm,
+            head.lemma, head.form, baseRecord.genreId, baseRecord.genre, baseRecord.document,
+            baseRecord.sourceSentenceId, baseRecord.sentenceText
+          ];
+          addContext(dependent.lemma, contextRecord);
+          if (head.universalPos !== 'PUNCT') {
+            const headEntry = lemmaEntry(head.lemma);
+            headEntry.headEdgeCount += 1;
+            addContext(head.lemma, [
+              head.lemma, 'head', baseRecord.relation, baseRecord.dependentLemma, baseRecord.dependentForm,
+              head.lemma, head.form, baseRecord.genreId, baseRecord.genre, baseRecord.document,
+              baseRecord.sourceSentenceId, baseRecord.sentenceText
+            ]);
+          }
+        }
+      }
+    });
+  }
+
+  const nonPunctuationRelationLabels = relationCounts.size;
+  const observedSourceSummary = {
+    documents: members.length,
+    sentences,
+    repositorySentenceClaim: sourceSummary.repositorySentenceClaim,
+    integerTokenRows,
+    nonPunctuationRows,
+    allRelationLabels: allRelationLabels.size,
+    nonPunctuationRelationLabels,
+    rootRows,
+    nonPunctuationRootRows,
+    nonRootDependencyRows,
+    uncompressedBytes
+  };
+  for (const [field, actual] of Object.entries(observedSourceSummary)) {
+    if (sourceSummary[field] !== actual) fail(`${sourceDisplayPath} reviewed treebank ${field} does not match the source archive`);
+  }
+  if (membersHash.digest('hex') !== sourceSummary.membersSha256) {
+    fail(`${sourceDisplayPath} reviewed treebank members do not match the source archive`);
+  }
+  if (observedGenres.size !== expectedGenres.size || [...expectedGenres.keys()].some((genreId) => !observedGenres.has(genreId))) {
+    fail(`${sourceDisplayPath} treebank genres do not match the publication plan`);
+  }
+
+  const lemmaRecords = [...lemmaStats.values()]
+    .sort((left, right) => compareStrings(left.lemma, right.lemma))
+    .map((entry) => [
+      entry.lemma, entry.tokenCount, entry.headEdgeCount, entry.dependentEdgeCount,
+      entry.rootEdgeCount
+    ]);
+  const relationRecords = [...relationCounts.entries()]
+    .map(([relation, count]) => [relation, count])
+    .sort((left, right) => right[1] - left[1] || compareStrings(left[0], right[0]));
+  const genreRecords = [...observedGenres.values()]
+    .sort((left, right) => compareStrings(left.genreId, right.genreId))
+    .map((entry) => [
+      entry.genreId, entry.genre, entry.documents, entry.sentences, entry.integerTokenRows,
+      entry.nonPunctuationRows, entry.relationshipRows
+    ]);
+  const contextRecords = [...contextRecordsByLemma.entries()]
+    .flatMap(([lemma, entries]) => entries.map(({ record, sequence }) => ({ lemma, record, sequence })))
+    .sort((left, right) => compareStrings(prefixFor(left.lemma, configuration.contextPrefixCodePoints), prefixFor(right.lemma, configuration.contextPrefixCodePoints))
+      || compareStrings(left.lemma, right.lemma) || left.sequence - right.sequence)
+    .map((entry) => entry.record);
+  const expectedSummary = configuration.expectedSummary;
+  const observedProductSummary = {
+    documents: members.length,
+    sentences,
+    integerTokenRows,
+    nonPunctuationRows,
+    allRelationLabels: allRelationLabels.size,
+    nonPunctuationRelationLabels,
+    rootRows,
+    nonPunctuationRootRows,
+    nonRootDependencyRows,
+    lemmaCount: lemmaRecords.length,
+    contextRecordCount: contextRecords.length,
+    contextRowsOmittedByLimit,
+    lemmaIndexPrefixes: new Set(lemmaRecords.map((record) => prefixFor(record[0], configuration.lemmaIndexPrefixCodePoints))).size,
+    contextPrefixes: new Set(contextRecords.map((record) => prefixFor(record[0], configuration.contextPrefixCodePoints))).size
+  };
+  for (const [field, actual] of Object.entries(observedProductSummary)) {
+    if (expectedSummary[field] !== actual) fail(`${sourceDisplayPath} syntax context ${field} does not match the publication plan`);
+  }
+
+  const productDirectory = path.join(outputRoot, contract.id);
+  const chunkBytes = configuration.chunkBytes;
+  const views = await Promise.all([
+    buildDerivedRecordsView({
+      productId: contract.id,
+      productDirectory,
+      sourceFile,
+      sourceRows: nonPunctuationRows,
+      view: {
+        id: 'relations-by-frequency', sourceRole: configuration.sourceRole,
+        title: 'ALKSNIS dependency relations',
+        description: 'Frequency of source dependency-relation labels across non-punctuation token rows, including source roots.',
+        ordering: { field: 'count', direction: 'descending' }, chunkBytes,
+        fields: [
+          derivedField('relation', 'Source dependency relation', 'string'),
+          derivedField('count', 'Annotated non-punctuation token rows', 'raw-token-count', 'tokens')
+        ]
+      },
+      records: relationRecords
+    }),
+    buildDerivedRecordsView({
+      productId: contract.id,
+      productDirectory,
+      sourceFile,
+      sourceRows: members.length,
+      view: {
+        id: 'genres-by-source-order', sourceRole: configuration.sourceRole,
+        title: 'ALKSNIS source genres',
+        description: 'Document, sentence, token, and non-punctuation relation totals for each source genre.',
+        ordering: { field: 'genreId', direction: 'ascending' }, chunkBytes,
+        fields: [
+          derivedField('genreId', 'Source genre identifier', 'string'),
+          derivedField('genre', 'Source genre', 'string'),
+          derivedField('documents', 'Documents', 'raw-token-count', 'documents'),
+          derivedField('sentences', 'Sentence IDs', 'raw-token-count', 'sentences'),
+          derivedField('integerTokenRows', 'Integer-ID token rows', 'raw-token-count', 'tokens'),
+          derivedField('nonPunctuationRows', 'Non-punctuation token rows', 'raw-token-count', 'tokens'),
+          derivedField('relationshipRows', 'Annotated relationship rows', 'raw-token-count', 'tokens')
+        ]
+      },
+      records: genreRecords
+    }),
+    buildDerivedRecordsView({
+      productId: contract.id,
+      productDirectory,
+      sourceFile,
+      sourceRows: nonPunctuationRows,
+      selection: {
+        field: 'lemma', codePoints: configuration.lemmaIndexPrefixCodePoints,
+        prefixForRecord: (record) => prefixFor(record[0], configuration.lemmaIndexPrefixCodePoints),
+        packPrefixes: true
+      },
+      view: {
+        id: 'lemmas-by-source-order', sourceRole: configuration.sourceRole,
+        title: 'ALKSNIS lemma context index',
+        description: 'Every non-punctuation source lemma, with its annotated token count and the number of retained dependency roles.',
+        ordering: { field: 'lemma', direction: 'ascending' }, chunkBytes,
+        fields: [
+          derivedField('lemma', 'Source lemma', 'string'),
+          derivedField('tokenCount', 'Non-punctuation token rows', 'raw-token-count', 'tokens'),
+          derivedField('headEdgeCount', 'Rows where the lemma is a non-punctuation head', 'raw-token-count', 'relationships'),
+          derivedField('dependentEdgeCount', 'Rows where the lemma is the dependent', 'raw-token-count', 'relationships'),
+          derivedField('rootEdgeCount', 'Rows where the lemma has source head 0', 'raw-token-count', 'relationships')
+        ]
+      },
+      records: lemmaRecords
+    }),
+    buildDerivedRecordsView({
+      productId: contract.id,
+      productDirectory,
+      sourceFile,
+      sourceRows: contextRecords.length,
+      selection: {
+        field: 'lemma', codePoints: configuration.contextPrefixCodePoints,
+        prefixForRecord: (record) => prefixFor(record[0], configuration.contextPrefixCodePoints),
+        packPrefixes: true
+      },
+      view: {
+        id: 'sentence-contexts-by-lemma', sourceRole: configuration.sourceRole,
+        title: 'ALKSNIS sentence contexts',
+        description: 'Up to the reviewed source-order limit of dependency contexts per non-punctuation lemma; fetch by selected lemma prefix.',
+        ordering: { field: 'lemma', direction: 'ascending' }, chunkBytes,
+        fields: [
+          derivedField('lemma', 'Selected source lemma', 'string'),
+          derivedField('direction', 'Selected lemma role', 'string'),
+          derivedField('relation', 'Source dependency relation', 'string'),
+          derivedField('dependentLemma', 'Dependent source lemma', 'string'),
+          derivedField('dependentForm', 'Dependent source form', 'string'),
+          derivedField('headLemma', 'Head source lemma or ROOT', 'string'),
+          derivedField('headForm', 'Head source form or ROOT', 'string'),
+          derivedField('genreId', 'Source genre identifier', 'string'),
+          derivedField('genre', 'Source genre', 'string'),
+          derivedField('document', 'Source CoNLL-U document', 'string'),
+          derivedField('sourceSentenceId', 'Source sentence identifier', 'string'),
+          derivedField('sentenceText', 'Source sentence text', 'string')
+        ]
+      },
+      records: contextRecords
+    })
+  ]);
+
+  const manifest = {
+    schemaVersion: 1,
+    id: contract.id,
+    title: contract.title,
+    productType: SYNTACTIC_CONTEXT_PRODUCT_TYPE,
+    publication: contractProduct.publication,
+    provenance: {
+      sourceRepository,
+      sourceUrl: contract.source.sourceUrl,
+      licence: contract.source.licence,
+      citation: contract.source.citation,
+      files: contract.source.files.map(publicSourceFile)
+    },
+    delivery: {
+      mode: 'static-prefix-chunked-syntax-context-json',
+      constraints: contract.delivery?.constraints ?? []
+    },
+    syntaxContext: {
+      overview: {
+        repositorySentenceClaim: sourceSummary.repositorySentenceClaim,
+        deliveredSentenceIds: sentences,
+        documents: members.length,
+        integerTokenRows,
+        nonPunctuationRows,
+        allRelationLabels: allRelationLabels.size,
+        nonPunctuationRelationLabels,
+        rootRows,
+        nonPunctuationRootRows,
+        nonRootDependencyRows
+      },
+      exclusions: ['UPOS=PUNCT is excluded from the lemma index, relation summary, and contexts.'],
+      exampleSelection: {
+        maxExamplesPerLemma: configuration.maxExamplesPerLemma,
+        order: 'Archive member, sentence, and token source order.',
+        omittedRows: contextRowsOmittedByLimit
+      },
+      lookup: {
+        lemmaIndexView: 'lemmas-by-source-order',
+        lemmaIndexPrefixCodePoints: configuration.lemmaIndexPrefixCodePoints,
+        contextView: 'sentence-contexts-by-lemma',
+        contextPrefixCodePoints: configuration.contextPrefixCodePoints,
+        directions: ['dependent', 'head', 'root']
+      }
+    },
+    views
+  };
+  await writeJson(path.join(productDirectory, 'manifest.json'), manifest);
+  return {
+    id: contract.id,
+    title: contract.title,
+    productType: manifest.productType,
+    publicationStatus: 'published',
+    manifest: `${contract.id}/manifest.json`,
+    licence: contract.source.licence,
+    viewCount: views.length,
+    recordCount: null
+  };
+}
+
 function validateGenericDataset(dataset, filename) {
   if (!isPlainObject(dataset) || dataset.schemaVersion !== 1 || !isSafeId(dataset.id)
     || !normalizeString(dataset.title) || !normalizeString(dataset.author)
@@ -714,22 +2389,59 @@ async function buildContractProduct({ contract, contractProduct, sourceRepositor
     };
   }
 
-  const filesByRole = new Map(contract.source.files.map((file) => [file.role, file]));
+  if (contractProduct.productType === SYNTACTIC_CONTEXT_PRODUCT_TYPE) {
+    return buildSyntacticContextProduct({ contract, contractProduct, sourceRepository, sourceRoot, outputRoot });
+  }
+
+  const sourceFilesWithRoles = contract.source.files.filter((file) => normalizeString(file.role));
+  const filesByRole = new Map(sourceFilesWithRoles.map((file) => [file.role, file]));
+  if (filesByRole.size !== sourceFilesWithRoles.length) {
+    fail(`${contract.id} assigns the same source role to more than one file`);
+  }
   const views = [];
   const usedSourceRoles = new Set();
   for (const view of contractProduct.views) {
     const sourceFile = filesByRole.get(view.sourceRole);
     if (!sourceFile) fail(`${contract.id} has no source file with role ${view.sourceRole}`);
     usedSourceRoles.add(view.sourceRole);
-    if (view.derivation !== undefined) {
+    if (view.derivation?.type === 'conllu-frequency') {
       views.push(await buildDerivedConlluFrequencyView({ productId: contract.id, productDirectory, view, sourceFile, sourceRoot }));
+    } else if (view.derivation?.type === 'name-transliteration') {
+      views.push(await buildDerivedNameTransliterationView({ productId: contract.id, productDirectory, view, sourceFile, sourceRoot }));
+    } else if (view.derivation?.type === 'nvh-lexicon') {
+      views.push(await buildDerivedNvhLexiconView({ productId: contract.id, productDirectory, view, sourceFile, sourceRoot }));
     } else {
       views.push(await buildChunkedView({ productId: contract.id, productDirectory, view, sourceFile, sourceRoot }));
     }
   }
-  if (usedSourceRoles.size !== contract.source.files.length
-    || contract.source.files.some((file) => !usedSourceRoles.has(file.role))) {
+  if (usedSourceRoles.size !== sourceFilesWithRoles.length
+    || sourceFilesWithRoles.some((file) => !usedSourceRoles.has(file.role))) {
     fail(`${contract.id} must publish at least one view for every reviewed machine-readable source file`);
+  }
+
+  const analysisProfiles = [];
+  for (const profile of contractProduct.analysisProfiles ?? []) {
+    if (profile.type === 'frequency-band-coverage') {
+      analysisProfiles.push(await buildFrequencyBandCoverageProfile({
+        contract,
+        productId: contract.id,
+        productDirectory,
+        profile,
+        views: contractProduct.views,
+        sourceRoot
+      }));
+    } else if (profile.type === 'normalized-contrast-lookup') {
+      analysisProfiles.push(await buildNormalizedContrastLookupProfile({
+        contract,
+        productId: contract.id,
+        productDirectory,
+        profile,
+        views: contractProduct.views,
+        sourceRoot
+      }));
+    } else {
+      fail(`${contract.id} has an unsupported analysis profile type: ${profile.type}`);
+    }
   }
 
   const manifest = {
@@ -749,7 +2461,8 @@ async function buildContractProduct({ contract, contractProduct, sourceRepositor
       mode: 'static-chunked-json',
       constraints: contract.delivery?.constraints ?? []
     },
-    views
+    views,
+    ...(analysisProfiles.length === 0 ? {} : { analysisProfiles })
   };
   await writeJson(path.join(productDirectory, 'manifest.json'), manifest);
   return {
@@ -840,7 +2553,10 @@ function parseArguments(args) {
     }
     const value = args[index + 1];
     if (!value || value.startsWith('--')) fail(`option ${option} requires a value`);
-    options[option.slice(2).replace(/-([a-z])/g, (_, letter) => letter.toUpperCase())] = value;
+    const key = option === '--output' ? 'outputRoot'
+      : option === '--static-root' ? 'staticRoot'
+        : option.slice(2).replace(/-([a-z])/g, (_, letter) => letter.toUpperCase());
+    options[key] = value;
     index += 1;
   }
   return options;

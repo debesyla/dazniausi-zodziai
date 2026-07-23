@@ -66,6 +66,10 @@ describe('DownloadButton', () => {
     expect(click).toHaveBeenCalledOnce();
     expect(downloadLink.href).toBe('blob:test-download');
     expect(downloadLink.download).toBe('utka-2018-lemmatized-totals-2026-07-20.csv');
+    expect(document.body.contains(downloadLink)).toBe(false);
+    expect(revokeObjectURL).not.toHaveBeenCalled();
+
+    vi.advanceTimersByTime(1_000);
     expect(revokeObjectURL).toHaveBeenCalledWith('blob:test-download');
 
     const blob = createObjectURL.mock.calls[0][0];
