@@ -71,10 +71,13 @@ function verifyTextFile(file, buffer) {
     const columns = parseDelimitedLine(line, delimiter);
     if (columns.length !== file.columns) fail(`${file.path} column count mismatch at row ${lineIndex + 1}: expected ${file.columns}, received ${columns.length}`);
 
+    for (const column of nullableColumns) {
+      if (columns[column] === '') counts.set(column, (counts.get(column) ?? 0) + 1);
+    }
+
     for (const column of numericColumns) {
       const value = columns[column];
       if (value === '' && nullableColumns.has(column)) {
-        counts.set(column, (counts.get(column) ?? 0) + 1);
         continue;
       }
       const parsed = parseInteger(value, `${file.path} row ${lineIndex + 1} column ${column}`);
@@ -108,6 +111,19 @@ function verifyTextFile(file, buffer) {
   }
 }
 
+function verifyNvhFile(file, buffer) {
+  let text;
+  try {
+    text = new TextDecoder('utf-8', { fatal: true }).decode(buffer);
+  } catch {
+    fail(`source file is not valid UTF-8: ${file.path}`);
+  }
+  const lines = countLines(text);
+  if (lines.length !== file.rows) {
+    fail(`${file.path} row count mismatch: expected ${file.rows}, received ${lines.length}`);
+  }
+}
+
 export async function verifySourceContracts({ contractPath = defaultContractPath, sourceRoot }) {
   if (!sourceRoot) fail('a --source-root directory is required');
   const manifest = JSON.parse(await readFile(contractPath, 'utf8'));
@@ -121,7 +137,8 @@ export async function verifySourceContracts({ contractPath = defaultContractPath
       const checksum = createHash('sha256').update(buffer).digest('hex');
       if (buffer.byteLength !== file.bytes) fail(`${file.path} byte count mismatch: expected ${file.bytes}, received ${buffer.byteLength}`);
       if (checksum !== file.sha256) fail(`${file.path} checksum mismatch: expected ${file.sha256}, received ${checksum}`);
-      if (!['binary', 'zip-conllu'].includes(file.format)) verifyTextFile(file, buffer);
+      if (file.format === 'nvh') verifyNvhFile(file, buffer);
+      else if (!['binary', 'zip-conllu'].includes(file.format)) verifyTextFile(file, buffer);
       verifiedFiles += 1;
     }
   }
