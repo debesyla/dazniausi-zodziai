@@ -77,4 +77,15 @@ describe('project hygiene', () => {
 			blockedBy: ['https://github.com/debesyla/dazniausi-zodziai/issues/41']
 		});
 	});
+
+	it('documents which statistical explorations the reviewed data can support', async () => {
+		const roadmap = await readRepositoryFile('docs/statistical-exploration-roadmap.md');
+
+		expect(roadmap).toContain('## Capability matrix');
+		expect(roadmap).toContain('DML6 coverage profile');
+		expect(roadmap).toContain('Wartime lexical contrast');
+		expect(roadmap).toContain('MATAS concordance and co-occurrence');
+		expect(roadmap).toContain('zero populated `HEAD` values and zero populated `DEPREL` values');
+		expect(roadmap).toContain('No time trend');
+	});
 });
