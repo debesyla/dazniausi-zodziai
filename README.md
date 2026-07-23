@@ -39,7 +39,9 @@ npm run build
 
 `npm run preview` serves the production build locally. The repeatable
 browser-release matrix and deployed-site sign-off steps are in
-[docs/browser-acceptance.md](docs/browser-acceptance.md).
+[docs/browser-acceptance.md](docs/browser-acceptance.md); use the
+[release-record template](docs/release-record.md) for the final go/no-go
+decision.
 
 ## Dataset maintenance
 
