@@ -12,6 +12,7 @@
   const dataProductsCatalog = `${base}/data-products/catalog.json`;
   const methodologyUrl = `${base}/apie`;
   const coverageProfile = `${base}/zodyno-apreptis`;
+  const wartimeContrast = `${base}/karo-zodziu-palyginimas`;
 
   let selectedDataset = $derived(catalog?.datasets.find((dataset) => dataset.id === selectedDatasetId));
 
@@ -97,6 +98,7 @@
     <h2 id="data-products-title">{t('dataProductsTitle')}</h2>
     <p>{t('dataProductsDescription')}</p>
     <p><a href={coverageProfile}>Tyrinėti DML6 žodyno aprėptį pagal dažnumą</a></p>
+    <p><a href={wartimeContrast}>Palyginti CCLL2 ir karo laikotarpio žodžių formas</a></p>
     <a href={dataProductsCatalog}>{t('openDataProducts')}</a>
   </section>
 </main>

@@ -563,4 +563,115 @@ describe('public data-product preparation', () => {
     const drilldown = JSON.parse(await readFile(path.join(outputRoot, 'coverage-fixture', 'analysis', 'coverage-by-band', abbreviation.drilldown.file), 'utf8'));
     expect(drilldown.records).toEqual([['tie-a', 10], ['tie-b', 10]]);
   });
+
+  it('builds a bounded normalized-contrast lookup without copying the source metrics into lookup buckets', async () => {
+    const root = await makeDirectory();
+    const sourceRoot = path.join(root, 'sources');
+    const staticRoot = path.join(root, 'static');
+    const outputRoot = path.join(staticRoot, 'data-products');
+    const planPath = path.join(root, 'plan.json');
+    const contractPath = path.join(root, 'contract.json');
+    const source = [
+      'KARAS\t200\t50\t800\t200\t400\t100',
+      'RETAS\t50\t12\t1000\t500\t\t',
+      'IŠSPRĘSTA\t544\t405\t\t\t670\t670',
+      'IŠSPRĘSTA\t\t\t638\t593\t\t'
+    ].join('\n').concat('\n');
+    const contract = {
+      schemaVersion: 1,
+      sourceRepository: { repositoryUrl: 'https://example.test/source.git', revision: 'fixture-revision' },
+      contracts: [{
+        id: 'contrast-fixture',
+        title: 'Contrast fixture',
+        source: {
+          sourceUrl: 'https://example.test/contrast',
+          licence: 'CC BY 4.0',
+          citation: 'Fixture contrast citation',
+          files: [{
+            path: 'comparison.tsv',
+            role: 'normalized-comparison',
+            bytes: Buffer.byteLength(source),
+            rows: 4,
+            sha256: checksum(source),
+            columns: 7,
+            numericColumns: [1, 2, 3, 4, 5, 6],
+            nullableColumns: [1, 2, 3, 4, 5, 6],
+            numericTotals: { 1: 794, 2: 467, 3: 2438, 4: 1293, 5: 1070, 6: 770 },
+            missingCounts: { 1: 1, 2: 1, 3: 1, 4: 1, 5: 2, 6: 2 },
+            samples: ['KARAS\t200\t50\t800\t200\t400\t100', 'IŠSPRĘSTA\t\t\t638\t593\t\t']
+          }]
+        },
+        delivery: { constraints: ['Keep absent metrics as null.'] }
+      }]
+    };
+    const normalized = (id, label, type, sourceColumn, sourceTokens) => ({
+      id, label, type, unit: `${type === 'normalized-token-count' ? 'tokens' : 'documents'} per 100 million source words`,
+      sourceColumn, nullable: true, normalization: { sourceTokens, targetTokens: 100000000 }
+    });
+    const fields = [
+      { id: 'word', label: 'Word form', type: 'string', sourceColumn: 0 },
+      normalized('ccll2TokenCount', 'CCLL2 token count', 'normalized-token-count', 1, 162000000),
+      normalized('ccll2DocumentCount', 'CCLL2 document count', 'normalized-document-count', 2, 162000000),
+      normalized('mediaTokenCount', 'Media token count', 'normalized-token-count', 3, 36000000),
+      normalized('mediaDocumentCount', 'Media document count', 'normalized-document-count', 4, 36000000),
+      normalized('socialTokenCount', 'Social token count', 'normalized-token-count', 5, 2000000),
+      normalized('socialDocumentCount', 'Social document count', 'normalized-document-count', 6, 2000000)
+    ];
+    const plan = {
+      schemaVersion: 1,
+      title: 'Fixture data products',
+      genericProducts: [],
+      contractProducts: [{
+        contractId: 'contrast-fixture',
+        productType: 'chunked-comparison',
+        publication: { status: 'published', scope: 'Every fixture row.', access: 'Chunked JSON.' },
+        views: [{
+          id: 'normalized-comparison', sourceRole: 'normalized-comparison', title: 'Fixture comparison',
+          description: 'Nullable normalized metrics.', ordering: { field: 'word', direction: 'ascending' },
+          chunkBytes: 1024, fields
+        }],
+        analysisProfiles: [{
+          id: 'contrast-lookup', type: 'normalized-contrast-lookup', sourceRole: 'normalized-comparison',
+          title: 'Fixture lookup', description: 'Bounded lookup fixture.', summaryMaxBytes: 16384,
+          lookup: { maxBucketBytes: 8192, normalization: 'trim-nfc-uppercase-lt', maxSourceRowsPerWord: 2 },
+          sources: [
+            { id: 'ccll2', label: 'CCLL2', tokenField: 'ccll2TokenCount', documentField: 'ccll2DocumentCount' },
+            { id: 'media', label: 'Media', tokenField: 'mediaTokenCount', documentField: 'mediaDocumentCount' },
+            { id: 'social', label: 'Social', tokenField: 'socialTokenCount', documentField: 'socialDocumentCount' }
+          ],
+          pairs: [{ id: 'media-vs-ccll2', label: 'Media / CCLL2', numeratorSource: 'media', denominatorSource: 'ccll2' }],
+          minimumRate: 100
+        }]
+      }]
+    };
+
+    await mkdir(sourceRoot, { recursive: true });
+    await Promise.all([
+      writeFile(path.join(sourceRoot, 'comparison.tsv'), source),
+      writeJson(planPath, plan),
+      writeJson(contractPath, contract)
+    ]);
+
+    await buildDataProducts({ sourceRoot, staticRoot, outputRoot, planPath, contractPath });
+    await expect(verifyDataProducts({ outputRoot, staticRoot })).resolves.toMatchObject({
+      products: 1,
+      chunkedViews: 1,
+      records: 4
+    });
+
+    const profile = JSON.parse(await readFile(path.join(outputRoot, 'contrast-fixture', 'analysis', 'contrast-lookup', 'manifest.json'), 'utf8'));
+    expect(profile.summary).toEqual({
+      lookupRecords: 4,
+      uniqueNormalizedWordForms: 3,
+      duplicateNormalizedWordForms: 1,
+      extraDuplicateRows: 1,
+      maxSourceRowsPerWord: 2,
+      sourceRows: 4
+    });
+    const bucket = profile.lookup.routing.buckets[0];
+    const lookupRecords = JSON.parse(await readFile(path.join(outputRoot, 'contrast-fixture', 'analysis', 'contrast-lookup', bucket.file), 'utf8')).records;
+    expect(lookupRecords).toContainEqual(['KARAS', 0]);
+    expect(lookupRecords[0]).toHaveLength(2);
+    expect(bucket.bytes).toBeLessThanOrEqual(profile.delivery.lookupBucketMaxBytes);
+  });
 });
