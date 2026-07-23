@@ -1,5 +1,7 @@
 /** Loader and validation for the small, manifest-led DML6/JCL coverage profile. */
 
+import { base } from '$app/paths';
+
 export interface CoverageCategoryDefinition {
   code: number;
   label: string;
@@ -79,7 +81,7 @@ export interface Dml6CoverageDrilldown {
   records: Array<[string, number]>;
 }
 
-const basePath = import.meta.env.BASE_URL.replace(/\/+$/, '');
+const basePath = base;
 const profileDirectory = `${basePath}/data-products/dadurkevicius-dml6-vs-jcl-comparison/analysis/dml6-jcl-coverage-by-frequency-band/`;
 const profileUrl = `${profileDirectory}manifest.json`;
 

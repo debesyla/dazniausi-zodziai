@@ -304,18 +304,13 @@ describe('public data-product preparation', () => {
     expect(chunk.records).toEqual([['ir,', 25], ['kad', 5]]);
   });
 
-  /* The lexical-collection fixture is retained on its own PR branch. This
-     temporary integration audit uses the coverage fixture below to exercise
-     the merged product builder without altering either review branch. */
-  // it('publishes source-ordered lexical collections with explicit transliteration and NVH derivations', async () => {
-  it('derives a bounded DML6-style coverage profile with transparent frequency bands', async () => {
+  it('publishes source-ordered lexical collections with explicit transliteration and NVH derivations', async () => {
     const root = await makeDirectory();
     const sourceRoot = path.join(root, 'sources');
     const staticRoot = path.join(root, 'static');
     const outputRoot = path.join(staticRoot, 'data-products');
     const planPath = path.join(root, 'plan.json');
     const contractPath = path.join(root, 'contract.json');
-    /* Lexical fixture intentionally omitted in this disposable audit merge.
     const transliterations = '2 Aaronas (Aaron)\n1 Maja (Maya)\n';
     const nvh = [
       'entry: pirmas',
@@ -429,7 +424,56 @@ describe('public data-product preparation', () => {
           }]
         }
       ]
-    */
+    };
+
+    await mkdir(sourceRoot, { recursive: true });
+    await Promise.all([
+      writeFile(path.join(sourceRoot, 'transliterations.txt'), transliterations),
+      writeFile(path.join(sourceRoot, 'lexicon.nvh'), nvh),
+      writeJson(planPath, plan),
+      writeJson(contractPath, contract)
+    ]);
+
+    await buildDataProducts({ sourceRoot, staticRoot, outputRoot, planPath, contractPath });
+    await expect(verifyDataProducts({ outputRoot, staticRoot })).resolves.toMatchObject({
+      products: 2,
+      chunkedViews: 2,
+      records: 4
+    });
+
+    const transliterationIndex = JSON.parse(await readFile(path.join(outputRoot, 'transliteration-fixture', 'views', 'source-name-pairs', 'index.json'), 'utf8'));
+    const transliterationChunk = JSON.parse(await readFile(path.join(outputRoot, 'transliteration-fixture', 'views', 'source-name-pairs', transliterationIndex.chunks[0].file), 'utf8'));
+    expect(transliterationChunk.records).toEqual([['Aaronas', 'Aaron', 2], ['Maja', 'Maya', 1]]);
+    expect(transliterationIndex.ordering).toEqual({ field: 'source', direction: 'as-stored' });
+
+    const nvhIndex = JSON.parse(await readFile(path.join(outputRoot, 'nvh-fixture', 'views', 'lexical-entries', 'index.json'), 'utf8'));
+    const nvhChunk = JSON.parse(await readFile(path.join(outputRoot, 'nvh-fixture', 'views', 'lexical-entries', nvhIndex.chunks[0].file), 'utf8'));
+    expect(nvhChunk.records).toEqual([
+      ['pirmas', {
+        source: { name: 'Pirmas šaltinis', date: '2026-01-01', url: 'https://example.test/first' },
+        senses: [{ label: '1', definitions: ['Pirmas apibrėžimas.'], examples: ['Pirmas pavyzdys.'] }],
+        userGroups: ['žiūrovai'],
+        variants: ['pirmasis'],
+        entryCompilers: ['AB']
+      }],
+      ['antras', {
+        source: { name: 'Antras šaltinis', date: null, url: null },
+        senses: [{ label: null, definitions: ['Antras apibrėžimas.'], examples: [null] }],
+        userGroups: [],
+        variants: [],
+        entryCompilers: ['CD']
+      }]
+    ]);
+    expect(nvhIndex.derivation).toMatchObject({ recordPageEntryCount: 3, expectedSummary: { recordCount: 2, exampleCount: 2 } });
+  });
+
+  it('derives a bounded DML6-style coverage profile with transparent frequency bands', async () => {
+    const root = await makeDirectory();
+    const sourceRoot = path.join(root, 'sources');
+    const staticRoot = path.join(root, 'static');
+    const outputRoot = path.join(staticRoot, 'data-products');
+    const planPath = path.join(root, 'plan.json');
+    const contractPath = path.join(root, 'contract.json');
     const source = 'one\t1\t0\ntwo\t2\t1\nthree\t9\t1\nten\t10\t2\ntie-b\t10\t3\ntie-a\t10\t3\n';
     const contract = {
       schemaVersion: 1,
@@ -501,10 +545,6 @@ describe('public data-product preparation', () => {
 
     await mkdir(sourceRoot, { recursive: true });
     await Promise.all([
-      /* Lexical fixture source writes intentionally omitted here.
-      writeFile(path.join(sourceRoot, 'transliterations.txt'), transliterations),
-      writeFile(path.join(sourceRoot, 'lexicon.nvh'), nvh),
-      */
       writeFile(path.join(sourceRoot, 'types.tsv'), source),
       writeJson(planPath, plan),
       writeJson(contractPath, contract)
@@ -512,37 +552,6 @@ describe('public data-product preparation', () => {
 
     await buildDataProducts({ sourceRoot, staticRoot, outputRoot, planPath, contractPath });
     await expect(verifyDataProducts({ outputRoot, staticRoot })).resolves.toMatchObject({
-      /* Lexical fixture assertions intentionally omitted here.
-      products: 2,
-      chunkedViews: 2,
-      records: 4
-    });
-
-    const transliterationIndex = JSON.parse(await readFile(path.join(outputRoot, 'transliteration-fixture', 'views', 'source-name-pairs', 'index.json'), 'utf8'));
-    const transliterationChunk = JSON.parse(await readFile(path.join(outputRoot, 'transliteration-fixture', 'views', 'source-name-pairs', transliterationIndex.chunks[0].file), 'utf8'));
-    expect(transliterationChunk.records).toEqual([['Aaronas', 'Aaron', 2], ['Maja', 'Maya', 1]]);
-    expect(transliterationIndex.ordering).toEqual({ field: 'source', direction: 'as-stored' });
-
-    const nvhIndex = JSON.parse(await readFile(path.join(outputRoot, 'nvh-fixture', 'views', 'lexical-entries', 'index.json'), 'utf8'));
-    const nvhChunk = JSON.parse(await readFile(path.join(outputRoot, 'nvh-fixture', 'views', 'lexical-entries', nvhIndex.chunks[0].file), 'utf8'));
-    expect(nvhChunk.records).toEqual([
-      ['pirmas', {
-        source: { name: 'Pirmas šaltinis', date: '2026-01-01', url: 'https://example.test/first' },
-        senses: [{ label: '1', definitions: ['Pirmas apibrėžimas.'], examples: ['Pirmas pavyzdys.'] }],
-        userGroups: ['žiūrovai'],
-        variants: ['pirmasis'],
-        entryCompilers: ['AB']
-      }],
-      ['antras', {
-        source: { name: 'Antras šaltinis', date: null, url: null },
-        senses: [{ label: null, definitions: ['Antras apibrėžimas.'], examples: [null] }],
-        userGroups: [],
-        variants: [],
-        entryCompilers: ['CD']
-      }]
-    ]);
-    expect(nvhIndex.derivation).toMatchObject({ recordPageEntryCount: 3, expectedSummary: { recordCount: 2, exampleCount: 2 } });
-      */
       products: 1,
       chunkedViews: 1,
       records: 6

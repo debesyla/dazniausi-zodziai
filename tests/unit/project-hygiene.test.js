@@ -43,6 +43,7 @@ describe('project hygiene', () => {
 			'Žemrietė Lithuanian homoforms',
 			'Raškinis foreign-name transliteration pairs',
 			'Birvinskaitė Lithuanian basketball slang',
+			'Lithuanian Treebank ALKSNIS v3.0',
 			'Rimkutė morphemic dictionary',
 			'Utka CCLL word lists',
 			'Utka CCLL2 vs war in Ukraine'
@@ -69,8 +70,14 @@ describe('project hygiene', () => {
 			'zemriete-2025-lithuanian-homoforms',
 			'raskinis-2025-foreign-name-transliterations',
 			'birvinskaite-2026-lithuanian-basketball-slang',
+			'rimkute-2019-alksnis-syntactic-context',
 			'rimkute-morphemic-dictionary'
 		]);
+		expect(plan.contractProducts.find((product) => product.contractId === 'rimkute-2019-alksnis-syntactic-context')).toMatchObject({
+			productType: 'chunked-syntactic-context',
+			publication: { status: 'published' },
+			syntaxContext: { maxExamplesPerLemma: 12, contextPrefixCodePoints: 3 }
+		});
 		expect(plan.contractProducts.find((product) => product.contractId === 'rimkute-morphemic-dictionary')).toMatchObject({
 			productType: 'metadata-only',
 			publication: { status: 'metadata-only' },

@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { base } from '$app/paths';
   import {
     coverageCategoryDefinitions,
     loadDml6CoverageDrilldown,
@@ -16,7 +17,7 @@
   let drilldownLoading = $state(false);
   let drilldownError = $state<string | null>(null);
   let requestNumber = 0;
-  const siteRoot = `${import.meta.env.BASE_URL.replace(/\/+$/, '')}/`;
+  const siteRoot = `${base}/`;
 
   let categories = $derived<CoverageCategoryDefinition[]>(profile ? coverageCategoryDefinitions(profile) : []);
   let selectedBand = $derived(profile?.summary.bands.find((band) => band.id === selection?.bandId) ?? null);

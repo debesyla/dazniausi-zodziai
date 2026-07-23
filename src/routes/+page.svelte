@@ -13,6 +13,7 @@
   const methodologyUrl = `${base}/apie`;
   const coverageProfile = `${base}/zodyno-apreptis`;
   const wartimeContrast = `${base}/karo-zodziu-palyginimas`;
+  const syntaxExplorerUrl = `${base}/sintakse`;
 
   let selectedDataset = $derived(catalog?.datasets.find((dataset) => dataset.id === selectedDatasetId));
 
@@ -101,6 +102,12 @@
     <p><a href={wartimeContrast}>Palyginti CCLL2 ir karo laikotarpio žodžių formas</a></p>
     <a href={dataProductsCatalog}>{t('openDataProducts')}</a>
   </section>
+
+  <section class="syntax-context" aria-labelledby="syntax-context-title">
+    <h2 id="syntax-context-title">ALKSNIS sintaksės kontekstai</h2>
+    <p>Patyrinėkite šaltinio pateiktus priklausomybių ryšius ir sakinių kontekstus pagal lemą, neatsisiųsdami viso medyno.</p>
+    <a href={syntaxExplorerUrl}>Atverti sintaksės kontekstų tyrinėjimą</a>
+  </section>
 </main>
 
 <style>
@@ -169,7 +176,15 @@
   }
 
   .data-products h2,
-  .data-products p {
+  .data-products p,
+  .syntax-context h2,
+  .syntax-context p {
     margin-bottom: var(--sm);
+  }
+
+  .syntax-context {
+    margin-top: var(--lg);
+    padding: var(--md);
+    border: 1px solid var(--border-color);
   }
 </style>

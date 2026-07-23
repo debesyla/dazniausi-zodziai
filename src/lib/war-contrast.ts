@@ -1,5 +1,7 @@
 /** Bounded lookup for the CCLL2 / wartime lexical comparison. */
 
+import { base } from '$app/paths';
+
 export interface Normalization {
   sourceTokens: number;
   targetTokens: number;
@@ -129,7 +131,7 @@ interface SourceIndex {
   chunks: SourceChunkDescriptor[];
 }
 
-const basePath = import.meta.env.BASE_URL.replace(/\/+$/, '');
+const basePath = base;
 const productDirectory = `${basePath}/data-products/utka-ccll2-war-ukraine-comparison/`;
 const profileDirectory = `${productDirectory}analysis/ccll2-wartime-normalized-contrast/`;
 const profileUrl = `${profileDirectory}manifest.json`;
