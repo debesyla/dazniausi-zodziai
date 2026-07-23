@@ -275,6 +275,89 @@
       ]
     },
     {
+      "contractId": "zemriete-2025-lithuanian-homoforms",
+      "productType": "chunked-lexical-collection",
+      "publication": {
+        "status": "published",
+        "scope": "Every reviewed homoform-analysis row from the public source TSV.",
+        "access": "Static JSON chunks preserve the source fields and distinct MATAS and component-frequency metrics."
+      },
+      "views": [
+        {
+          "id": "homoform-analyses",
+          "sourceRole": "homoform-records",
+          "title": "Lithuanian homoform analyses",
+          "description": "Every source homoform, lemma, morphology, frequency pair, and type/subtype in the original source order.",
+          "ordering": { "field": "source", "direction": "as-stored" },
+          "chunkBytes": 262144,
+          "fields": [
+            { "id": "homoform", "label": "Homoform", "type": "string", "sourceColumn": 0 },
+            { "id": "lemma", "label": "Lemma", "type": "string", "sourceColumn": 1 },
+            { "id": "morphology", "label": "Morphological information", "type": "string", "sourceColumn": 2, "nullable": true },
+            { "id": "matasFrequency", "label": "MATAS frequency", "type": "raw-token-count", "unit": "tokens in MATAS", "sourceColumn": 3 },
+            { "id": "homoformComponentFrequency", "label": "Homoform component frequency", "type": "raw-token-count", "unit": "tokens in the source component", "sourceColumn": 4 },
+            { "id": "homoformType", "label": "Homoform type and subtype", "type": "string", "sourceColumn": 5 }
+          ]
+        }
+      ]
+    },
+    {
+      "contractId": "raskinis-2025-foreign-name-transliterations",
+      "productType": "chunked-lexical-collection",
+      "publication": {
+        "status": "published",
+        "scope": "Every reviewed foreign-name pair and source match count from the public source file.",
+        "access": "Static JSON chunks retain the source's left and parenthesized strings without normalizing their direction."
+      },
+      "views": [
+        {
+          "id": "source-name-pairs",
+          "sourceRole": "source-name-pairs",
+          "title": "Foreign-name transliteration source pairs",
+          "description": "Every source-provided pair, kept in source order; sourceMatchCount is not a general word-frequency measure.",
+          "ordering": { "field": "source", "direction": "as-stored" },
+          "chunkBytes": 262144,
+          "derivation": {
+            "type": "name-transliteration",
+            "expectedSummary": { "sourceRows": 68167, "recordCount": 68167, "totalFrequency": 133254 }
+          },
+          "fields": [
+            { "id": "sourceLeftName", "label": "First source name string", "type": "string", "derived": true },
+            { "id": "sourceParenthesizedName", "label": "Parenthesized source name string", "type": "string", "derived": true },
+            { "id": "sourceMatchCount", "label": "Source match count", "type": "raw-token-count", "unit": "matches in the source corpus extraction", "derived": true }
+          ]
+        }
+      ]
+    },
+    {
+      "contractId": "birvinskaite-2026-lithuanian-basketball-slang",
+      "productType": "chunked-lexical-collection",
+      "publication": {
+        "status": "published",
+        "scope": "Every parsed entry from the reviewed basketball-slang NVH lexical database.",
+        "access": "Static JSON chunks preserve source details, senses, definitions, examples, variants, user groups, and compilers without inventing a frequency ranking."
+      },
+      "views": [
+        {
+          "id": "lexical-entries",
+          "sourceRole": "basketball-slang-entries",
+          "title": "Lithuanian basketball slang entries",
+          "description": "Every parsed source entry in source order, with nested lexical evidence and the record-page count discrepancy kept in derivation metadata.",
+          "ordering": { "field": "source", "direction": "as-stored" },
+          "chunkBytes": 262144,
+          "derivation": {
+            "type": "nvh-lexicon",
+            "recordPageEntryCount": 233,
+            "expectedSummary": { "sourceRows": 2286, "recordCount": 223, "senseCount": 224, "definitionCount": 227, "exampleCount": 287 }
+          },
+          "fields": [
+            { "id": "entry", "label": "Entry", "type": "string", "derived": true },
+            { "id": "details", "label": "Source and lexical details", "type": "lexical-entry-details", "derived": true }
+          ]
+        }
+      ]
+    },
+    {
       "contractId": "rimkute-morphemic-dictionary",
       "productType": "metadata-only",
       "publication": {

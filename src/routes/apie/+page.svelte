@@ -14,6 +14,7 @@
       'chunked-wordform-list': 'Didelis žodžių formų dažnumo sąrašas',
       'chunked-frequency-list': 'Žodžių formų arba viengramių dažnumo sąrašas',
       'chunked-derived-frequency-list': 'Iš anotuoto tekstyno išvestas dažnumo sąrašas',
+      'chunked-lexical-collection': 'Specializuotas leksinis rinkinys su šaltiniui būdingais laukais',
       'chunked-comparison': 'Atskirų metrikų palyginamasis rinkinys',
       'metadata-only': 'Šaltinio metaduomenys be publikuojamų eilučių'
     };

@@ -1,0 +1,68 @@
+{
+  "schemaVersion": 1,
+  "id": "zemriete-2025-lithuanian-homoforms",
+  "title": "Lithuanian homoforms",
+  "productType": "chunked-lexical-collection",
+  "publication": {
+    "status": "published",
+    "scope": "Every reviewed homoform-analysis row from the public source TSV.",
+    "access": "Static JSON chunks preserve the source fields and distinct MATAS and component-frequency metrics."
+  },
+  "provenance": {
+    "sourceRepository": {
+      "repositoryUrl": "https://github.com/debesyla/dazniausi-zodziai-sources.git",
+      "revision": "18bc4bcd29632430423ee4c8242da10483bf5d19"
+    },
+    "sourceUrl": "https://clarin-repo.lt/items/c5e06f7b-364d-46e8-b4e8-6e5d48a0d2c3",
+    "licence": "CC BY 4.0",
+    "citation": "Lithuanian Homoforms. 2025. CLARIN-LT Repository. https://hdl.handle.net/20.500.11821/75.",
+    "files": [
+      {
+        "path": "zemriete-2025-11-18-lithuanian-homoforms/original/Homoformos_2025-11-01.zip",
+        "format": "binary",
+        "bytes": 1184321,
+        "sha256": "d15a8a4447dad4e0205210d9e944d6ad287fe628323e701cd5e45b5aac89492c"
+      },
+      {
+        "role": "homoform-records",
+        "path": "zemriete-2025-11-18-lithuanian-homoforms/original/Homoformos_2025-11-01.tsv",
+        "format": "text",
+        "bytes": 17351074,
+        "sha256": "a72e2fbb784df0ba6c597a79f23ab885277eab7ecf441ef887aee824fab89d9d",
+        "rows": 177226,
+        "columns": 17,
+        "hasHeader": true,
+        "archiveMember": "Homoformos_2025-11-01.tsv"
+      }
+    ]
+  },
+  "delivery": {
+    "mode": "static-chunked-json",
+    "constraints": [
+      "Keep the source's homoform, lemma, morphology, and type/subtype strings distinct.",
+      "Keep MATAS frequency and component frequency as separate raw source metrics.",
+      "Retain the source record order; it is not a consistently descending frequency ranking."
+    ]
+  },
+  "views": [
+    {
+      "id": "homoform-analyses",
+      "title": "Lithuanian homoform analyses",
+      "description": "Every source homoform, lemma, morphology, frequency pair, and type/subtype in the original source order.",
+      "index": "views/homoform-analyses/index.json",
+      "sourceRole": "homoform-records",
+      "recordEncoding": "array",
+      "summary": {
+        "sourceRows": 177226,
+        "recordCount": 177226,
+        "numericTotals": {
+          "matasFrequency": 2419451,
+          "homoformComponentFrequency": 843500
+        },
+        "nullCounts": {
+          "morphology": 1
+        }
+      }
+    }
+  ]
+}
