@@ -1,0 +1,159 @@
+{
+  "schemaVersion": 1,
+  "id": "rimkute-2019-alksnis-syntactic-context",
+  "title": "Lithuanian Treebank ALKSNIS v3.0 syntactic contexts",
+  "productType": "chunked-syntactic-context",
+  "publication": {
+    "status": "published",
+    "scope": "Source-scoped dependency-relation totals, genre totals, an index of every non-punctuation source lemma, and bounded sentence contexts derived from the reviewed ALKSNIS v3.0 CoNLL-U documents.",
+    "access": "A compact manifest loads first. Relation and genre totals are separate small views; lemma and context chunks are requested only for the selected source-lemma prefix."
+  },
+  "provenance": {
+    "sourceRepository": {
+      "repositoryUrl": "https://github.com/debesyla/dazniausi-zodziai-sources.git",
+      "revision": "8ddc7197fa01c3e185bbfc0ac4214ea529ae56c6"
+    },
+    "sourceUrl": "https://clarin-repo.lt/items/a9db057d-de4e-45ee-9645-45f408592d76",
+    "licence": "CC BY 4.0",
+    "citation": "Rimkutė, E., Bielinskienė, A., Kovalevskaitė, J., Boizou, L., Aleksandravičiūtė, G., Brokaitė, K., and Utka, A. 2019. Lithuanian Treebank ALKSNIS. Vytautas Magnus University. CLARIN-LT Repository. https://hdl.handle.net/20.500.11821/21.",
+    "files": [
+      {
+        "role": "alksnis-treebank",
+        "path": "alksnis-2019-10-24-lithuanian-treebank/original/Alksnis-3.0.zip",
+        "format": "zip-conllu-treebank",
+        "bytes": 2713010,
+        "sha256": "95af1a9ba62960d1321f89bc5a6dc9a9fafa71c4c15c62336a469d2896ec84c0",
+        "archiveDirectory": "Alksnis-3.0",
+        "conlluSummary": {
+          "documents": 76,
+          "sentences": 3642,
+          "repositorySentenceClaim": 3643,
+          "integerTokenRows": 70047,
+          "nonPunctuationRows": 57156,
+          "allRelationLabels": 104,
+          "nonPunctuationRelationLabels": 92,
+          "rootRows": 3642,
+          "nonPunctuationRootRows": 2956,
+          "nonRootDependencyRows": 54200,
+          "uncompressedBytes": 6173268,
+          "membersSha256": "33ee2641a906776035ec13d1bc78eb58bdc87c8828da9a4dde91d222a0fa4990"
+        }
+      }
+    ]
+  },
+  "delivery": {
+    "mode": "static-prefix-chunked-syntax-context-json",
+    "constraints": [
+      "Treat ALKSNIS as a finite annotated treebank, not as a generic frequency corpus or a thesaurus.",
+      "Keep source relation labels, dependency direction, source document, genre, and sentence identifier with every displayed context.",
+      "Exclude UPOS=PUNCT from the lemma index, relation summary, and context examples; do not infer a missing linguistic relation.",
+      "Keep roots explicit as HEAD=0 / ROOT rather than inventing a lexical head.",
+      "Do not claim statistically significant genre differences or generic similarity from this source-scoped sample.",
+      "Show at most the documented source-order context limit per lemma and disclose omitted rows."
+    ]
+  },
+  "syntaxContext": {
+    "overview": {
+      "repositorySentenceClaim": 3643,
+      "deliveredSentenceIds": 3642,
+      "documents": 76,
+      "integerTokenRows": 70047,
+      "nonPunctuationRows": 57156,
+      "allRelationLabels": 104,
+      "nonPunctuationRelationLabels": 92,
+      "rootRows": 3642,
+      "nonPunctuationRootRows": 2956,
+      "nonRootDependencyRows": 54200
+    },
+    "exclusions": [
+      "UPOS=PUNCT is excluded from the lemma index, relation summary, and contexts."
+    ],
+    "exampleSelection": {
+      "maxExamplesPerLemma": 12,
+      "order": "Archive member, sentence, and token source order.",
+      "omittedRows": 67299
+    },
+    "lookup": {
+      "lemmaIndexView": "lemmas-by-source-order",
+      "lemmaIndexPrefixCodePoints": 1,
+      "contextView": "sentence-contexts-by-lemma",
+      "contextPrefixCodePoints": 3,
+      "directions": [
+        "dependent",
+        "head",
+        "root"
+      ]
+    }
+  },
+  "views": [
+    {
+      "id": "relations-by-frequency",
+      "title": "ALKSNIS dependency relations",
+      "description": "Frequency of source dependency-relation labels across non-punctuation token rows, including source roots.",
+      "index": "views/relations-by-frequency/index.json",
+      "sourceRole": "alksnis-treebank",
+      "recordEncoding": "array",
+      "summary": {
+        "sourceRows": 57156,
+        "recordCount": 92,
+        "numericTotals": {
+          "count": 57156
+        },
+        "nullCounts": {}
+      }
+    },
+    {
+      "id": "genres-by-source-order",
+      "title": "ALKSNIS source genres",
+      "description": "Document, sentence, token, and non-punctuation relation totals for each source genre.",
+      "index": "views/genres-by-source-order/index.json",
+      "sourceRole": "alksnis-treebank",
+      "recordEncoding": "array",
+      "summary": {
+        "sourceRows": 76,
+        "recordCount": 6,
+        "numericTotals": {
+          "documents": 76,
+          "sentences": 3642,
+          "integerTokenRows": 70047,
+          "nonPunctuationRows": 57156,
+          "relationshipRows": 57156
+        },
+        "nullCounts": {}
+      }
+    },
+    {
+      "id": "lemmas-by-source-order",
+      "title": "ALKSNIS lemma context index",
+      "description": "Every non-punctuation source lemma, with its annotated token count and the number of retained dependency roles.",
+      "index": "views/lemmas-by-source-order/index.json",
+      "sourceRole": "alksnis-treebank",
+      "recordEncoding": "array",
+      "summary": {
+        "sourceRows": 57156,
+        "recordCount": 8656,
+        "numericTotals": {
+          "tokenCount": 57156,
+          "headEdgeCount": 49971,
+          "dependentEdgeCount": 57156,
+          "rootEdgeCount": 2956
+        },
+        "nullCounts": {}
+      }
+    },
+    {
+      "id": "sentence-contexts-by-lemma",
+      "title": "ALKSNIS sentence contexts",
+      "description": "Up to the reviewed source-order limit of dependency contexts per non-punctuation lemma; fetch by selected lemma prefix.",
+      "index": "views/sentence-contexts-by-lemma/index.json",
+      "sourceRole": "alksnis-treebank",
+      "recordEncoding": "array",
+      "summary": {
+        "sourceRows": 39828,
+        "recordCount": 39828,
+        "numericTotals": {},
+        "nullCounts": {}
+      }
+    }
+  ]
+}

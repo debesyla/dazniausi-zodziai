@@ -275,6 +275,46 @@
       ]
     },
     {
+      "contractId": "rimkute-2019-alksnis-syntactic-context",
+      "productType": "chunked-syntactic-context",
+      "publication": {
+        "status": "published",
+        "scope": "Source-scoped dependency-relation totals, genre totals, an index of every non-punctuation source lemma, and bounded sentence contexts derived from the reviewed ALKSNIS v3.0 CoNLL-U documents.",
+        "access": "A compact manifest loads first. Relation and genre totals are separate small views; lemma and context chunks are requested only for the selected source-lemma prefix."
+      },
+      "syntaxContext": {
+        "sourceRole": "alksnis-treebank",
+        "maxExamplesPerLemma": 12,
+        "chunkBytes": 65536,
+        "lemmaIndexPrefixCodePoints": 1,
+        "contextPrefixCodePoints": 3,
+        "genreLabels": {
+          "administraciniai_dokumentai": "Administraciniai dokumentai",
+          "bendroji_periodika": "Bendroji periodika",
+          "grozine_literatura": "Grožinė literatūra",
+          "moksline_literatura/moksl_recenzijos": "Mokslinė literatūra: recenzijos",
+          "moksline_literatura/moksl_santraukos": "Mokslinė literatūra: santraukos",
+          "specialioji_periodika": "Specialioji periodika"
+        },
+        "expectedSummary": {
+          "documents": 76,
+          "sentences": 3642,
+          "integerTokenRows": 70047,
+          "nonPunctuationRows": 57156,
+          "allRelationLabels": 104,
+          "nonPunctuationRelationLabels": 92,
+          "rootRows": 3642,
+          "nonPunctuationRootRows": 2956,
+          "nonRootDependencyRows": 54200,
+          "lemmaCount": 8656,
+          "contextRecordCount": 39828,
+          "contextRowsOmittedByLimit": 67299,
+          "lemmaIndexPrefixes": 47,
+          "contextPrefixes": 1959
+        }
+      }
+    },
+    {
       "contractId": "rimkute-morphemic-dictionary",
       "productType": "metadata-only",
       "publication": {

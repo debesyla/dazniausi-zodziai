@@ -1,0 +1,71 @@
+{
+  "schemaVersion": 1,
+  "productId": "rimkute-2019-alksnis-syntactic-context",
+  "viewId": "relations-by-frequency",
+  "recordEncoding": "array",
+  "fields": [
+    {
+      "id": "relation",
+      "label": "Source dependency relation",
+      "type": "string",
+      "derived": true
+    },
+    {
+      "id": "count",
+      "label": "Annotated non-punctuation token rows",
+      "type": "raw-token-count",
+      "unit": "tokens",
+      "derived": true
+    }
+  ],
+  "ordering": {
+    "field": "count",
+    "direction": "descending"
+  },
+  "sourceFile": {
+    "role": "alksnis-treebank",
+    "path": "alksnis-2019-10-24-lithuanian-treebank/original/Alksnis-3.0.zip",
+    "format": "zip-conllu-treebank",
+    "bytes": 2713010,
+    "sha256": "95af1a9ba62960d1321f89bc5a6dc9a9fafa71c4c15c62336a469d2896ec84c0",
+    "archiveDirectory": "Alksnis-3.0",
+    "conlluSummary": {
+      "documents": 76,
+      "sentences": 3642,
+      "repositorySentenceClaim": 3643,
+      "integerTokenRows": 70047,
+      "nonPunctuationRows": 57156,
+      "allRelationLabels": 104,
+      "nonPunctuationRelationLabels": 92,
+      "rootRows": 3642,
+      "nonPunctuationRootRows": 2956,
+      "nonRootDependencyRows": 54200,
+      "uncompressedBytes": 6173268,
+      "membersSha256": "33ee2641a906776035ec13d1bc78eb58bdc87c8828da9a4dde91d222a0fa4990"
+    }
+  },
+  "derivation": {
+    "type": "conllu-treebank-syntax-context",
+    "expectedSummary": {
+      "sourceRows": 57156,
+      "recordCount": 92
+    }
+  },
+  "maxChunkBytes": 65536,
+  "summary": {
+    "sourceRows": 57156,
+    "recordCount": 92,
+    "numericTotals": {
+      "count": 57156
+    },
+    "nullCounts": {}
+  },
+  "chunks": [
+    {
+      "file": "chunks/000001.json",
+      "records": 92,
+      "bytes": 1601,
+      "sha256": "dd0dcd17f77cb0177c8766bb8dc3769e662d2370de5d6b636d64ba5c1b97be66"
+    }
+  ]
+}
