@@ -1,0 +1,59 @@
+{
+  "schemaVersion": 1,
+  "productId": "birvinskaite-2026-lithuanian-basketball-slang",
+  "viewId": "lexical-entries",
+  "recordEncoding": "array",
+  "fields": [
+    {
+      "id": "entry",
+      "label": "Entry",
+      "type": "string",
+      "derived": true
+    },
+    {
+      "id": "details",
+      "label": "Source and lexical details",
+      "type": "lexical-entry-details",
+      "derived": true
+    }
+  ],
+  "ordering": {
+    "field": "source",
+    "direction": "as-stored"
+  },
+  "sourceFile": {
+    "role": "basketball-slang-entries",
+    "path": "birvinskaite-2026-02-23-lithuanian-basketball-slang/original/Krepsinio_zargono_leksine_baze_2026-02-23_versija.nvh",
+    "format": "nvh",
+    "bytes": 79501,
+    "sha256": "59148e9853d57b4cfd8d73490e3c6f9b3ed94bd67bdb434607086331787419da",
+    "rows": 2286,
+    "archiveMember": "Krepsinio_zargono_leksine_baze_2026-02-23_versija.nvh"
+  },
+  "derivation": {
+    "type": "nvh-lexicon",
+    "recordPageEntryCount": 233,
+    "expectedSummary": {
+      "sourceRows": 2286,
+      "recordCount": 223,
+      "senseCount": 224,
+      "definitionCount": 227,
+      "exampleCount": 287
+    }
+  },
+  "maxChunkBytes": 262144,
+  "summary": {
+    "sourceRows": 2286,
+    "recordCount": 223,
+    "numericTotals": {},
+    "nullCounts": {}
+  },
+  "chunks": [
+    {
+      "file": "chunks/000001.json",
+      "records": 223,
+      "bytes": 82855,
+      "sha256": "8e3eb0f4d7b6c17407f3404561d864c1b92beaef5c34fe02efc91f96bf48c6a7"
+    }
+  ]
+}
