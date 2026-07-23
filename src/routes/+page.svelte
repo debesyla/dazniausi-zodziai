@@ -92,7 +92,24 @@
     background: #222;
     color: #FFBF00;
     border: 1px solid #FFBF00;
+    max-width: 100%;
     padding: var(--xs) var(--sm);
+  }
+
+  @media (max-width: 767px) {
+    .dataset-selector label,
+    .dataset-selector select {
+      display: block;
+    }
+
+    .dataset-selector label {
+      margin-bottom: var(--xs);
+      margin-right: 0;
+    }
+
+    .dataset-selector select {
+      width: 100%;
+    }
   }
 
   .loading,

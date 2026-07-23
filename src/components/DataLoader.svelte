@@ -146,8 +146,13 @@
         {/if}
         {#each uniqueTypes as type}
           <label>
-            <input type="checkbox" bind:group={selectedTypes} value={type} />
-            {typeLabels[type] ?? type}{#if typeLabels[type]} ({type}){/if}
+            <input
+              type="checkbox"
+              bind:group={selectedTypes}
+              value={type}
+              aria-label={typeLabels[type] ? `${typeLabels[type]} (${type})` : type}
+            />
+            <span>{typeLabels[type] ?? type}{#if typeLabels[type]}&nbsp;({type}){/if}</span>
           </label>
         {/each}
       </div>
@@ -222,7 +227,10 @@
   }
 
   .type-filter label {
-    display: inline-block;
+    align-items: center;
+    display: inline-flex;
+    gap: var(--xs);
+    min-height: 44px;
     margin-right: var(--lg);
     color: #FFBF00;
   }

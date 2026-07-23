@@ -18,6 +18,7 @@
 		"products:verify": "node scripts/verify-data-products.mjs",
 		"test": "vitest run",
 		"test:browser": "playwright test",
+		"test:browser:deployed": "playwright test",
 		"test:watch": "vitest"
 	},
 	"devDependencies": {
