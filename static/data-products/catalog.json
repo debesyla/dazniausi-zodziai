@@ -83,6 +83,36 @@
       "recordCount": null
     },
     {
+      "id": "zemriete-2025-lithuanian-homoforms",
+      "title": "Lithuanian homoforms",
+      "productType": "chunked-lexical-collection",
+      "publicationStatus": "published",
+      "manifest": "zemriete-2025-lithuanian-homoforms/manifest.json",
+      "licence": "CC BY 4.0",
+      "viewCount": 1,
+      "recordCount": null
+    },
+    {
+      "id": "raskinis-2025-foreign-name-transliterations",
+      "title": "Foreign-name transliteration pairs",
+      "productType": "chunked-lexical-collection",
+      "publicationStatus": "published",
+      "manifest": "raskinis-2025-foreign-name-transliterations/manifest.json",
+      "licence": "CC BY 4.0",
+      "viewCount": 1,
+      "recordCount": null
+    },
+    {
+      "id": "birvinskaite-2026-lithuanian-basketball-slang",
+      "title": "Lithuanian basketball slang lexical database",
+      "productType": "chunked-lexical-collection",
+      "publicationStatus": "published",
+      "manifest": "birvinskaite-2026-lithuanian-basketball-slang/manifest.json",
+      "licence": "CC BY 4.0",
+      "viewCount": 1,
+      "recordCount": null
+    },
+    {
       "id": "rimkute-morphemic-dictionary",
       "title": "Dažninis lietuvių kalbos morfemikos žodynas",
       "productType": "metadata-only",

@@ -1,0 +1,61 @@
+{
+  "schemaVersion": 1,
+  "id": "birvinskaite-2026-lithuanian-basketball-slang",
+  "title": "Lithuanian basketball slang lexical database",
+  "productType": "chunked-lexical-collection",
+  "publication": {
+    "status": "published",
+    "scope": "Every parsed entry from the reviewed basketball-slang NVH lexical database.",
+    "access": "Static JSON chunks preserve source details, senses, definitions, examples, variants, user groups, and compilers without inventing a frequency ranking."
+  },
+  "provenance": {
+    "sourceRepository": {
+      "repositoryUrl": "https://github.com/debesyla/dazniausi-zodziai-sources.git",
+      "revision": "18bc4bcd29632430423ee4c8242da10483bf5d19"
+    },
+    "sourceUrl": "https://clarin-repo.lt/items/6c15e277-4bc5-4a3f-a0c1-16d00aa8a4f6",
+    "licence": "CC BY 4.0",
+    "citation": "Lithuanian Basketball Slang Lexical Database. 2026. CLARIN-LT Repository. https://hdl.handle.net/20.500.11821/81.",
+    "files": [
+      {
+        "path": "birvinskaite-2026-02-23-lithuanian-basketball-slang/original/Krepsinio_zargono_leksine_baze_2026-02-23_versija.zip",
+        "format": "binary",
+        "bytes": 16587,
+        "sha256": "73fc11e97a7c82d73b793cd06c8faff37c3f2eaa60cafeb02e6782320e823ee0"
+      },
+      {
+        "role": "basketball-slang-entries",
+        "path": "birvinskaite-2026-02-23-lithuanian-basketball-slang/original/Krepsinio_zargono_leksine_baze_2026-02-23_versija.nvh",
+        "format": "nvh",
+        "bytes": 79501,
+        "sha256": "59148e9853d57b4cfd8d73490e3c6f9b3ed94bd67bdb434607086331787419da",
+        "rows": 2286,
+        "archiveMember": "Krepsinio_zargono_leksine_baze_2026-02-23_versija.nvh"
+      }
+    ]
+  },
+  "delivery": {
+    "mode": "static-chunked-json",
+    "constraints": [
+      "Do not present entries as corpus-frequency observations or rank them by popularity.",
+      "Preserve source, definition, example, variant, user-group, and compiler information where supplied.",
+      "Report 223 parsed top-level entries from the stored NVH file and preserve the source-record page's separate 233-entry claim."
+    ]
+  },
+  "views": [
+    {
+      "id": "lexical-entries",
+      "title": "Lithuanian basketball slang entries",
+      "description": "Every parsed source entry in source order, with nested lexical evidence and the record-page count discrepancy kept in derivation metadata.",
+      "index": "views/lexical-entries/index.json",
+      "sourceRole": "basketball-slang-entries",
+      "recordEncoding": "array",
+      "summary": {
+        "sourceRows": 2286,
+        "recordCount": 223,
+        "numericTotals": {},
+        "nullCounts": {}
+      }
+    }
+  ]
+}

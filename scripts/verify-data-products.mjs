@@ -16,6 +16,7 @@ const NUMERIC_FIELD_TYPES = new Set([
 const FIELD_TYPES = new Set([
   'string',
   'source-pos-code',
+  'lexical-entry-details',
   ...NUMERIC_FIELD_TYPES
 ]);
 const SUMMARIZED_FIELD_TYPES = new Set([
@@ -27,7 +28,8 @@ const CHUNKED_PRODUCT_TYPES = new Set([
   'chunked-wordform-list',
   'chunked-comparison',
   'chunked-frequency-list',
-  'chunked-derived-frequency-list'
+  'chunked-derived-frequency-list',
+  'chunked-lexical-collection'
 ]);
 
 function fail(message) {
@@ -99,6 +101,9 @@ function validateField(field, description) {
   } else if (!Number.isInteger(field.sourceColumn) || field.sourceColumn < 0) {
     fail(`${description}.sourceColumn is invalid`);
   }
+  if (field.type === 'lexical-entry-details' && field.derived !== true) {
+    fail(`${description}.lexical-entry-details must be derived`);
+  }
   if (field.nullable !== undefined && typeof field.nullable !== 'boolean') fail(`${description}.nullable is invalid`);
   if (NUMERIC_FIELD_TYPES.has(field.type) && !normalizeString(field.unit)) fail(`${description}.unit is invalid`);
   if (field.type === 'coverage-code') {
@@ -119,11 +124,56 @@ function validateField(field, description) {
   }
 }
 
-function validateRecord(record, fields, description, totals, nullCounts) {
+function validateStringArray(value, description, { allowNull = false } = {}) {
+  if (!Array.isArray(value) || value.some((item) => item !== null && !normalizeString(item))
+    || (!allowNull && value.some((item) => item === null))) {
+    fail(`${description} is invalid`);
+  }
+}
+
+function validateLexicalEntryDetails(value, description, lexicalCounts) {
+  if (!isPlainObject(value) || Object.keys(value).some((key) => !['source', 'senses', 'userGroups', 'variants', 'entryCompilers'].includes(key))
+    || !isPlainObject(value.source) || Object.keys(value.source).some((key) => !['name', 'date', 'url'].includes(key))
+    || !Object.hasOwn(value.source, 'name') || !Object.hasOwn(value.source, 'date') || !Object.hasOwn(value.source, 'url')) {
+    fail(`${description} is invalid`);
+  }
+  for (const sourceField of ['name', 'date', 'url']) {
+    if (value.source[sourceField] !== null && !normalizeString(value.source[sourceField])) {
+      fail(`${description}.source.${sourceField} is invalid`);
+    }
+  }
+  if (!Array.isArray(value.senses) || value.senses.length === 0) fail(`${description}.senses is invalid`);
+  for (const [senseIndex, sense] of value.senses.entries()) {
+    if (!isPlainObject(sense) || Object.keys(sense).some((key) => !['label', 'definitions', 'examples'].includes(key))
+      || !Object.hasOwn(sense, 'label') || (sense.label !== null && !normalizeString(sense.label))) {
+      fail(`${description}.senses[${senseIndex}] is invalid`);
+    }
+    validateStringArray(sense.definitions, `${description}.senses[${senseIndex}].definitions`);
+    validateStringArray(sense.examples, `${description}.senses[${senseIndex}].examples`, { allowNull: true });
+    lexicalCounts.senseCount += 1;
+    lexicalCounts.definitionCount += sense.definitions.length;
+    lexicalCounts.exampleCount += sense.examples.length;
+  }
+  validateStringArray(value.userGroups, `${description}.userGroups`);
+  validateStringArray(value.variants, `${description}.variants`);
+  validateStringArray(value.entryCompilers, `${description}.entryCompilers`);
+  if (value.entryCompilers.length === 0) fail(`${description}.entryCompilers is invalid`);
+}
+
+function validateRecord(record, fields, description, totals, nullCounts, lexicalCounts) {
   if (!Array.isArray(record) || record.length !== fields.length) fail(`${description} has the wrong record shape`);
   for (const [index, field] of fields.entries()) {
     const value = record[index];
+    if (field.type === 'lexical-entry-details') {
+      validateLexicalEntryDetails(value, `${description}.${field.id}`, lexicalCounts);
+      continue;
+    }
     if (!NUMERIC_FIELD_TYPES.has(field.type)) {
+      if (value === null) {
+        if (field.nullable !== true) fail(`${description} has a null non-nullable ${field.id} field`);
+        nullCounts[field.id] += 1;
+        continue;
+      }
       if (!normalizeString(value)) fail(`${description} has an empty ${field.id} field`);
       continue;
     }
@@ -138,6 +188,40 @@ function validateRecord(record, fields, description, totals, nullCounts) {
     }
     if (SUMMARIZED_FIELD_TYPES.has(field.type)) totals[field.id] += value;
   }
+}
+
+function validatedDerivedSourceRows({ derivation, fields, totals, lexicalCounts, viewRecords, description }) {
+  if (!isPlainObject(derivation) || !isPlainObject(derivation.expectedSummary)) {
+    fail(`${description} derivation metadata is invalid`);
+  }
+  const expected = derivation.expectedSummary;
+  if (!Number.isSafeInteger(expected.sourceRows) || expected.sourceRows < viewRecords
+    || expected.recordCount !== viewRecords) {
+    fail(`${description} derivation metadata is invalid`);
+  }
+  if (derivation.type === 'conllu-frequency') {
+    const countField = fields.find((field) => field.id === 'count' && field.type === 'raw-token-count');
+    if (!countField || !Number.isSafeInteger(expected.totalFrequency) || expected.totalFrequency < 0
+      || totals.count !== expected.totalFrequency) {
+      fail(`${description} derivation metadata is invalid`);
+    }
+  } else if (derivation.type === 'name-transliteration') {
+    const countField = fields.find((field) => field.id === 'sourceMatchCount' && field.type === 'raw-token-count');
+    if (!countField || !Number.isSafeInteger(expected.totalFrequency) || expected.totalFrequency < 0
+      || totals.sourceMatchCount !== expected.totalFrequency) {
+      fail(`${description} derivation metadata is invalid`);
+    }
+  } else if (derivation.type === 'nvh-lexicon') {
+    if (!Number.isSafeInteger(derivation.recordPageEntryCount) || derivation.recordPageEntryCount < 0
+      || !Number.isSafeInteger(expected.senseCount) || expected.senseCount !== lexicalCounts.senseCount
+      || !Number.isSafeInteger(expected.definitionCount) || expected.definitionCount !== lexicalCounts.definitionCount
+      || !Number.isSafeInteger(expected.exampleCount) || expected.exampleCount !== lexicalCounts.exampleCount) {
+      fail(`${description} derivation metadata is invalid`);
+    }
+  } else {
+    fail(`${description} uses an unsupported derivation type`);
+  }
+  return expected.sourceRows;
 }
 
 function expectedTotals(fields) {
@@ -192,6 +276,7 @@ async function verifyChunkedProduct({ manifest, productDirectory }) {
     }
     const totals = expectedTotals(fields);
     const nullCounts = expectedNullCounts(fields);
+    const lexicalCounts = { senseCount: 0, definitionCount: 0, exampleCount: 0 };
     let viewRecords = 0;
 
     for (const [chunkIndex, descriptor] of index.chunks.entries()) {
@@ -213,20 +298,21 @@ async function verifyChunkedProduct({ manifest, productDirectory }) {
         fail(`${manifest.id}/${view.id} chunk ${chunkIndex} content is invalid`);
       }
       for (const [recordIndex, record] of chunk.records.entries()) {
-        validateRecord(record, fields, `${manifest.id}/${view.id} chunk ${chunkIndex} record ${recordIndex}`, totals, nullCounts);
+        validateRecord(record, fields, `${manifest.id}/${view.id} chunk ${chunkIndex} record ${recordIndex}`, totals, nullCounts, lexicalCounts);
       }
       viewRecords += chunk.records.length;
     }
 
     let sourceRows = viewRecords;
     if (index.derivation !== undefined) {
-      if (!isPlainObject(index.derivation) || !isPlainObject(index.derivation.expectedSummary)
-        || !Number.isSafeInteger(index.derivation.expectedSummary.sourceRows)
-        || index.derivation.expectedSummary.sourceRows < viewRecords
-        || index.derivation.expectedSummary.recordCount !== viewRecords) {
-        fail(`${manifest.id}/${view.id} derivation metadata is invalid`);
-      }
-      sourceRows = index.derivation.expectedSummary.sourceRows;
+      sourceRows = validatedDerivedSourceRows({
+        derivation: index.derivation,
+        fields,
+        totals,
+        lexicalCounts,
+        viewRecords,
+        description: `${manifest.id}/${view.id}`
+      });
     }
     const expectedSummary = {
       sourceRows,

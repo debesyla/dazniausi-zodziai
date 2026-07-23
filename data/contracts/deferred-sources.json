@@ -3,7 +3,7 @@
   "contractType": "deferred-source-contracts",
   "sourceRepository": {
     "repositoryUrl": "https://github.com/debesyla/dazniausi-zodziai-sources.git",
-    "revision": "5aa69dd8df47c17b21e50ca4b41709159deb1bf0"
+    "revision": "18bc4bcd29632430423ee4c8242da10483bf5d19"
   },
   "contracts": [
     {
@@ -363,6 +363,150 @@
           "Exclude UPOS=PUNCT from both frequency views.",
           "Preserve the Universal POS value; use UNSPECIFIED only where the source field is empty.",
           "Keep lemma and wordform frequencies as separate views."
+        ]
+      }
+    },
+    {
+      "id": "zemriete-2025-lithuanian-homoforms",
+      "title": "Lithuanian homoforms",
+      "decision": "publish",
+      "reason": "The public CC BY 4.0 TSV is a complete, structured homoform inventory. Its MATAS frequency and per-component frequency are retained as distinct source metrics rather than recast as one generic word-frequency ranking.",
+      "source": {
+        "sourceUrl": "https://clarin-repo.lt/items/c5e06f7b-364d-46e8-b4e8-6e5d48a0d2c3",
+        "licence": "CC BY 4.0",
+        "citation": "Lithuanian Homoforms. 2025. CLARIN-LT Repository. https://hdl.handle.net/20.500.11821/75.",
+        "encoding": "utf-8",
+        "entryKind": "homoform-analysis",
+        "files": [
+          {
+            "path": "zemriete-2025-11-18-lithuanian-homoforms/original/Homoformos_2025-11-01.zip",
+            "format": "binary",
+            "bytes": 1184321,
+            "sha256": "d15a8a4447dad4e0205210d9e944d6ad287fe628323e701cd5e45b5aac89492c"
+          },
+          {
+            "path": "zemriete-2025-11-18-lithuanian-homoforms/original/Homoformos_2025-11-01.tsv",
+            "role": "homoform-records",
+            "bytes": 17351074,
+            "rows": 177226,
+            "sha256": "a72e2fbb784df0ba6c597a79f23ab885277eab7ecf441ef887aee824fab89d9d",
+            "hasHeader": true,
+            "columns": 17,
+            "numericColumns": [3, 4],
+            "numericTotals": { "3": 2419451, "4": 843500 },
+            "nullableColumns": [2],
+            "missingCounts": { "2": 1 },
+            "archiveMember": "Homoformos_2025-11-01.tsv"
+          }
+        ]
+      },
+      "schema": {
+        "key": "homoform plus lemma plus morphology",
+        "frequencyField": null,
+        "metrics": [
+          { "id": "matasFrequency", "label": "MATAS frequency", "type": "raw-token-count", "unit": "tokens in MATAS" },
+          { "id": "homoformComponentFrequency", "label": "Homoform component frequency", "type": "raw-token-count", "unit": "tokens in the source component" }
+        ]
+      },
+      "delivery": {
+        "status": "published-static-json",
+        "mode": "static-chunked-lexical-json",
+        "constraints": [
+          "Keep the source's homoform, lemma, morphology, and type/subtype strings distinct.",
+          "Keep MATAS frequency and component frequency as separate raw source metrics.",
+          "Retain the source record order; it is not a consistently descending frequency ranking."
+        ]
+      }
+    },
+    {
+      "id": "raskinis-2025-foreign-name-transliterations",
+      "title": "Foreign-name transliteration pairs",
+      "decision": "publish",
+      "reason": "The public CC BY 4.0 text file is a complete, reproducibly parseable list of source name pairs and source match counts. Source ordering and pair direction are retained literally because the source record warns about noise and inconsistent transliterations.",
+      "source": {
+        "sourceUrl": "https://clarin-repo.lt/items/bf567c29-aa7a-4f0f-ad21-f13ba10e7f7d",
+        "licence": "CC BY 4.0",
+        "citation": "Foreign-name transliteration data. 2025. CLARIN-LT Repository. https://hdl.handle.net/20.500.11821/68.",
+        "encoding": "utf-8",
+        "entryKind": "source-name-pair",
+        "files": [
+          {
+            "path": "raskinis-2025-04-23-foreign-name-transliteration/original/data_0.zip",
+            "format": "binary",
+            "bytes": 767551,
+            "sha256": "fa33e4b3169b38f32606406f5b8f65f8eaa47c3d2b790ee0b942e85e379365b4"
+          },
+          {
+            "path": "raskinis-2025-04-23-foreign-name-transliteration/original/data_0.txt",
+            "role": "source-name-pairs",
+            "bytes": 2834637,
+            "rows": 68167,
+            "sha256": "5b35a574bbc9c1c0f65d8b29a49f7d98acdfa64e54bbc87b326f7c6517db1c27",
+            "columns": 1,
+            "archiveMember": "data_0.txt"
+          }
+        ]
+      },
+      "schema": {
+        "key": "source-provided name pair",
+        "frequencyField": null,
+        "metrics": [
+          { "id": "sourceMatchCount", "label": "Source match count", "type": "raw-token-count", "unit": "matches in the source corpus extraction" }
+        ]
+      },
+      "delivery": {
+        "status": "published-static-json",
+        "mode": "static-chunked-lexical-json",
+        "constraints": [
+          "Expose the two source strings as left and parenthesized fields; do not silently infer a canonical foreign or Lithuanian ordering.",
+          "Treat sourceMatchCount as an extraction match count, not as a general Lithuanian-language frequency.",
+          "Retain the source record order and its documented noise or non-standard transliterations."
+        ]
+      }
+    },
+    {
+      "id": "birvinskaite-2026-lithuanian-basketball-slang",
+      "title": "Lithuanian basketball slang lexical database",
+      "decision": "publish",
+      "reason": "The public CC BY 4.0 NVH lexical database is fully parseable into entries, source metadata, senses, definitions, examples, variants, and compiler fields. It is a crowdsourced lexicon, not a corpus frequency dataset.",
+      "source": {
+        "sourceUrl": "https://clarin-repo.lt/items/6c15e277-4bc5-4a3f-a0c1-16d00aa8a4f6",
+        "licence": "CC BY 4.0",
+        "citation": "Lithuanian Basketball Slang Lexical Database. 2026. CLARIN-LT Repository. https://hdl.handle.net/20.500.11821/81.",
+        "encoding": "utf-8",
+        "entryKind": "lexical-entry",
+        "files": [
+          {
+            "path": "birvinskaite-2026-02-23-lithuanian-basketball-slang/original/Krepsinio_zargono_leksine_baze_2026-02-23_versija.zip",
+            "format": "binary",
+            "bytes": 16587,
+            "sha256": "73fc11e97a7c82d73b793cd06c8faff37c3f2eaa60cafeb02e6782320e823ee0"
+          },
+          {
+            "path": "birvinskaite-2026-02-23-lithuanian-basketball-slang/original/Krepsinio_zargono_leksine_baze_2026-02-23_versija.nvh",
+            "role": "basketball-slang-entries",
+            "format": "nvh",
+            "bytes": 79501,
+            "rows": 2286,
+            "sha256": "59148e9853d57b4cfd8d73490e3c6f9b3ed94bd67bdb434607086331787419da",
+            "archiveMember": "Krepsinio_zargono_leksine_baze_2026-02-23_versija.nvh"
+          }
+        ]
+      },
+      "schema": {
+        "key": "entry",
+        "frequencyField": null,
+        "recordPageEntryCount": 233,
+        "storedFileEntryCount": 223,
+        "details": "source, senses, definitions, examples, user groups, variants, and entry compilers"
+      },
+      "delivery": {
+        "status": "published-static-json",
+        "mode": "static-chunked-lexical-json",
+        "constraints": [
+          "Do not present entries as corpus-frequency observations or rank them by popularity.",
+          "Preserve source, definition, example, variant, user-group, and compiler information where supplied.",
+          "Report 223 parsed top-level entries from the stored NVH file and preserve the source-record page's separate 233-entry claim."
         ]
       }
     },

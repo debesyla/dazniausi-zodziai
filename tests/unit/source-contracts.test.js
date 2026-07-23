@@ -92,6 +92,25 @@ describe('verifySourceContracts', () => {
     await expect(verifySourceContracts({ contractPath, sourceRoot })).resolves.toEqual({ contracts: 1, files: 1 });
   });
 
+  it('preserves an explicitly missing nullable string field', async () => {
+    const sourceRoot = await makeDirectory();
+    const source = 'homoform\tlemma\tmorphology\nbūti\tbūti\t\natlikti\tatlikti\tvksm.\n';
+    await writeFile(path.join(sourceRoot, 'homoforms.tsv'), source);
+    const contractPath = path.join(sourceRoot, 'contract.json');
+    await writeFile(contractPath, JSON.stringify(manifestFor({
+      path: 'homoforms.tsv',
+      bytes: Buffer.byteLength(source),
+      rows: 2,
+      sha256: checksum(source),
+      hasHeader: true,
+      columns: 3,
+      nullableColumns: [2],
+      missingCounts: { 2: 1 }
+    })));
+
+    await expect(verifySourceContracts({ contractPath, sourceRoot })).resolves.toEqual({ contracts: 1, files: 1 });
+  });
+
   it('rejects a source symlink that escapes the configured root', async () => {
     const sourceRoot = await makeDirectory();
     const outsideRoot = await makeDirectory();

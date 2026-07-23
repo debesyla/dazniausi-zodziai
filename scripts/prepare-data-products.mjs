@@ -17,6 +17,7 @@ const defaultOutputRoot = path.join(defaultStaticRoot, 'data-products');
 const FIELD_TYPES = new Set([
   'string',
   'source-pos-code',
+  'lexical-entry-details',
   'raw-token-count',
   'normalized-token-count',
   'normalized-document-count',
@@ -37,7 +38,8 @@ const CHUNKED_PRODUCT_TYPES = new Set([
   'chunked-wordform-list',
   'chunked-comparison',
   'chunked-frequency-list',
-  'chunked-derived-frequency-list'
+  'chunked-derived-frequency-list',
+  'chunked-lexical-collection'
 ]);
 
 function fail(message) {
@@ -120,6 +122,9 @@ function validateField(field, description) {
   } else if (!Number.isInteger(field.sourceColumn) || field.sourceColumn < 0) {
     fail(`${description}.sourceColumn must be a non-negative integer`);
   }
+  if (field.type === 'lexical-entry-details' && field.derived !== true) {
+    fail(`${description}.lexical-entry-details must be a derived field`);
+  }
   if (field.nullable !== undefined && typeof field.nullable !== 'boolean') {
     fail(`${description}.nullable must be true or false when provided`);
   }
@@ -148,7 +153,8 @@ function validateField(field, description) {
 function validateView(view, description) {
   if (!isPlainObject(view) || !isSafeId(view.id) || !normalizeString(view.sourceRole) || !normalizeString(view.title)
     || !normalizeString(view.description) || !isPlainObject(view.ordering) || !normalizeString(view.ordering.field)
-    || !['ascending', 'descending'].includes(view.ordering.direction)
+    || !(['ascending', 'descending'].includes(view.ordering.direction)
+      || (view.ordering.field === 'source' && view.ordering.direction === 'as-stored'))
     || !Number.isSafeInteger(view.chunkBytes) || view.chunkBytes < 1024) {
     fail(`${description} is missing required metadata`);
   }
@@ -163,7 +169,9 @@ function validateView(view, description) {
     ids.add(field.id);
     if (field.derived !== true) sourceColumns.add(field.sourceColumn);
   }
-  if (!ids.has(view.ordering.field)) fail(`${description}.ordering.field must name a field`);
+  if (!(view.ordering.field === 'source' && view.ordering.direction === 'as-stored') && !ids.has(view.ordering.field)) {
+    fail(`${description}.ordering.field must name a field unless it declares source order`);
+  }
 }
 
 function validatePublication(publication, description) {
@@ -180,17 +188,33 @@ function validatePublication(publication, description) {
 
 function validateDerivation(derivation, description) {
   if (derivation === undefined) return;
-  if (!isPlainObject(derivation) || derivation.type !== 'conllu-frequency'
-    || !['lemma', 'wordform'].includes(derivation.key)
-    || !Array.isArray(derivation.excludeUniversalPos)
-    || derivation.excludeUniversalPos.some((value) => !normalizeString(value))
-    || !normalizeString(derivation.missingUniversalPos)
-    || !isPlainObject(derivation.expectedSummary)) {
-    fail(`${description}.derivation is invalid`);
+  if (!isPlainObject(derivation) || !isPlainObject(derivation.expectedSummary)) fail(`${description}.derivation is invalid`);
+  if (derivation.type === 'conllu-frequency') {
+    if (!['lemma', 'wordform'].includes(derivation.key)
+      || !Array.isArray(derivation.excludeUniversalPos)
+      || derivation.excludeUniversalPos.some((value) => !normalizeString(value))
+      || !normalizeString(derivation.missingUniversalPos)) {
+      fail(`${description}.derivation is invalid`);
+    }
+    for (const field of ['sourceRows', 'recordCount', 'totalFrequency']) {
+      asSafeInteger(derivation.expectedSummary[field], `${description}.derivation.expectedSummary.${field}`);
+    }
+    return;
   }
-  for (const field of ['sourceRows', 'recordCount', 'totalFrequency']) {
-    asSafeInteger(derivation.expectedSummary[field], `${description}.derivation.expectedSummary.${field}`);
+  if (derivation.type === 'name-transliteration') {
+    for (const field of ['sourceRows', 'recordCount', 'totalFrequency']) {
+      asSafeInteger(derivation.expectedSummary[field], `${description}.derivation.expectedSummary.${field}`);
+    }
+    return;
   }
+  if (derivation.type === 'nvh-lexicon') {
+    asSafeInteger(derivation.recordPageEntryCount, `${description}.derivation.recordPageEntryCount`);
+    for (const field of ['sourceRows', 'recordCount', 'senseCount', 'definitionCount', 'exampleCount']) {
+      asSafeInteger(derivation.expectedSummary[field], `${description}.derivation.expectedSummary.${field}`);
+    }
+    return;
+  }
+  fail(`${description}.derivation type is not supported`);
 }
 
 export function validatePublicationPlan(plan) {
@@ -293,7 +317,11 @@ function parseNonNegativeSafeInteger(value, description) {
 }
 
 function parseFieldValue(field, value, sourcePath, lineNumber) {
+  if (field.type === 'lexical-entry-details') {
+    fail(`${sourcePath} line ${lineNumber} cannot read a structured lexical field directly from a delimited source`);
+  }
   if (!NUMERIC_FIELD_TYPES.has(field.type)) {
+    if (!normalizeString(value) && field.nullable === true) return null;
     if (!normalizeString(value)) fail(`${sourcePath} line ${lineNumber} has an empty ${field.id} value`);
     return value;
   }
@@ -453,6 +481,282 @@ async function buildChunkedView({ productId, productDirectory, view, sourceFile,
     recordEncoding: 'array',
     summary
   };
+}
+
+async function writeRecordsInChunks({ productId, view, chunksDirectory, records, sourceDisplayPath }) {
+  const suffix = ']}\n';
+  const chunks = [];
+  let chunkNumber = 0;
+  let recordJsons = [];
+  let recordsBytes = 0;
+
+  async function flushChunk() {
+    if (recordJsons.length === 0) return;
+    const serialized = `${chunkPrefix(productId, view.id, chunkNumber)}${recordJsons.join(',')}${suffix}`;
+    const buffer = Buffer.from(serialized, 'utf8');
+    if (buffer.byteLength > view.chunkBytes) {
+      fail(`${productId}/${view.id} chunk ${chunkNumber} exceeds its ${view.chunkBytes}-byte budget`);
+    }
+    const filename = `${String(chunkNumber + 1).padStart(6, '0')}.json`;
+    await writeFile(path.join(chunksDirectory, filename), buffer);
+    chunks.push({
+      file: `chunks/${filename}`,
+      records: recordJsons.length,
+      bytes: buffer.byteLength,
+      sha256: createHash('sha256').update(buffer).digest('hex')
+    });
+    chunkNumber += 1;
+    recordJsons = [];
+    recordsBytes = 0;
+  }
+
+  for (const record of records) {
+    const recordJson = JSON.stringify(record);
+    const candidateBytes = Buffer.byteLength(chunkPrefix(productId, view.id, chunkNumber)) + recordsBytes
+      + (recordJsons.length === 0 ? 0 : 1) + Buffer.byteLength(recordJson) + Buffer.byteLength(suffix);
+    if (candidateBytes > view.chunkBytes && recordJsons.length > 0) await flushChunk();
+    const currentBytes = Buffer.byteLength(chunkPrefix(productId, view.id, chunkNumber)) + recordsBytes
+      + (recordJsons.length === 0 ? 0 : 1) + Buffer.byteLength(recordJson) + Buffer.byteLength(suffix);
+    if (currentBytes > view.chunkBytes) {
+      fail(`${sourceDisplayPath} produced a record that cannot fit in the ${view.chunkBytes}-byte chunk budget`);
+    }
+    recordJsons.push(recordJson);
+    recordsBytes += (recordJsons.length === 1 ? 0 : 1) + Buffer.byteLength(recordJson);
+  }
+  await flushChunk();
+  return chunks;
+}
+
+function assertDerivedFieldLayout(view, expectedFields) {
+  if (view.fields.length !== expectedFields.length) {
+    fail(`${view.id} has an unexpected derived-field layout`);
+  }
+  for (const [index, expected] of expectedFields.entries()) {
+    const field = view.fields[index];
+    if (field.id !== expected.id || field.type !== expected.type || field.derived !== true) {
+      fail(`${view.id} has an unexpected derived-field layout`);
+    }
+  }
+}
+
+function buildDerivedViewIndex({ productId, view, sourceFile, summary, chunks }) {
+  return {
+    schemaVersion: 1,
+    productId,
+    viewId: view.id,
+    recordEncoding: 'array',
+    fields: view.fields,
+    ordering: view.ordering,
+    sourceFile: publicSourceFile(sourceFile),
+    derivation: view.derivation,
+    maxChunkBytes: view.chunkBytes,
+    summary,
+    chunks
+  };
+}
+
+function publicViewDescriptor(view, summary) {
+  return {
+    id: view.id,
+    title: view.title,
+    description: view.description,
+    index: `views/${view.id}/index.json`,
+    sourceRole: view.sourceRole,
+    recordEncoding: 'array',
+    summary
+  };
+}
+
+async function buildDerivedNameTransliterationView({ productId, productDirectory, view, sourceFile, sourceRoot }) {
+  if (view.derivation?.type !== 'name-transliteration' || sourceFile.hasHeader === true || sourceFile.columns !== 1) {
+    fail(`${view.id} requires a one-column, headerless name-transliteration source`);
+  }
+  assertDerivedFieldLayout(view, [
+    { id: 'sourceLeftName', type: 'string' },
+    { id: 'sourceParenthesizedName', type: 'string' },
+    { id: 'sourceMatchCount', type: 'raw-token-count' }
+  ]);
+  const { realRoot, sourcePath } = await resolveSourcePath(sourceRoot, sourceFile.path);
+  const sourceDisplayPath = sourceRelativePath(realRoot, sourcePath);
+  const viewDirectory = path.join(productDirectory, 'views', view.id);
+  const chunksDirectory = path.join(viewDirectory, 'chunks');
+  await mkdir(chunksDirectory, { recursive: true });
+
+  const records = [];
+  const lines = createInterface({
+    input: createReadStream(sourcePath, { encoding: 'utf8' }),
+    crlfDelay: Infinity
+  });
+  let sourceRows = 0;
+  let sourceMatchTotal = 0;
+  for await (const line of lines) {
+    sourceRows += 1;
+    const match = line.match(/^\s*(\d+)\s+(.+?)\s+\((.+)\)\s*$/);
+    if (!match) fail(`${sourceDisplayPath} line ${sourceRows} does not match the reviewed name-pair pattern`);
+    const sourceLeftName = normalizeString(match[2]);
+    const sourceParenthesizedName = normalizeString(match[3]);
+    const sourceMatchCount = parseNonNegativeSafeInteger(match[1], `${sourceDisplayPath} line ${sourceRows} sourceMatchCount`);
+    if (!sourceLeftName || !sourceParenthesizedName) {
+      fail(`${sourceDisplayPath} line ${sourceRows} has an empty name string`);
+    }
+    sourceMatchTotal += sourceMatchCount;
+    records.push([sourceLeftName, sourceParenthesizedName, sourceMatchCount]);
+  }
+  const expected = view.derivation.expectedSummary;
+  if (sourceRows !== sourceFile.rows || sourceRows !== expected.sourceRows
+    || records.length !== expected.recordCount || sourceMatchTotal !== expected.totalFrequency) {
+    fail(`${sourceDisplayPath} ${view.id} does not match its reviewed derived summary`);
+  }
+  const chunks = await writeRecordsInChunks({ productId, view, chunksDirectory, records, sourceDisplayPath });
+  if (chunks.length === 0) fail(`${sourceDisplayPath} produced no records`);
+  const summary = {
+    sourceRows,
+    recordCount: records.length,
+    numericTotals: { sourceMatchCount: sourceMatchTotal },
+    nullCounts: {}
+  };
+  await writeJson(path.join(viewDirectory, 'index.json'), buildDerivedViewIndex({ productId, view, sourceFile, summary, chunks }));
+  return publicViewDescriptor(view, summary);
+}
+
+function decodeUtf8(buffer, description) {
+  try {
+    return new TextDecoder('utf-8', { fatal: true }).decode(buffer);
+  } catch {
+    fail(`${description} is not valid UTF-8`);
+  }
+}
+
+function sourceLines(text) {
+  const lines = text.split(/\r?\n/);
+  return lines.at(-1) === '' ? lines.slice(0, -1) : lines;
+}
+
+async function buildDerivedNvhLexiconView({ productId, productDirectory, view, sourceFile, sourceRoot }) {
+  if (view.derivation?.type !== 'nvh-lexicon' || sourceFile.format !== 'nvh') {
+    fail(`${view.id} requires an NVH lexical-database source`);
+  }
+  assertDerivedFieldLayout(view, [
+    { id: 'entry', type: 'string' },
+    { id: 'details', type: 'lexical-entry-details' }
+  ]);
+  const { realRoot, sourcePath } = await resolveSourcePath(sourceRoot, sourceFile.path);
+  const sourceDisplayPath = sourceRelativePath(realRoot, sourcePath);
+  const viewDirectory = path.join(productDirectory, 'views', view.id);
+  const chunksDirectory = path.join(viewDirectory, 'chunks');
+  await mkdir(chunksDirectory, { recursive: true });
+
+  const lines = sourceLines(decodeUtf8(await readFile(sourcePath), sourceDisplayPath));
+  const records = [];
+  let current = null;
+  let currentSense = null;
+  let senseCount = 0;
+  let definitionCount = 0;
+  let exampleCount = 0;
+
+  function finishEntry() {
+    if (!current) return;
+    if (!current.source || current.senses.length === 0 || current.entryCompilers.length === 0) {
+      fail(`${sourceDisplayPath} entry ${JSON.stringify(current.entry)} is missing reviewed lexical metadata`);
+    }
+    const source = {
+      name: current.source.name || null,
+      date: current.source.date || null,
+      url: current.source.url || null
+    };
+    const details = {
+      source,
+      senses: current.senses,
+      userGroups: current.userGroups,
+      variants: current.variants,
+      entryCompilers: current.entryCompilers
+    };
+    senseCount += details.senses.length;
+    definitionCount += details.senses.reduce((total, sense) => total + sense.definitions.length, 0);
+    exampleCount += details.senses.reduce((total, sense) => total + sense.examples.length, 0);
+    records.push([current.entry, details]);
+    current = null;
+    currentSense = null;
+  }
+
+  for (const [lineIndex, line] of lines.entries()) {
+    const lineNumber = lineIndex + 1;
+    const match = line.match(/^( *)([A-Za-z_]+):(.*)$/);
+    if (!match) fail(`${sourceDisplayPath} line ${lineNumber} has an unsupported NVH structure`);
+    const indentation = match[1].length;
+    const key = match[2];
+    const value = normalizeString(match[3]);
+    if (indentation === 0) {
+      if (key !== 'entry' || !value) fail(`${sourceDisplayPath} line ${lineNumber} has an invalid entry`);
+      finishEntry();
+      current = {
+        entry: value,
+        source: null,
+        senses: [],
+        userGroups: [],
+        variants: [],
+        entryCompilers: []
+      };
+      continue;
+    }
+    if (!current) fail(`${sourceDisplayPath} line ${lineNumber} appears before an entry`);
+    if (indentation === 2) {
+      if (key === 'source_name') {
+        if (current.source) fail(`${sourceDisplayPath} line ${lineNumber} has an invalid source name`);
+        current.source = { name: value, date: '', url: '', dateSeen: false, urlSeen: false };
+      } else if (key === 'sense') {
+        currentSense = { label: value || null, definitions: [], examples: [] };
+        current.senses.push(currentSense);
+      } else if (key === 'user_group') {
+        if (value) current.userGroups.push(value);
+      } else if (key === 'variant') {
+        if (value) current.variants.push(value);
+      } else if (key === 'entry_compiler') {
+        if (value) current.entryCompilers.push(value);
+      } else {
+        fail(`${sourceDisplayPath} line ${lineNumber} has an unsupported entry field ${key}`);
+      }
+      continue;
+    }
+    if (indentation === 4) {
+      if (key === 'source_date') {
+        if (!current.source || current.source.dateSeen) fail(`${sourceDisplayPath} line ${lineNumber} has an invalid source date`);
+        current.source.date = value;
+        current.source.dateSeen = true;
+      } else if (key === 'source_URL') {
+        if (!current.source || current.source.urlSeen) fail(`${sourceDisplayPath} line ${lineNumber} has an invalid source URL`);
+        current.source.url = value;
+        current.source.urlSeen = true;
+      } else if (key === 'definition') {
+        if (!currentSense || !value) fail(`${sourceDisplayPath} line ${lineNumber} has an invalid definition`);
+        currentSense.definitions.push(value);
+      } else if (key === 'example') {
+        if (!currentSense) fail(`${sourceDisplayPath} line ${lineNumber} has an invalid example`);
+        currentSense.examples.push(value || null);
+      } else {
+        fail(`${sourceDisplayPath} line ${lineNumber} has an unsupported nested field ${key}`);
+      }
+      continue;
+    }
+    fail(`${sourceDisplayPath} line ${lineNumber} has unsupported indentation`);
+  }
+  finishEntry();
+
+  const expected = view.derivation.expectedSummary;
+  if (lines.length !== sourceFile.rows || lines.length !== expected.sourceRows || records.length !== expected.recordCount
+    || senseCount !== expected.senseCount || definitionCount !== expected.definitionCount || exampleCount !== expected.exampleCount) {
+    fail(`${sourceDisplayPath} ${view.id} does not match its reviewed derived summary`);
+  }
+  const chunks = await writeRecordsInChunks({ productId, view, chunksDirectory, records, sourceDisplayPath });
+  if (chunks.length === 0) fail(`${sourceDisplayPath} produced no records`);
+  const summary = {
+    sourceRows: lines.length,
+    recordCount: records.length,
+    numericTotals: {},
+    nullCounts: {}
+  };
+  await writeJson(path.join(viewDirectory, 'index.json'), buildDerivedViewIndex({ productId, view, sourceFile, summary, chunks }));
+  return publicViewDescriptor(view, summary);
 }
 
 function assertDerivedConlluView(view, sourceFile) {
@@ -714,21 +1018,29 @@ async function buildContractProduct({ contract, contractProduct, sourceRepositor
     };
   }
 
-  const filesByRole = new Map(contract.source.files.map((file) => [file.role, file]));
+  const sourceFilesWithRoles = contract.source.files.filter((file) => normalizeString(file.role));
+  const filesByRole = new Map(sourceFilesWithRoles.map((file) => [file.role, file]));
+  if (filesByRole.size !== sourceFilesWithRoles.length) {
+    fail(`${contract.id} assigns the same source role to more than one file`);
+  }
   const views = [];
   const usedSourceRoles = new Set();
   for (const view of contractProduct.views) {
     const sourceFile = filesByRole.get(view.sourceRole);
     if (!sourceFile) fail(`${contract.id} has no source file with role ${view.sourceRole}`);
     usedSourceRoles.add(view.sourceRole);
-    if (view.derivation !== undefined) {
+    if (view.derivation?.type === 'conllu-frequency') {
       views.push(await buildDerivedConlluFrequencyView({ productId: contract.id, productDirectory, view, sourceFile, sourceRoot }));
+    } else if (view.derivation?.type === 'name-transliteration') {
+      views.push(await buildDerivedNameTransliterationView({ productId: contract.id, productDirectory, view, sourceFile, sourceRoot }));
+    } else if (view.derivation?.type === 'nvh-lexicon') {
+      views.push(await buildDerivedNvhLexiconView({ productId: contract.id, productDirectory, view, sourceFile, sourceRoot }));
     } else {
       views.push(await buildChunkedView({ productId: contract.id, productDirectory, view, sourceFile, sourceRoot }));
     }
   }
-  if (usedSourceRoles.size !== contract.source.files.length
-    || contract.source.files.some((file) => !usedSourceRoles.has(file.role))) {
+  if (usedSourceRoles.size !== sourceFilesWithRoles.length
+    || sourceFilesWithRoles.some((file) => !usedSourceRoles.has(file.role))) {
     fail(`${contract.id} must publish at least one view for every reviewed machine-readable source file`);
   }
 

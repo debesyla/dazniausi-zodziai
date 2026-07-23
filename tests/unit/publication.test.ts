@@ -100,11 +100,15 @@ describe('loadPublicDataProducts', () => {
 
     const products = await loadPublicDataProducts();
 
-    expect(products).toHaveLength(9);
+    expect(products).toHaveLength(12);
     expect(products.map((product) => product.id)).toContain('petkevicius-2025-ccll-lemmas');
     expect(products.find((product) => product.id === 'utka-2018-lemmatized-totals')).toMatchObject({ viewCount: 1, views: [] });
     expect(products.find((product) => product.id === 'rimkute-2024-matas-v3-frequencies')).toMatchObject({ viewCount: 2 });
-    expect(fetch.mock.calls).toHaveLength(10);
+    expect(products.find((product) => product.id === 'birvinskaite-2026-lithuanian-basketball-slang')).toMatchObject({
+      productType: 'chunked-lexical-collection',
+      viewCount: 1
+    });
+    expect(fetch.mock.calls).toHaveLength(13);
     expect(fetch.mock.calls.map(([url]) => String(url)).every((url) => !url.includes('/chunks/'))).toBe(true);
   });
 });
