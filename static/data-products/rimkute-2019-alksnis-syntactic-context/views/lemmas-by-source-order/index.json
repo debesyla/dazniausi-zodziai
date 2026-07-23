@@ -1,0 +1,180 @@
+{
+  "schemaVersion": 1,
+  "productId": "rimkute-2019-alksnis-syntactic-context",
+  "viewId": "lemmas-by-source-order",
+  "recordEncoding": "array",
+  "fields": [
+    {
+      "id": "lemma",
+      "label": "Source lemma",
+      "type": "string",
+      "derived": true
+    },
+    {
+      "id": "tokenCount",
+      "label": "Non-punctuation token rows",
+      "type": "raw-token-count",
+      "unit": "tokens",
+      "derived": true
+    },
+    {
+      "id": "headEdgeCount",
+      "label": "Rows where the lemma is a non-punctuation head",
+      "type": "raw-token-count",
+      "unit": "relationships",
+      "derived": true
+    },
+    {
+      "id": "dependentEdgeCount",
+      "label": "Rows where the lemma is the dependent",
+      "type": "raw-token-count",
+      "unit": "relationships",
+      "derived": true
+    },
+    {
+      "id": "rootEdgeCount",
+      "label": "Rows where the lemma has source head 0",
+      "type": "raw-token-count",
+      "unit": "relationships",
+      "derived": true
+    }
+  ],
+  "ordering": {
+    "field": "lemma",
+    "direction": "ascending"
+  },
+  "sourceFile": {
+    "role": "alksnis-treebank",
+    "path": "alksnis-2019-10-24-lithuanian-treebank/original/Alksnis-3.0.zip",
+    "format": "zip-conllu-treebank",
+    "bytes": 2713010,
+    "sha256": "95af1a9ba62960d1321f89bc5a6dc9a9fafa71c4c15c62336a469d2896ec84c0",
+    "archiveDirectory": "Alksnis-3.0",
+    "conlluSummary": {
+      "documents": 76,
+      "sentences": 3642,
+      "repositorySentenceClaim": 3643,
+      "integerTokenRows": 70047,
+      "nonPunctuationRows": 57156,
+      "allRelationLabels": 104,
+      "nonPunctuationRelationLabels": 92,
+      "rootRows": 3642,
+      "nonPunctuationRootRows": 2956,
+      "nonRootDependencyRows": 54200,
+      "uncompressedBytes": 6173268,
+      "membersSha256": "33ee2641a906776035ec13d1bc78eb58bdc87c8828da9a4dde91d222a0fa4990"
+    }
+  },
+  "derivation": {
+    "type": "conllu-treebank-syntax-context",
+    "expectedSummary": {
+      "sourceRows": 57156,
+      "recordCount": 8656
+    }
+  },
+  "selection": {
+    "type": "lemma-prefix",
+    "field": "lemma",
+    "codePoints": 1
+  },
+  "maxChunkBytes": 65536,
+  "summary": {
+    "sourceRows": 57156,
+    "recordCount": 8656,
+    "numericTotals": {
+      "tokenCount": 57156,
+      "headEdgeCount": 49971,
+      "dependentEdgeCount": 57156,
+      "rootEdgeCount": 2956
+    },
+    "nullCounts": {}
+  },
+  "chunks": [
+    {
+      "file": "chunks/000001.json",
+      "records": 3075,
+      "bytes": 65517,
+      "sha256": "d57d31f47c2e30c8cc3df673202fdfeea0e7e523f82a5a6cdf1cd899071aa7bd",
+      "selectionPrefixes": [
+        "%",
+        "&",
+        "(",
+        "-",
+        ".",
+        "0",
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6",
+        "7",
+        "8",
+        "9",
+        "a",
+        "b",
+        "c",
+        "d",
+        "e",
+        "f",
+        "g",
+        "h",
+        "i",
+        "j",
+        "k",
+        "l",
+        "m",
+        "n",
+        "o",
+        "p",
+        "r",
+        "s",
+        "t",
+        "u",
+        "v",
+        "w",
+        "x",
+        "y",
+        "z"
+      ]
+    },
+    {
+      "file": "chunks/000002.json",
+      "records": 2902,
+      "bytes": 65516,
+      "sha256": "bf7f69e43d55ad1043905ff15cb2f66672107e4c6b9d40280cfe6ce969d05a85",
+      "selectionPrefixes": [
+        "j",
+        "k",
+        "l",
+        "m",
+        "n",
+        "o",
+        "p"
+      ]
+    },
+    {
+      "file": "chunks/000003.json",
+      "records": 2679,
+      "bytes": 59827,
+      "sha256": "bc040b823388f0528a880cbdb68274ee877dd5bea572058e1aab64d09af92835",
+      "selectionPrefixes": [
+        "p",
+        "r",
+        "s",
+        "t",
+        "u",
+        "v",
+        "y",
+        "z",
+        "č",
+        "ė",
+        "į",
+        "ķ",
+        "š",
+        "ū",
+        "ž"
+      ]
+    }
+  ]
+}

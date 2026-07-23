@@ -1,0 +1,4300 @@
+{
+  "schemaVersion": 1,
+  "productId": "rimkute-2019-alksnis-syntactic-context",
+  "viewId": "sentence-contexts-by-lemma",
+  "recordEncoding": "array",
+  "fields": [
+    {
+      "id": "lemma",
+      "label": "Selected source lemma",
+      "type": "string",
+      "derived": true
+    },
+    {
+      "id": "direction",
+      "label": "Selected lemma role",
+      "type": "string",
+      "derived": true
+    },
+    {
+      "id": "relation",
+      "label": "Source dependency relation",
+      "type": "string",
+      "derived": true
+    },
+    {
+      "id": "dependentLemma",
+      "label": "Dependent source lemma",
+      "type": "string",
+      "derived": true
+    },
+    {
+      "id": "dependentForm",
+      "label": "Dependent source form",
+      "type": "string",
+      "derived": true
+    },
+    {
+      "id": "headLemma",
+      "label": "Head source lemma or ROOT",
+      "type": "string",
+      "derived": true
+    },
+    {
+      "id": "headForm",
+      "label": "Head source form or ROOT",
+      "type": "string",
+      "derived": true
+    },
+    {
+      "id": "genreId",
+      "label": "Source genre identifier",
+      "type": "string",
+      "derived": true
+    },
+    {
+      "id": "genre",
+      "label": "Source genre",
+      "type": "string",
+      "derived": true
+    },
+    {
+      "id": "document",
+      "label": "Source CoNLL-U document",
+      "type": "string",
+      "derived": true
+    },
+    {
+      "id": "sourceSentenceId",
+      "label": "Source sentence identifier",
+      "type": "string",
+      "derived": true
+    },
+    {
+      "id": "sentenceText",
+      "label": "Source sentence text",
+      "type": "string",
+      "derived": true
+    }
+  ],
+  "ordering": {
+    "field": "lemma",
+    "direction": "ascending"
+  },
+  "sourceFile": {
+    "role": "alksnis-treebank",
+    "path": "alksnis-2019-10-24-lithuanian-treebank/original/Alksnis-3.0.zip",
+    "format": "zip-conllu-treebank",
+    "bytes": 2713010,
+    "sha256": "95af1a9ba62960d1321f89bc5a6dc9a9fafa71c4c15c62336a469d2896ec84c0",
+    "archiveDirectory": "Alksnis-3.0",
+    "conlluSummary": {
+      "documents": 76,
+      "sentences": 3642,
+      "repositorySentenceClaim": 3643,
+      "integerTokenRows": 70047,
+      "nonPunctuationRows": 57156,
+      "allRelationLabels": 104,
+      "nonPunctuationRelationLabels": 92,
+      "rootRows": 3642,
+      "nonPunctuationRootRows": 2956,
+      "nonRootDependencyRows": 54200,
+      "uncompressedBytes": 6173268,
+      "membersSha256": "33ee2641a906776035ec13d1bc78eb58bdc87c8828da9a4dde91d222a0fa4990"
+    }
+  },
+  "derivation": {
+    "type": "conllu-treebank-syntax-context",
+    "expectedSummary": {
+      "sourceRows": 39828,
+      "recordCount": 39828
+    }
+  },
+  "selection": {
+    "type": "lemma-prefix",
+    "field": "lemma",
+    "codePoints": 3
+  },
+  "maxChunkBytes": 65536,
+  "summary": {
+    "sourceRows": 39828,
+    "recordCount": 39828,
+    "numericTotals": {},
+    "nullCounts": {}
+  },
+  "chunks": [
+    {
+      "file": "chunks/000001.json",
+      "records": 161,
+      "bytes": 65202,
+      "sha256": "0e5b742ecf451b4ddecd9abc27b81b93ddeb0ce41a5f978f2a5b53e3dfa12f9c",
+      "selectionPrefixes": [
+        "%",
+        "&am",
+        "&gt",
+        "(36",
+        "(ne",
+        "- 9",
+        "-11",
+        "-13",
+        "-70",
+        "-93",
+        ".",
+        "0,0",
+        "0,3",
+        "0,7",
+        "01",
+        "02",
+        "1",
+        "1,1",
+        "1,9",
+        "1.1",
+        "1.2",
+        "1.3",
+        "10",
+        "10 ",
+        "10,",
+        "100",
+        "101",
+        "102",
+        "104",
+        "106",
+        "108",
+        "109",
+        "11",
+        "11,",
+        "11-",
+        "11/",
+        "112",
+        "114",
+        "116",
+        "11:",
+        "12",
+        "12-",
+        "12.",
+        "120",
+        "121",
+        "125",
+        "13"
+      ]
+    },
+    {
+      "file": "chunks/000002.json",
+      "records": 160,
+      "bytes": 65375,
+      "sha256": "446d3d91cb25bc05bf9adb9e0714e6356efe20723fec353140c4295b5923189b",
+      "selectionPrefixes": [
+        "13",
+        "131",
+        "132",
+        "135",
+        "138",
+        "14",
+        "14,",
+        "141",
+        "142",
+        "143",
+        "144",
+        "145",
+        "15",
+        "15-",
+        "150",
+        "152",
+        "153",
+        "159",
+        "16",
+        "16,",
+        "16-",
+        "161",
+        "167",
+        "169",
+        "17",
+        "17.",
+        "170",
+        "172",
+        "175",
+        "177",
+        "178",
+        "18",
+        "18.",
+        "180",
+        "183",
+        "19",
+        "19,",
+        "190",
+        "191",
+        "192",
+        "194"
+      ]
+    },
+    {
+      "file": "chunks/000003.json",
+      "records": 155,
+      "bytes": 65363,
+      "sha256": "764080734ad128792984f2c18de1698a3291363429227c2ccb17b8383bb3fb0f",
+      "selectionPrefixes": [
+        "194",
+        "195",
+        "196",
+        "197",
+        "198",
+        "199",
+        "1k-",
+        "1v-",
+        "2",
+        "2,1",
+        "2,5",
+        "2.1",
+        "2.2",
+        "2.3",
+        "2.4",
+        "2.9",
+        "2/3",
+        "20",
+        "20-",
+        "20.",
+        "200"
+      ]
+    },
+    {
+      "file": "chunks/000004.json",
+      "records": 155,
+      "bytes": 65412,
+      "sha256": "76f86e35f2c8b36f06c42d0bab329ca10232a497064db718b388b7943dd1a748",
+      "selectionPrefixes": [
+        "200",
+        "201",
+        "202",
+        "203",
+        "204",
+        "21",
+        "21,",
+        "21.",
+        "212",
+        "213",
+        "22",
+        "22.",
+        "220",
+        "225",
+        "227",
+        "23",
+        "23.",
+        "230",
+        "24"
+      ]
+    },
+    {
+      "file": "chunks/000005.json",
+      "records": 151,
+      "bytes": 65445,
+      "sha256": "62be9ee69df613b80b2d8dd8f80279d94cf35cbfa38771101bd8df4fa1b55a0d",
+      "selectionPrefixes": [
+        "24",
+        "240",
+        "241",
+        "242",
+        "248",
+        "25",
+        "250",
+        "26",
+        "269",
+        "27",
+        "28",
+        "28.",
+        "29",
+        "3",
+        "3,3",
+        "30",
+        "300",
+        "306",
+        "31",
+        "310",
+        "316",
+        "32",
+        "320",
+        "324",
+        "337",
+        "34",
+        "34,",
+        "35",
+        "36-",
+        "361",
+        "362",
+        "37",
+        "38",
+        "38-",
+        "380",
+        "385",
+        "386",
+        "39",
+        "398",
+        "3d-",
+        "4"
+      ]
+    },
+    {
+      "file": "chunks/000006.json",
+      "records": 152,
+      "bytes": 65288,
+      "sha256": "ede4a1b3194866fa78b58dd3396744a888c907e8c3dc898e958063847cb4a8ad",
+      "selectionPrefixes": [
+        "4",
+        "4,3",
+        "4.6",
+        "40",
+        "400",
+        "402",
+        "408",
+        "42",
+        "43",
+        "44",
+        "442",
+        "443",
+        "45",
+        "455",
+        "46",
+        "47",
+        "47,",
+        "48",
+        "49",
+        "5",
+        "50",
+        "50 ",
+        "500",
+        "51 ",
+        "53",
+        "54",
+        "55",
+        "56",
+        "58",
+        "583",
+        "59",
+        "6",
+        "6 -",
+        "6,7",
+        "6.1",
+        "6.2",
+        "6.3",
+        "6.4",
+        "6.5",
+        "6.7",
+        "60",
+        "600",
+        "61",
+        "615",
+        "62",
+        "63",
+        "64",
+        "65",
+        "66",
+        "67",
+        "68",
+        "69",
+        "7"
+      ]
+    },
+    {
+      "file": "chunks/000007.json",
+      "records": 164,
+      "bytes": 65246,
+      "sha256": "c1055ebaa514d5843162dcc1627024416b0760db4fe581bfbf383a68da875698",
+      "selectionPrefixes": [
+        "7",
+        "7.1",
+        "7.2",
+        "7.3",
+        "7.4",
+        "7.5",
+        "70",
+        "70 ",
+        "71",
+        "729",
+        "73-",
+        "74",
+        "75",
+        "77",
+        "77-",
+        "78-",
+        "79",
+        "79,",
+        "790",
+        "8",
+        "8-a",
+        "80",
+        "800",
+        "83",
+        "84-",
+        "85",
+        "850",
+        "86",
+        "86 ",
+        "87",
+        "89",
+        "89,",
+        "9",
+        "9,1",
+        "9,5",
+        "90",
+        "90,",
+        "900",
+        "92",
+        "93",
+        "95",
+        "95 ",
+        "96",
+        "98",
+        "994",
+        "a",
+        "a =",
+        "a.",
+        "abe"
+      ]
+    },
+    {
+      "file": "chunks/000008.json",
+      "records": 156,
+      "bytes": 65484,
+      "sha256": "b81bd120a13ca1d42af5bc1632b8b338dba3afd8b6113502ca3d9b8c3fee7563",
+      "selectionPrefixes": [
+        "abe",
+        "abi",
+        "abr",
+        "abs",
+        "abu",
+        "ach",
+        "acq",
+        "act",
+        "ada",
+        "ade",
+        "adm",
+        "ado",
+        "adr",
+        "adt",
+        "ae",
+        "afe",
+        "afr",
+        "age",
+        "agi"
+      ]
+    },
+    {
+      "file": "chunks/000009.json",
+      "records": 151,
+      "bytes": 65426,
+      "sha256": "fd0524c530c055d74a0cd2fef599141bf118fcb6d62d2b756ec4c289d7e798ee",
+      "selectionPrefixes": [
+        "agi",
+        "agr",
+        "agu",
+        "aha",
+        "aid",
+        "aik",
+        "aim",
+        "ais",
+        "aiš",
+        "aiž",
+        "ak",
+        "aka",
+        "akc",
+        "aki"
+      ]
+    },
+    {
+      "file": "chunks/000010.json",
+      "records": 152,
+      "bytes": 65128,
+      "sha256": "11bfba3a04f5509d66a83e06caccadee2a302eacae1cc614f2c9f618c53a34c9",
+      "selectionPrefixes": [
+        "aki",
+        "akm",
+        "akr",
+        "aks",
+        "akt",
+        "akv",
+        "alb",
+        "ald",
+        "ale",
+        "alg"
+      ]
+    },
+    {
+      "file": "chunks/000011.json",
+      "records": 161,
+      "bytes": 65163,
+      "sha256": "bfa5c36d986c3430d3569967181c5d7ca62b2b8b919f061d24e7404e47d0b456",
+      "selectionPrefixes": [
+        "alg",
+        "ali",
+        "alj",
+        "alk",
+        "alt",
+        "alu",
+        "alv",
+        "aly",
+        "alz",
+        "alė",
+        "ama",
+        "amb",
+        "ame",
+        "ami",
+        "amp",
+        "amt",
+        "amž",
+        "ana"
+      ]
+    },
+    {
+      "file": "chunks/000012.json",
+      "records": 172,
+      "bytes": 65238,
+      "sha256": "424fdf785f590bd0a57ff0279cb8835ed5b6cd751a68e0e5b00b42f70ebb6487",
+      "selectionPrefixes": [
+        "ana",
+        "and",
+        "ane",
+        "ang",
+        "ani",
+        "ank",
+        "ann",
+        "ano",
+        "ans",
+        "ant",
+        "ap"
+      ]
+    },
+    {
+      "file": "chunks/000013.json",
+      "records": 157,
+      "bytes": 65453,
+      "sha256": "b0eb06994c7f1fd89ba93686be57d7f3635c7a75b2ae6935a7016a9a0cf2afd1",
+      "selectionPrefixes": [
+        "apa",
+        "apd",
+        "ape",
+        "apg",
+        "api"
+      ]
+    },
+    {
+      "file": "chunks/000014.json",
+      "records": 158,
+      "bytes": 65380,
+      "sha256": "45719f3a114dbf13f28c4bc999f63220883fb8b90d3333351360b81abf9cc692",
+      "selectionPrefixes": [
+        "api",
+        "apk",
+        "apl",
+        "apm",
+        "apn",
+        "apr"
+      ]
+    },
+    {
+      "file": "chunks/000015.json",
+      "records": 157,
+      "bytes": 65534,
+      "sha256": "f39032c4d90e57c9871deca5ee3b52d2c1f955e08c0eaf85a6727b16976f199a",
+      "selectionPrefixes": [
+        "apr",
+        "aps"
+      ]
+    },
+    {
+      "file": "chunks/000016.json",
+      "records": 161,
+      "bytes": 65199,
+      "sha256": "5b10beaeebd78b03139701e7bf14b677fa61191d3ce2498946074fd6ccb82379",
+      "selectionPrefixes": [
+        "aps",
+        "apt",
+        "apv",
+        "apy",
+        "apč",
+        "apš",
+        "apž"
+      ]
+    },
+    {
+      "file": "chunks/000017.json",
+      "records": 174,
+      "bytes": 65274,
+      "sha256": "e5c9262c3060d7f51aa0fff6a8ebe7e8360cdbadaf2b61c7f42071773f376bd7",
+      "selectionPrefixes": [
+        "apž",
+        "ar",
+        "ara",
+        "arb",
+        "arc",
+        "are",
+        "arg",
+        "ari",
+        "ark",
+        "arm",
+        "aro",
+        "art",
+        "arv",
+        "arč",
+        "arš",
+        "arū",
+        "asi",
+        "asm"
+      ]
+    },
+    {
+      "file": "chunks/000018.json",
+      "records": 163,
+      "bytes": 65419,
+      "sha256": "16d03437e022507ff129f49809f53a988c061e13653d9a1802c0b0d3d29cddc7",
+      "selectionPrefixes": [
+        "asm",
+        "aso",
+        "asp",
+        "at",
+        "ata",
+        "atb",
+        "ate",
+        "atg",
+        "ati"
+      ]
+    },
+    {
+      "file": "chunks/000019.json",
+      "records": 151,
+      "bytes": 65426,
+      "sha256": "363d133baea7fe402e27f4739aac7efeb4117a597aaea9558e005549b573ca5c",
+      "selectionPrefixes": [
+        "ati",
+        "atk",
+        "atl"
+      ]
+    },
+    {
+      "file": "chunks/000020.json",
+      "records": 169,
+      "bytes": 65211,
+      "sha256": "d7831fb8eaceb8adfc0df20e0c63023c1b9a1293ac5244761a84ccf15b6eb3eb",
+      "selectionPrefixes": [
+        "atl",
+        "atm",
+        "atn",
+        "ato",
+        "atp",
+        "atr",
+        "ats"
+      ]
+    },
+    {
+      "file": "chunks/000021.json",
+      "records": 168,
+      "bytes": 65326,
+      "sha256": "21ca20a80f4d1654761356365d25e6e6224e7d739b76cc82cc3926ec3e6f348f",
+      "selectionPrefixes": [
+        "ats"
+      ]
+    },
+    {
+      "file": "chunks/000022.json",
+      "records": 155,
+      "bytes": 65052,
+      "sha256": "651f3e0fb31c1feb00c135d85315fc2137d2ee1b5690a7f3a4be162bad2dad61",
+      "selectionPrefixes": [
+        "ats"
+      ]
+    },
+    {
+      "file": "chunks/000023.json",
+      "records": 149,
+      "bytes": 65377,
+      "sha256": "a15605b6ce1d44d80e141562542f5a3589da9452bb9944ced0db3ce9be594ac2",
+      "selectionPrefixes": [
+        "ats",
+        "atv"
+      ]
+    },
+    {
+      "file": "chunks/000024.json",
+      "records": 173,
+      "bytes": 65391,
+      "sha256": "2cc60c2f28d4052b1a59a245a716f80c4bad34d178ad5a1ee40e2fccca5e851c",
+      "selectionPrefixes": [
+        "atv",
+        "atė",
+        "atš",
+        "atž",
+        "aud",
+        "aug",
+        "auk"
+      ]
+    },
+    {
+      "file": "chunks/000025.json",
+      "records": 164,
+      "bytes": 64728,
+      "sha256": "670ef20248e0d905e06d2e7f8061d2743c8273644946c8a450af848fe032fd12",
+      "selectionPrefixes": [
+        "auk",
+        "aur",
+        "aus",
+        "aut",
+        "auš",
+        "ava",
+        "avi",
+        "aze",
+        "ači",
+        "aš",
+        "aša",
+        "aši",
+        "ašt",
+        "ažu",
+        "ažū",
+        "b",
+        "bab",
+        "bad",
+        "bag",
+        "bai"
+      ]
+    },
+    {
+      "file": "chunks/000026.json",
+      "records": 156,
+      "bytes": 65446,
+      "sha256": "f8570677263ca8273c7e92e6b0dead9b85cdca8bec074b8551c58a8fa5a2c817",
+      "selectionPrefixes": [
+        "bai",
+        "baj",
+        "bak",
+        "bal"
+      ]
+    },
+    {
+      "file": "chunks/000027.json",
+      "records": 172,
+      "bytes": 65444,
+      "sha256": "d27f6b522b78024b82c9e0b4e35068f7b1e9cac355f23e18ad65301b8413aed2",
+      "selectionPrefixes": [
+        "bal",
+        "bam",
+        "ban",
+        "bao",
+        "bar",
+        "bat",
+        "bau",
+        "baz",
+        "baž",
+        "bbc",
+        "be"
+      ]
+    },
+    {
+      "file": "chunks/000028.json",
+      "records": 155,
+      "bytes": 65170,
+      "sha256": "5c987d1a081194d16e0b47104073c569f16eb3285398eb8217d832b8a1675a58",
+      "selectionPrefixes": [
+        "be",
+        "bed",
+        "beg",
+        "bei",
+        "bej",
+        "bek",
+        "bel",
+        "bem",
+        "ben"
+      ]
+    },
+    {
+      "file": "chunks/000029.json",
+      "records": 152,
+      "bytes": 64759,
+      "sha256": "25b81e3c4d880a7215b380f53e4b571d180e2a1e9df31c43fc592fdd35617474",
+      "selectionPrefixes": [
+        "ben",
+        "bep",
+        "ber",
+        "bes",
+        "bet",
+        "beu",
+        "bev",
+        "bib"
+      ]
+    },
+    {
+      "file": "chunks/000030.json",
+      "records": 169,
+      "bytes": 65386,
+      "sha256": "8b0a1d8afe4fd230c47cb9dc4c8cae4a0b658efa648e1c877443d6c406c534c3",
+      "selectionPrefixes": [
+        "bib",
+        "bij",
+        "bil",
+        "bio",
+        "bir",
+        "biu",
+        "biz",
+        "bič",
+        "bja",
+        "bla",
+        "bli",
+        "blo",
+        "bly",
+        "bog",
+        "bom",
+        "bon",
+        "bor",
+        "bos"
+      ]
+    },
+    {
+      "file": "chunks/000031.json",
+      "records": 186,
+      "bytes": 65333,
+      "sha256": "6694cf4ddbcfe3b7f246ea820ce2beec9d428747acf7fd3ec8fcb86c7a0ba180",
+      "selectionPrefixes": [
+        "bra",
+        "bre",
+        "bri",
+        "bro",
+        "bru",
+        "brū",
+        "bub",
+        "bud",
+        "buf",
+        "buh",
+        "bui",
+        "buk",
+        "bul",
+        "bur",
+        "bus",
+        "but",
+        "buv",
+        "bvp",
+        "bėd",
+        "bėg"
+      ]
+    },
+    {
+      "file": "chunks/000032.json",
+      "records": 163,
+      "bytes": 65494,
+      "sha256": "f806df567be379e6f0c58a9364ae8133ed10188f93a9779f98a28202fa5bccb0",
+      "selectionPrefixes": [
+        "bėg",
+        "bėr",
+        "būd",
+        "būg",
+        "būk",
+        "būr",
+        "būs",
+        "būt",
+        "c.",
+        "cal",
+        "car",
+        "cbc",
+        "cen"
+      ]
+    },
+    {
+      "file": "chunks/000033.json",
+      "records": 140,
+      "bytes": 65323,
+      "sha256": "153c2feac53c197d6e3a669990c2152e810cbf53babd63d1188858ba1ce1b80f",
+      "selectionPrefixes": [
+        "cen",
+        "cer",
+        "cfi",
+        "cha",
+        "chi",
+        "cho",
+        "chr",
+        "chu",
+        "cif",
+        "cig",
+        "cik",
+        "cil",
+        "cin",
+        "cir",
+        "cis",
+        "cit",
+        "civ",
+        "ck",
+        "clo",
+        "cm",
+        "com",
+        "con",
+        "cor",
+        "cro",
+        "cuk",
+        "d.",
+        "da",
+        "dab"
+      ]
+    },
+    {
+      "file": "chunks/000034.json",
+      "records": 159,
+      "bytes": 65272,
+      "sha256": "5c1e848da542f603f0666540249743cccd59ca055177fca3be465eace573b1fe",
+      "selectionPrefixes": [
+        "dab",
+        "dag",
+        "dai",
+        "dak",
+        "dal"
+      ]
+    },
+    {
+      "file": "chunks/000035.json",
+      "records": 146,
+      "bytes": 65128,
+      "sha256": "cac008ec83e5b86dbb0e29228bb1768e7e70ddfcf975b2eeb97dd78eba5eea97",
+      "selectionPrefixes": [
+        "dal",
+        "dan",
+        "dap",
+        "dar",
+        "dat"
+      ]
+    },
+    {
+      "file": "chunks/000036.json",
+      "records": 170,
+      "bytes": 65448,
+      "sha256": "267ef1ee4dc99fece48baf312751873b355605c0e80f23dc8b8eae35395a0000",
+      "selectionPrefixes": [
+        "dat",
+        "dau",
+        "dav",
+        "daž",
+        "de",
+        "deb",
+        "def",
+        "deg",
+        "dei",
+        "dej"
+      ]
+    },
+    {
+      "file": "chunks/000037.json",
+      "records": 133,
+      "bytes": 65363,
+      "sha256": "da0386389c29dcf5b15c8ca16b78b93c7508cd130eb3b94aaad5bc26dc7a99e5",
+      "selectionPrefixes": [
+        "dej",
+        "dek",
+        "del",
+        "dem",
+        "den",
+        "dep",
+        "der"
+      ]
+    },
+    {
+      "file": "chunks/000038.json",
+      "records": 155,
+      "bytes": 65243,
+      "sha256": "00e8dda31c3b36b4a7a4086ec2d3e3cda8b23f0f29b9b9ec65961a38d8c3e701",
+      "selectionPrefixes": [
+        "der",
+        "des",
+        "det",
+        "dev",
+        "deš",
+        "dia",
+        "did"
+      ]
+    },
+    {
+      "file": "chunks/000039.json",
+      "records": 167,
+      "bytes": 65463,
+      "sha256": "85374eb6a97bfd1dfcd38131321ac170cc34b9921ac2e60728ebb580c04e91de",
+      "selectionPrefixes": [
+        "did",
+        "die",
+        "dif",
+        "dig",
+        "dik",
+        "dim",
+        "din",
+        "dio",
+        "dip",
+        "dir"
+      ]
+    },
+    {
+      "file": "chunks/000040.json",
+      "records": 156,
+      "bytes": 65128,
+      "sha256": "413f71276409116211a54e5c9c12240aa0ed25eea50d7d429b2fa926608e947f",
+      "selectionPrefixes": [
+        "dir",
+        "dis",
+        "diu",
+        "div",
+        "diz",
+        "dnb",
+        "doc",
+        "dok",
+        "dol",
+        "dom",
+        "don",
+        "dos"
+      ]
+    },
+    {
+      "file": "chunks/000041.json",
+      "records": 167,
+      "bytes": 65163,
+      "sha256": "eee97bd5d2a07453426c3c6679fa69180572733406a0b379f524f86c14bf3e65",
+      "selectionPrefixes": [
+        "dot",
+        "dov",
+        "dpn",
+        "dra",
+        "dre",
+        "dri",
+        "dro",
+        "dru",
+        "drą",
+        "drė",
+        "drį",
+        "drū",
+        "dsn",
+        "du",
+        "dub",
+        "dug",
+        "duj",
+        "duk"
+      ]
+    },
+    {
+      "file": "chunks/000042.json",
+      "records": 179,
+      "bytes": 65503,
+      "sha256": "580befe66ff5e1a5231df21b53a92a0d9f3c6e373c31c532ce23294f38d2e9ff",
+      "selectionPrefixes": [
+        "duk",
+        "dul",
+        "dum",
+        "dun",
+        "duo",
+        "dur",
+        "dus",
+        "duš",
+        "dva",
+        "dve",
+        "dvi",
+        "dvy",
+        "dyd",
+        "dze",
+        "dzi",
+        "dzū",
+        "dėd",
+        "dėk"
+      ]
+    },
+    {
+      "file": "chunks/000043.json",
+      "records": 172,
+      "bytes": 65092,
+      "sha256": "7e27c9d1786e37b0f8e39f551bcbdff6168c38b6252caabbd0dbb203552dfbf5",
+      "selectionPrefixes": [
+        "dėk",
+        "dėl",
+        "dėm",
+        "dės",
+        "dėt",
+        "dėv",
+        "dėž",
+        "dūm",
+        "dūs",
+        "dži",
+        "džo",
+        "džu",
+        "e",
+        "e-v",
+        "e."
+      ]
+    },
+    {
+      "file": "chunks/000044.json",
+      "records": 146,
+      "bytes": 65293,
+      "sha256": "dc4c1567e0795c63525dd0cefc652f44b7d2ec0bda120ce47d8eb7bec67020c0",
+      "selectionPrefixes": [
+        "e.",
+        "e62",
+        "eb",
+        "ech",
+        "edu",
+        "efe",
+        "egi",
+        "egl",
+        "ego",
+        "egz",
+        "eib",
+        "eid",
+        "eig",
+        "eil",
+        "eis"
+      ]
+    },
+    {
+      "file": "chunks/000045.json",
+      "records": 162,
+      "bytes": 65392,
+      "sha256": "2777a883b6e17b92db0467a07b3754515c35a6736b824d2b006f4f91f8abeb95",
+      "selectionPrefixes": [
+        "eis",
+        "eit",
+        "eki",
+        "eko",
+        "ekr",
+        "eks",
+        "eku",
+        "ela",
+        "ele"
+      ]
+    },
+    {
+      "file": "chunks/000046.json",
+      "records": 160,
+      "bytes": 65251,
+      "sha256": "67c9e4edd1cb03da1033968541960807eb1848ead27798d9844837d773062a18",
+      "selectionPrefixes": [
+        "ele",
+        "elg",
+        "eli",
+        "elt",
+        "elž",
+        "emi",
+        "emo",
+        "emp",
+        "ene",
+        "enr",
+        "ent",
+        "ep",
+        "epi",
+        "epo",
+        "er2",
+        "erd",
+        "ere",
+        "eri"
+      ]
+    },
+    {
+      "file": "chunks/000047.json",
+      "records": 171,
+      "bytes": 65399,
+      "sha256": "6dd1659e8874080ef561b57a57c50396c1eae78847b5023e325fe47d053c4517",
+      "selectionPrefixes": [
+        "ero",
+        "ert",
+        "erz",
+        "es",
+        "ese",
+        "esm",
+        "est",
+        "esy",
+        "esą",
+        "et",
+        "eta",
+        "ete",
+        "eti",
+        "etn",
+        "ets",
+        "eug",
+        "eur"
+      ]
+    },
+    {
+      "file": "chunks/000048.json",
+      "records": 148,
+      "bytes": 65181,
+      "sha256": "0d6b6774d924734a956b7fa878dc511a9aa0d627b5caa44e63399ebc6f88546e",
+      "selectionPrefixes": [
+        "eur",
+        "eva",
+        "evo",
+        "exc",
+        "ext",
+        "eže",
+        "ežū",
+        "fak",
+        "fam",
+        "fan",
+        "far",
+        "fas",
+        "fat",
+        "fea",
+        "fed",
+        "fem",
+        "fen",
+        "fer",
+        "fia",
+        "fig",
+        "fik",
+        "fil",
+        "fin"
+      ]
+    },
+    {
+      "file": "chunks/000049.json",
+      "records": 155,
+      "bytes": 65526,
+      "sha256": "cebb27c1e8313376ef382ea6c97c1651682de6ca2a0a2f8c218a16c4f1e26995",
+      "selectionPrefixes": [
+        "fin",
+        "fir",
+        "fis",
+        "fiz",
+        "fli",
+        "fly",
+        "fob",
+        "fol",
+        "fon",
+        "for",
+        "fot",
+        "fra"
+      ]
+    },
+    {
+      "file": "chunks/000050.json",
+      "records": 177,
+      "bytes": 64987,
+      "sha256": "e41b58dff2cc98b4b190d63d06204df9c7acf77f55f1fc2bbf5152d8737605ca",
+      "selectionPrefixes": [
+        "fra",
+        "fun",
+        "fur",
+        "fut",
+        "g",
+        "g.",
+        "gab",
+        "gad",
+        "gai",
+        "gal"
+      ]
+    },
+    {
+      "file": "chunks/000051.json",
+      "records": 174,
+      "bytes": 65319,
+      "sha256": "c6e4c32ee23a964198a49062fb50cb6bb96de064a9c80dc4f2987be2884351fb",
+      "selectionPrefixes": [
+        "gal",
+        "gam",
+        "gan",
+        "gap",
+        "gar"
+      ]
+    },
+    {
+      "file": "chunks/000052.json",
+      "records": 152,
+      "bytes": 65140,
+      "sha256": "fc8b8598aeb0e60d2eacc2988a0edbda819de78dc385a46566ef6c079122c937",
+      "selectionPrefixes": [
+        "gar",
+        "gat",
+        "gau",
+        "gav"
+      ]
+    },
+    {
+      "file": "chunks/000053.json",
+      "records": 157,
+      "bytes": 65142,
+      "sha256": "1faa46f862ce92a97c2634bee490ced0aac38e3b0b5bd240c7bd89a22a12dc55",
+      "selectionPrefixes": [
+        "gav",
+        "gaz",
+        "gaš",
+        "geb",
+        "ged",
+        "gee",
+        "geg",
+        "gei",
+        "gel",
+        "gen",
+        "geo",
+        "ger"
+      ]
+    },
+    {
+      "file": "chunks/000054.json",
+      "records": 172,
+      "bytes": 65346,
+      "sha256": "f586615e529d9de485d2b1bec0ac9f5ca1c68e6778453f89e9a0eb87c917df57",
+      "selectionPrefixes": [
+        "ger",
+        "ges",
+        "gfi",
+        "gi",
+        "gid",
+        "gie",
+        "gil",
+        "gim",
+        "gin",
+        "gip",
+        "gir"
+      ]
+    },
+    {
+      "file": "chunks/000055.json",
+      "records": 175,
+      "bytes": 65411,
+      "sha256": "1a3124e6100153daf8e5b20834fa90de7ad2d50f9f000963f5085c795cd91e08",
+      "selectionPrefixes": [
+        "gir",
+        "git",
+        "gla",
+        "gle",
+        "gli",
+        "glo",
+        "glė",
+        "glū",
+        "gmo",
+        "gmp",
+        "god",
+        "gol",
+        "gor",
+        "got",
+        "gra"
+      ]
+    },
+    {
+      "file": "chunks/000056.json",
+      "records": 177,
+      "bytes": 65299,
+      "sha256": "31e81a3684d2449df802cbd3406d726df4977a1309daa0fb631b28693b331c91",
+      "selectionPrefixes": [
+        "gra",
+        "gre",
+        "gri",
+        "gro",
+        "gru",
+        "gry",
+        "grą"
+      ]
+    },
+    {
+      "file": "chunks/000057.json",
+      "records": 168,
+      "bytes": 65157,
+      "sha256": "eaa70328b1671f173672397c0c5837d549494b373116bf15847b91abf52986e5",
+      "selectionPrefixes": [
+        "grą",
+        "grė",
+        "grę",
+        "grį",
+        "grū",
+        "gud",
+        "gul",
+        "gum",
+        "guo",
+        "gur",
+        "gvi",
+        "gyd",
+        "gyl",
+        "gyn",
+        "gys",
+        "gyv"
+      ]
+    },
+    {
+      "file": "chunks/000058.json",
+      "records": 164,
+      "bytes": 65199,
+      "sha256": "2538498992554a7d73e2b6ebdc0cd766427b919beedcefc140953c16d236d42c",
+      "selectionPrefixes": [
+        "gyv",
+        "gąs",
+        "gėd",
+        "gėl",
+        "gėr",
+        "gūž",
+        "h.",
+        "ha",
+        "hai",
+        "har",
+        "hed",
+        "hen",
+        "her",
+        "hib",
+        "hie",
+        "hig",
+        "hil",
+        "him",
+        "hip",
+        "hob",
+        "hol",
+        "hon",
+        "hor",
+        "hui",
+        "hum",
+        "i",
+        "i."
+      ]
+    },
+    {
+      "file": "chunks/000059.json",
+      "records": 167,
+      "bytes": 65376,
+      "sha256": "a79fc38b705b04f2f909ca813d2fbc3a2ed7813830bcfb0f549cd4c899e2ce76",
+      "selectionPrefixes": [
+        "i.",
+        "ibe",
+        "ibm",
+        "ide",
+        "idi",
+        "idė",
+        "iet",
+        "ieš",
+        "igl",
+        "ign",
+        "ii",
+        "iii",
+        "iki",
+        "ilg"
+      ]
+    },
+    {
+      "file": "chunks/000060.json",
+      "records": 151,
+      "bytes": 65334,
+      "sha256": "8d1536f039816a5b9a4f844213444c94baa2e9ca86d320b4b6aaffe3ecdd13b4",
+      "selectionPrefixes": [
+        "ilg",
+        "ili",
+        "ilo",
+        "ils",
+        "imb",
+        "imi",
+        "iml",
+        "imp",
+        "imt",
+        "in",
+        "inc",
+        "ind",
+        "inf"
+      ]
+    },
+    {
+      "file": "chunks/000061.json",
+      "records": 127,
+      "bytes": 64924,
+      "sha256": "5768b5ad38c35287d91d7e954073cc758a5494c000e7bd4dfb92a35e180ec41f",
+      "selectionPrefixes": [
+        "inf",
+        "ini",
+        "ink",
+        "ino"
+      ]
+    },
+    {
+      "file": "chunks/000062.json",
+      "records": 138,
+      "bytes": 65402,
+      "sha256": "5c088777f50b48613e9fe440ee6510fce0b15d0457a151d0df6b71ece5fa6059",
+      "selectionPrefixes": [
+        "ino",
+        "ins",
+        "int"
+      ]
+    },
+    {
+      "file": "chunks/000063.json",
+      "records": 122,
+      "bytes": 65265,
+      "sha256": "f843661dd855cb0c81a77d69631bae56a82d3aa3b6e82188ac9cd1d2c8ba9a09",
+      "selectionPrefixes": [
+        "int",
+        "inv"
+      ]
+    },
+    {
+      "file": "chunks/000064.json",
+      "records": 147,
+      "bytes": 65223,
+      "sha256": "52c5cf91f94192182ddcb837c9eaf586b9a9a78f114e8fcd9b7835d8e5a65b96",
+      "selectionPrefixes": [
+        "inv",
+        "inž",
+        "ir",
+        "ire",
+        "irg",
+        "irm",
+        "irt",
+        "ism",
+        "isp",
+        "ist",
+        "it",
+        "ita",
+        "iti",
+        "iv",
+        "iva",
+        "izo",
+        "iš",
+        "iša"
+      ]
+    },
+    {
+      "file": "chunks/000065.json",
+      "records": 161,
+      "bytes": 65301,
+      "sha256": "68d38a9d02050e06f375eead85057519477d63d3c79bcb29576efcfd8a1dbe4b",
+      "selectionPrefixes": [
+        "iša",
+        "išb",
+        "išd",
+        "iše",
+        "išg"
+      ]
+    },
+    {
+      "file": "chunks/000066.json",
+      "records": 153,
+      "bytes": 65258,
+      "sha256": "3216bd6b9611c68fc7dc8e6850e70a5b6e64ce9fcbe9a72a804ad417990e9423",
+      "selectionPrefixes": [
+        "išg",
+        "iši",
+        "išj",
+        "išk",
+        "išl"
+      ]
+    },
+    {
+      "file": "chunks/000067.json",
+      "records": 164,
+      "bytes": 65031,
+      "sha256": "40a87688ba80fd05f0c4b1ff4aea0a9590ea4f38dadee9795ef4b180c3af82a1",
+      "selectionPrefixes": [
+        "išl",
+        "išm",
+        "išn",
+        "išo",
+        "išp"
+      ]
+    },
+    {
+      "file": "chunks/000068.json",
+      "records": 155,
+      "bytes": 65369,
+      "sha256": "48850e1e77e3c41c6cb23c9dbdb582b2a3f1f90fb1cb96c9f4f3df693c1654c7",
+      "selectionPrefixes": [
+        "išp",
+        "išr",
+        "išs"
+      ]
+    },
+    {
+      "file": "chunks/000069.json",
+      "records": 165,
+      "bytes": 65110,
+      "sha256": "e021524e1869592fe6dbd6af2c70e10ece3ea2094c847509f5c901d9b80baae7",
+      "selectionPrefixes": [
+        "išs"
+      ]
+    },
+    {
+      "file": "chunks/000070.json",
+      "records": 166,
+      "bytes": 65171,
+      "sha256": "7225ff1c9d7393161085c73cfd4de72fda01c7e2dca842c97672d12d44c9de07",
+      "selectionPrefixes": [
+        "išs",
+        "išt",
+        "išv"
+      ]
+    },
+    {
+      "file": "chunks/000071.json",
+      "records": 158,
+      "bytes": 65333,
+      "sha256": "b0c97a6004b0c035a45fcf837e4b94395320428077c84b44ee56c8a3cd25c12f",
+      "selectionPrefixes": [
+        "išv",
+        "išė",
+        "išš",
+        "ižd",
+        "j.",
+        "jak",
+        "jam",
+        "jan",
+        "jap",
+        "jas",
+        "jau"
+      ]
+    },
+    {
+      "file": "chunks/000072.json",
+      "records": 174,
+      "bytes": 65180,
+      "sha256": "808e53ab9258220732e99222ae71ee16898ee954a94e5d9036d704fab464d777",
+      "selectionPrefixes": [
+        "jau",
+        "jav",
+        "jea",
+        "jeg",
+        "jei",
+        "jer",
+        "ji",
+        "jie",
+        "jis",
+        "jog",
+        "jok",
+        "jol",
+        "jon",
+        "jud",
+        "juk"
+      ]
+    },
+    {
+      "file": "chunks/000073.json",
+      "records": 175,
+      "bytes": 65376,
+      "sha256": "c3b14e4be41c5498a1e0712e07fa06066557f9c1648b26dd69c0a0f8dfd5cef1",
+      "selectionPrefixes": [
+        "juk",
+        "jul",
+        "jun",
+        "juo",
+        "jur",
+        "jus",
+        "jān",
+        "jėg",
+        "jūr"
+      ]
+    },
+    {
+      "file": "chunks/000074.json",
+      "records": 176,
+      "bytes": 65210,
+      "sha256": "645f09b3332f53e90720fd14d21d1385a82c0e1da5c4c7bbd32f7dc8ff3a037d",
+      "selectionPrefixes": [
+        "jūr",
+        "k.",
+        "kab",
+        "kac",
+        "kad",
+        "kah",
+        "kai"
+      ]
+    },
+    {
+      "file": "chunks/000075.json",
+      "records": 175,
+      "bytes": 64962,
+      "sha256": "8e17c708da427be1f0c4ff86dbaf81294b6856b00d6b39bee2ff1fee7265b344",
+      "selectionPrefixes": [
+        "kai",
+        "kaj",
+        "kak",
+        "kal",
+        "kam",
+        "kan"
+      ]
+    },
+    {
+      "file": "chunks/000076.json",
+      "records": 168,
+      "bytes": 65493,
+      "sha256": "bd85dd654b4c17cf9840c2f4d044ecd4c657846117d9885f486a8aeef0cab57e",
+      "selectionPrefixes": [
+        "kan",
+        "kap",
+        "kar"
+      ]
+    },
+    {
+      "file": "chunks/000077.json",
+      "records": 185,
+      "bytes": 65287,
+      "sha256": "3a2aa1eb0bbe94b92aed622db01865947339a027907c7526ca4874201d7e639c",
+      "selectionPrefixes": [
+        "kar",
+        "kas",
+        "kat",
+        "kau"
+      ]
+    },
+    {
+      "file": "chunks/000078.json",
+      "records": 177,
+      "bytes": 65268,
+      "sha256": "4e28aeaa386508a1062c1c09e21a3f3394beb3667a46d8901198a08648d546c8",
+      "selectionPrefixes": [
+        "kau",
+        "kav",
+        "kaz",
+        "kaš",
+        "kaž",
+        "kei",
+        "kek",
+        "kel"
+      ]
+    },
+    {
+      "file": "chunks/000079.json",
+      "records": 171,
+      "bytes": 65101,
+      "sha256": "a911a4c54940d7360f10285132cabcd9eb76b176dc6fef24bf128b1fe707f225",
+      "selectionPrefixes": [
+        "kel",
+        "ken",
+        "kep",
+        "ker",
+        "ket",
+        "kg",
+        "kia",
+        "kib",
+        "kie"
+      ]
+    },
+    {
+      "file": "chunks/000080.json",
+      "records": 184,
+      "bytes": 65479,
+      "sha256": "34f898b43e2268b22a6c24b7e5604ca195bffd1616e5fa43ca5812a5a420d610",
+      "selectionPrefixes": [
+        "kie",
+        "kig",
+        "kij",
+        "kik",
+        "kil",
+        "kin",
+        "kio",
+        "kip",
+        "kir",
+        "kis",
+        "kit"
+      ]
+    },
+    {
+      "file": "chunks/000081.json",
+      "records": 160,
+      "bytes": 65519,
+      "sha256": "bb97c3c53ecc71ed370dd0839acff67b26014d454ddcce62a1a536d2160c6d06",
+      "selectionPrefixes": [
+        "kit",
+        "kiš",
+        "kla",
+        "kle"
+      ]
+    },
+    {
+      "file": "chunks/000082.json",
+      "records": 148,
+      "bytes": 65496,
+      "sha256": "685d0a3762252f8398111a2d74c7e1b9eec976a1e0cf270533328fca5b19bf47",
+      "selectionPrefixes": [
+        "kle",
+        "kli",
+        "klo",
+        "klu",
+        "kly",
+        "km",
+        "kn",
+        "kne",
+        "kni",
+        "kny",
+        "ko",
+        "kob",
+        "kod",
+        "koe",
+        "kog",
+        "koj"
+      ]
+    },
+    {
+      "file": "chunks/000083.json",
+      "records": 161,
+      "bytes": 65491,
+      "sha256": "dc073e771047e6eb39387cc6ee0f1ea7aa598c2e508f5ea3ee34ca2b966f785f",
+      "selectionPrefixes": [
+        "koj",
+        "kok",
+        "kol",
+        "kom"
+      ]
+    },
+    {
+      "file": "chunks/000084.json",
+      "records": 156,
+      "bytes": 65490,
+      "sha256": "7d49691a729f328b0dab923a2ffb910bf0e4e04b50ab4be6aeef7939647307ed",
+      "selectionPrefixes": [
+        "kom",
+        "kon"
+      ]
+    },
+    {
+      "file": "chunks/000085.json",
+      "records": 143,
+      "bytes": 65263,
+      "sha256": "dd3af53a696762a4a71456fa112a6d260ab990b79384460591804b8ee1cabb5d",
+      "selectionPrefixes": [
+        "kon"
+      ]
+    },
+    {
+      "file": "chunks/000086.json",
+      "records": 145,
+      "bytes": 65309,
+      "sha256": "5ecf0375fbfda551a9c3d8f2b83d5637171b9938130c45c9c2b52b9c7e4b0c1f",
+      "selectionPrefixes": [
+        "kon"
+      ]
+    },
+    {
+      "file": "chunks/000087.json",
+      "records": 153,
+      "bytes": 65257,
+      "sha256": "5bcc83dbbe4bff8eac334ecaca2ad9a47b2426d92a74dda74c9b3e46eac30ee7",
+      "selectionPrefixes": [
+        "kon",
+        "koo",
+        "kop",
+        "kor",
+        "kos",
+        "kov",
+        "koš"
+      ]
+    },
+    {
+      "file": "chunks/000088.json",
+      "records": 164,
+      "bytes": 65401,
+      "sha256": "acb1583864a937f1bfe63940b498205c72a8be18c34577242df3bf2ddf2c10f2",
+      "selectionPrefixes": [
+        "koš",
+        "kra",
+        "kre",
+        "kri"
+      ]
+    },
+    {
+      "file": "chunks/000089.json",
+      "records": 155,
+      "bytes": 65193,
+      "sha256": "175d60f264740cbec1aaff15cde9214ba26a575c5007d84b54ddf587a7f74fa7",
+      "selectionPrefixes": [
+        "kri",
+        "kro",
+        "kru",
+        "kry",
+        "krė",
+        "krū",
+        "ksp",
+        "kt.",
+        "ku",
+        "kub",
+        "kuk",
+        "kul"
+      ]
+    },
+    {
+      "file": "chunks/000090.json",
+      "records": 172,
+      "bytes": 65392,
+      "sha256": "2d2e725028f1f1bf61e338094bf79208b34afe5e3c8986d9f9cbe19387794fd9",
+      "selectionPrefixes": [
+        "kul",
+        "kum",
+        "kun",
+        "kuo",
+        "kup",
+        "kur",
+        "kuč",
+        "kva"
+      ]
+    },
+    {
+      "file": "chunks/000091.json",
+      "records": 151,
+      "bytes": 65423,
+      "sha256": "7dbe9d1213f2e2b49214a834c4d36419dcbb6de45af9fa757da59201f97d89ff",
+      "selectionPrefixes": [
+        "kva",
+        "kve",
+        "kvi",
+        "kvo",
+        "kvė",
+        "kyb",
+        "ką",
+        "kėd",
+        "kėl",
+        "kės",
+        "kęs",
+        "kūd",
+        "kūl",
+        "kūn",
+        "kūr"
+      ]
+    },
+    {
+      "file": "chunks/000092.json",
+      "records": 155,
+      "bytes": 65315,
+      "sha256": "91a31d88bc05ea18d7ea2c2888728c24fa5e4fb592d7884a4a0478e478054c13",
+      "selectionPrefixes": [
+        "kūr",
+        "l.",
+        "la",
+        "lab",
+        "lai"
+      ]
+    },
+    {
+      "file": "chunks/000093.json",
+      "records": 178,
+      "bytes": 65445,
+      "sha256": "d4c26c602b78aeb99dc0b87a4f55ce1f9a7ad821b5f4a42d0f47fcc50566496c",
+      "selectionPrefixes": [
+        "lai",
+        "lak",
+        "lan",
+        "lao",
+        "lap",
+        "lat"
+      ]
+    },
+    {
+      "file": "chunks/000094.json",
+      "records": 168,
+      "bytes": 64987,
+      "sha256": "47ac5725f9b4e3eaa9df1a6eea0314a90de7c74dd024f9ccbe6e31f60c1d7a45",
+      "selectionPrefixes": [
+        "lat",
+        "lau",
+        "lav",
+        "laš",
+        "laž",
+        "ldk",
+        "ldp",
+        "le",
+        "lea",
+        "led",
+        "leg",
+        "lei",
+        "lek",
+        "lem",
+        "len"
+      ]
+    },
+    {
+      "file": "chunks/000095.json",
+      "records": 152,
+      "bytes": 65399,
+      "sha256": "be66ab06648d1db3bc5ce2bb8aa55d19ae76b7ae505630cbb294564c07cfc687",
+      "selectionPrefixes": [
+        "len",
+        "leo",
+        "ler",
+        "les",
+        "lev",
+        "lg",
+        "li",
+        "lia",
+        "lib",
+        "lie",
+        "lig"
+      ]
+    },
+    {
+      "file": "chunks/000096.json",
+      "records": 167,
+      "bytes": 65405,
+      "sha256": "51f6b8d17ac3ea29e77f4263be8eb07db4bebfb7c5f3b71925ba661ce6eee50b",
+      "selectionPrefixes": [
+        "lig",
+        "lik",
+        "lin",
+        "lip",
+        "lis",
+        "lit",
+        "liu",
+        "liū",
+        "lkp",
+        "lkr",
+        "lll",
+        "lnk",
+        "log",
+        "loj",
+        "lok"
+      ]
+    },
+    {
+      "file": "chunks/000097.json",
+      "records": 155,
+      "bytes": 65382,
+      "sha256": "4c7abfffd87eaac6b3417d1c4b4e95a45f8ff7c70a1fb539cbc65f0139d1cac2",
+      "selectionPrefixes": [
+        "lok",
+        "lon",
+        "lop",
+        "lor",
+        "los",
+        "lov",
+        "lp",
+        "lps",
+        "lrt",
+        "lss",
+        "lt",
+        "lts",
+        "ltv",
+        "lub",
+        "luc",
+        "lui",
+        "luk",
+        "lup",
+        "lvo",
+        "lyd",
+        "lyg",
+        "lyt"
+      ]
+    },
+    {
+      "file": "chunks/000098.json",
+      "records": 160,
+      "bytes": 65486,
+      "sha256": "e699eee1cd5ae7576107c6b466775db1d495cdf4031c8aa2ac87684833c0b52c",
+      "selectionPrefixes": [
+        "lyt",
+        "lėk",
+        "lėt",
+        "lėš",
+        "lęš",
+        "lūk",
+        "m.",
+        "mac",
+        "mad",
+        "mag",
+        "mai",
+        "maj",
+        "mak",
+        "mal"
+      ]
+    },
+    {
+      "file": "chunks/000099.json",
+      "records": 175,
+      "bytes": 65115,
+      "sha256": "24063972798432ab6c1130373bf6b5a71ed1e9ccd133b4d14d97686273f9bf63",
+      "selectionPrefixes": [
+        "mal",
+        "mam",
+        "man",
+        "mar",
+        "mas",
+        "mat"
+      ]
+    },
+    {
+      "file": "chunks/000100.json",
+      "records": 174,
+      "bytes": 65279,
+      "sha256": "494e3cfad2a2f1f35798f1a1bf1050b80e1847d3502109dee95757ad82fa6073",
+      "selectionPrefixes": [
+        "mat",
+        "max",
+        "maz",
+        "mač",
+        "maš",
+        "maž",
+        "mec"
+      ]
+    },
+    {
+      "file": "chunks/000101.json",
+      "records": 170,
+      "bytes": 65490,
+      "sha256": "b3a83ac2989869ecd16bc252afd2aaa78018898328918bf38cdbc5ca16973772",
+      "selectionPrefixes": [
+        "mec",
+        "med",
+        "meg",
+        "mei",
+        "mek",
+        "mel",
+        "mem",
+        "men",
+        "mer",
+        "mes",
+        "met"
+      ]
+    },
+    {
+      "file": "chunks/000102.json",
+      "records": 151,
+      "bytes": 65347,
+      "sha256": "49afde63958a4a362d2050876c4f0b8d3e08ccaa04f40fb9a94767921a4be2fe",
+      "selectionPrefixes": [
+        "met",
+        "mez",
+        "meč",
+        "meš",
+        "mg",
+        "mic",
+        "mid",
+        "mie"
+      ]
+    },
+    {
+      "file": "chunks/000103.json",
+      "records": 166,
+      "bytes": 65373,
+      "sha256": "a3b19b5ad7797544fa2b8759b4511fde08e910df370119998e45d67cb33ddda5",
+      "selectionPrefixes": [
+        "mie",
+        "mig",
+        "mik",
+        "mil",
+        "min"
+      ]
+    },
+    {
+      "file": "chunks/000104.json",
+      "records": 163,
+      "bytes": 65414,
+      "sha256": "94aa0ff15bab6f7908487586eec7deaa8c20895c813cac4ccca4b3ae9f431a43",
+      "selectionPrefixes": [
+        "min",
+        "mir",
+        "mis",
+        "mit",
+        "miš",
+        "mla",
+        "mln",
+        "mlr",
+        "mob",
+        "moc",
+        "mod"
+      ]
+    },
+    {
+      "file": "chunks/000105.json",
+      "records": 145,
+      "bytes": 65427,
+      "sha256": "4c61e7b930bd64a2bfdec7adeb7928edb42f792672e21fd579d36de6d1b41192",
+      "selectionPrefixes": [
+        "mod",
+        "mok"
+      ]
+    },
+    {
+      "file": "chunks/000106.json",
+      "records": 156,
+      "bytes": 65257,
+      "sha256": "1e547b613be0c265bfafc0f59818f34e394141506432303b917cd1b0c182dff5",
+      "selectionPrefixes": [
+        "mok",
+        "mol",
+        "mom",
+        "mon",
+        "mor",
+        "mot",
+        "moz",
+        "mui",
+        "mul",
+        "mun",
+        "mus"
+      ]
+    },
+    {
+      "file": "chunks/000107.json",
+      "records": 178,
+      "bytes": 65117,
+      "sha256": "dd9d5637047dbd1fb96eedb9bf5a3dde22f48af48f4994e20fc328962ef5a68a",
+      "selectionPrefixes": [
+        "mus",
+        "muz",
+        "muš",
+        "mvį",
+        "mw",
+        "myk",
+        "myl",
+        "mąs",
+        "mėg",
+        "mėl",
+        "mėn",
+        "mės",
+        "mėt",
+        "mėš",
+        "mūr",
+        "mūš",
+        "n",
+        "n =",
+        "n-t",
+        "n.",
+        "na",
+        "nac"
+      ]
+    },
+    {
+      "file": "chunks/000108.json",
+      "records": 159,
+      "bytes": 65006,
+      "sha256": "afe377740fd274211f100a2ea5506364bef0d00204f963362fe23a81b65fee1c",
+      "selectionPrefixes": [
+        "nac",
+        "naf",
+        "nag",
+        "nai",
+        "nak",
+        "nam",
+        "nar",
+        "nas",
+        "nat",
+        "nau"
+      ]
+    },
+    {
+      "file": "chunks/000109.json",
+      "records": 144,
+      "bytes": 65511,
+      "sha256": "7f35d4b73a0c8097fa4355f005778448e17946de676e0dbb5816a79da2037146",
+      "selectionPrefixes": [
+        "nau",
+        "naš",
+        "nba",
+        "ndx",
+        "ne",
+        "nea"
+      ]
+    },
+    {
+      "file": "chunks/000110.json",
+      "records": 151,
+      "bytes": 65439,
+      "sha256": "ef5797f19041a8e5b6d0b2354e03ab6954e924202ce9602f4d4f545151cba922",
+      "selectionPrefixes": [
+        "nea"
+      ]
+    },
+    {
+      "file": "chunks/000111.json",
+      "records": 187,
+      "bytes": 65444,
+      "sha256": "4b23c0a4d990fe41b61edef74aa84d965b4c0848bc1476d08c44be7d8289d962",
+      "selectionPrefixes": [
+        "nea",
+        "neb",
+        "nec",
+        "ned"
+      ]
+    },
+    {
+      "file": "chunks/000112.json",
+      "records": 171,
+      "bytes": 65436,
+      "sha256": "3ebbea6ee3536a175f837cd3706e8a3c9ef1f1872a44e8c1157939b41f8f5d20",
+      "selectionPrefixes": [
+        "ned",
+        "nee",
+        "nef",
+        "neg"
+      ]
+    },
+    {
+      "file": "chunks/000113.json",
+      "records": 185,
+      "bytes": 65509,
+      "sha256": "b5a5f32c7725f13a3384bab498dd5723081f84f582f29207d52075ae6b8932cc",
+      "selectionPrefixes": [
+        "neg",
+        "nei",
+        "nej",
+        "nek"
+      ]
+    },
+    {
+      "file": "chunks/000114.json",
+      "records": 177,
+      "bytes": 65239,
+      "sha256": "41357f9d0ba9b9f3b6e2a5813fa6870d784e9d112842b2eeea2c0fd766972aad",
+      "selectionPrefixes": [
+        "nek",
+        "nel",
+        "nem"
+      ]
+    },
+    {
+      "file": "chunks/000115.json",
+      "records": 184,
+      "bytes": 65442,
+      "sha256": "e925e36f333d904534818ff2902c0a52d0729277907f9160a14844abe5a36656",
+      "selectionPrefixes": [
+        "nem",
+        "nen",
+        "neo",
+        "nep"
+      ]
+    },
+    {
+      "file": "chunks/000116.json",
+      "records": 185,
+      "bytes": 65442,
+      "sha256": "5725dbc9555de3c93689846e6241f7b287212a1aa5c7d0de086aa918dca1dc0f",
+      "selectionPrefixes": [
+        "nep"
+      ]
+    },
+    {
+      "file": "chunks/000117.json",
+      "records": 157,
+      "bytes": 64486,
+      "sha256": "600ed4d9c915aa7e29d5c3d6b9c287438f923cb6df30f2a3830b076b07c65884",
+      "selectionPrefixes": [
+        "nep"
+      ]
+    },
+    {
+      "file": "chunks/000118.json",
+      "records": 177,
+      "bytes": 65268,
+      "sha256": "704e639b43dfc557d41363bae97689b18070f1ac1e05e19a320befa4af68d1e4",
+      "selectionPrefixes": [
+        "nep",
+        "ner",
+        "nes"
+      ]
+    },
+    {
+      "file": "chunks/000119.json",
+      "records": 182,
+      "bytes": 65522,
+      "sha256": "1f3119b316306768b5b7503b7cb93d95041a5ff51d5007de9905c51286dda1e0",
+      "selectionPrefixes": [
+        "nes"
+      ]
+    },
+    {
+      "file": "chunks/000120.json",
+      "records": 172,
+      "bytes": 64627,
+      "sha256": "94e642599f4c851ebc993affcd4dc88fd3b2c0c8d446746b781e1bc905325614",
+      "selectionPrefixes": [
+        "nes",
+        "net"
+      ]
+    },
+    {
+      "file": "chunks/000121.json",
+      "records": 157,
+      "bytes": 65193,
+      "sha256": "b136aaba9893abfe574765105193a97d8bc828f112545d4a13145995231d663e",
+      "selectionPrefixes": [
+        "net",
+        "neu",
+        "nev"
+      ]
+    },
+    {
+      "file": "chunks/000122.json",
+      "records": 167,
+      "bytes": 65510,
+      "sha256": "c9728ee48cb52d83a88cf77b5f08c171166c83b1dad253293248174169c209cb",
+      "selectionPrefixes": [
+        "nev",
+        "neį",
+        "neš",
+        "než"
+      ]
+    },
+    {
+      "file": "chunks/000123.json",
+      "records": 169,
+      "bytes": 65164,
+      "sha256": "49a31cbdbd2d86f964dfdba6c545949533e690e1fdb94f60bedea8beabc92b3d",
+      "selectionPrefixes": [
+        "než",
+        "nie",
+        "nij",
+        "nik",
+        "nio",
+        "niu",
+        "niū",
+        "nnf",
+        "nob",
+        "nom",
+        "nor",
+        "nos"
+      ]
+    },
+    {
+      "file": "chunks/000124.json",
+      "records": 166,
+      "bytes": 65241,
+      "sha256": "aca603a0f48416244d498da1c9090ce7f84bc745f254eb378b4fbb3e23f94229",
+      "selectionPrefixes": [
+        "nos",
+        "nov",
+        "nr.",
+        "nub",
+        "nud",
+        "nue",
+        "nug",
+        "nuj",
+        "nuk",
+        "nul"
+      ]
+    },
+    {
+      "file": "chunks/000125.json",
+      "records": 147,
+      "bytes": 65461,
+      "sha256": "2007b6327a55ba83023957d32c9785cc7929ef3284687b4cd3055075df1df2da",
+      "selectionPrefixes": [
+        "nul",
+        "num",
+        "nun",
+        "nuo"
+      ]
+    },
+    {
+      "file": "chunks/000126.json",
+      "records": 170,
+      "bytes": 65350,
+      "sha256": "46de1cc11a07b6633c1169b14e47156282bdb6772e48fb8669732863ed6990ae",
+      "selectionPrefixes": [
+        "nuo",
+        "nup",
+        "nur",
+        "nus"
+      ]
+    },
+    {
+      "file": "chunks/000127.json",
+      "records": 169,
+      "bytes": 65505,
+      "sha256": "c7d3f1fda83c79f973ddc101a1f1572b7f39ec758f4788e8cd6f7bba9f240cde",
+      "selectionPrefixes": [
+        "nus",
+        "nut"
+      ]
+    },
+    {
+      "file": "chunks/000128.json",
+      "records": 166,
+      "bytes": 65014,
+      "sha256": "ac57f6cd253742793c4eb1a647eb50cc7f55be4932d621647f39d74aae75f4dc",
+      "selectionPrefixes": [
+        "nut",
+        "nuv",
+        "nuš",
+        "nuž",
+        "nyk",
+        "nė",
+        "nėr",
+        "o",
+        "obj",
+        "obu",
+        "oda",
+        "odd",
+        "ode",
+        "odo"
+      ]
+    },
+    {
+      "file": "chunks/000129.json",
+      "records": 166,
+      "bytes": 65405,
+      "sha256": "d8aa6d943dbf8740cb6530856deaf135d5d8e15c40e8b5e86c25e48b35285058",
+      "selectionPrefixes": [
+        "ofi",
+        "ogi",
+        "oil",
+        "oks",
+        "oku",
+        "oli",
+        "ome",
+        "omi",
+        "omn",
+        "ona",
+        "ope",
+        "opo",
+        "opt",
+        "ora",
+        "orb",
+        "ore",
+        "org",
+        "ori"
+      ]
+    },
+    {
+      "file": "chunks/000130.json",
+      "records": 148,
+      "bytes": 65417,
+      "sha256": "bbcf01bd591c548dc9d6fe4c9f2becec91dc9aabb635adb7952c851778615035",
+      "selectionPrefixes": [
+        "ori",
+        "ork",
+        "orn",
+        "oru",
+        "osr",
+        "ost",
+        "osv",
+        "oti",
+        "ozo",
+        "oši",
+        "ošt",
+        "oži",
+        "ožy",
+        "p",
+        "p &",
+        "p =",
+        "p.",
+        "pa.",
+        "paa",
+        "pab"
+      ]
+    },
+    {
+      "file": "chunks/000131.json",
+      "records": 171,
+      "bytes": 65511,
+      "sha256": "ab88a3bda7f9c92b9c8f24dcbe7314c1d8533fc11cb26ec9df3c8f5660728eab",
+      "selectionPrefixes": [
+        "pab",
+        "pac",
+        "pad"
+      ]
+    },
+    {
+      "file": "chunks/000132.json",
+      "records": 167,
+      "bytes": 65168,
+      "sha256": "79f69ef47d207801e29b6a5f9bd483467c0c2130bb478e8607bec27348bd2493",
+      "selectionPrefixes": [
+        "pad",
+        "pae",
+        "pag"
+      ]
+    },
+    {
+      "file": "chunks/000133.json",
+      "records": 150,
+      "bytes": 64849,
+      "sha256": "f71773fee72ab728759fb6a9dd9e2a0d7a25f89c120f5e5ccf0841d6d599ce0c",
+      "selectionPrefixes": [
+        "pag",
+        "pai",
+        "paj"
+      ]
+    },
+    {
+      "file": "chunks/000134.json",
+      "records": 152,
+      "bytes": 65172,
+      "sha256": "5f43daca8a00503271a57fd787523da8e689f1b78820e77e7c4a8a897f5b2fed",
+      "selectionPrefixes": [
+        "paj",
+        "pak"
+      ]
+    },
+    {
+      "file": "chunks/000135.json",
+      "records": 177,
+      "bytes": 65310,
+      "sha256": "b5ffab19829811fd7b9f7bb48413cec2838c939ed6e55ef8da0e4f8972c4e1b1",
+      "selectionPrefixes": [
+        "pak",
+        "pal"
+      ]
+    },
+    {
+      "file": "chunks/000136.json",
+      "records": 160,
+      "bytes": 65435,
+      "sha256": "d1a1f79a989d938a63f9c38e92c5101ff9292647a29c3f1a732331ca659cb3e7",
+      "selectionPrefixes": [
+        "pal",
+        "pam",
+        "pan"
+      ]
+    },
+    {
+      "file": "chunks/000137.json",
+      "records": 171,
+      "bytes": 65079,
+      "sha256": "87e2cb81dcd7055c2655302527c59f1b033e6e50a6e4ff56ffcc19c1015d2e92",
+      "selectionPrefixes": [
+        "pan",
+        "pap",
+        "par"
+      ]
+    },
+    {
+      "file": "chunks/000138.json",
+      "records": 164,
+      "bytes": 65162,
+      "sha256": "48717295a4188e31a97053d7d5baa2caa0aa059616fa24e983e5b970ae2ff6ca",
+      "selectionPrefixes": [
+        "par"
+      ]
+    },
+    {
+      "file": "chunks/000139.json",
+      "records": 159,
+      "bytes": 65469,
+      "sha256": "dce361f730b5f3bfccb812838ab65be8e43c97f08eeb681c778b6d01ccd559bd",
+      "selectionPrefixes": [
+        "par",
+        "pas"
+      ]
+    },
+    {
+      "file": "chunks/000140.json",
+      "records": 172,
+      "bytes": 65513,
+      "sha256": "5ecc4b8c348823f91c02903d11d1d34886eeb84bff6ec6939fb245355203a374",
+      "selectionPrefixes": [
+        "pas"
+      ]
+    },
+    {
+      "file": "chunks/000141.json",
+      "records": 176,
+      "bytes": 65334,
+      "sha256": "822f6278979c4fbf8033650afbcac3c7e9c721b1bec9bb67982ff426c88a8668",
+      "selectionPrefixes": [
+        "pas"
+      ]
+    },
+    {
+      "file": "chunks/000142.json",
+      "records": 163,
+      "bytes": 65266,
+      "sha256": "10d2ec06c078f0dcc8489b9fb8384d65854788b7074c4d70de26e54ea7c17692",
+      "selectionPrefixes": [
+        "pas"
+      ]
+    },
+    {
+      "file": "chunks/000143.json",
+      "records": 159,
+      "bytes": 65152,
+      "sha256": "1e726ab09045d608534544a25dbb51796a3295567f500240e9537c367dc3d295",
+      "selectionPrefixes": [
+        "pas"
+      ]
+    },
+    {
+      "file": "chunks/000144.json",
+      "records": 166,
+      "bytes": 65470,
+      "sha256": "a44d1228e82b3d185e12d75b01b71dfa3ba2bc2e3b08ef84431f9128fbab423b",
+      "selectionPrefixes": [
+        "pas"
+      ]
+    },
+    {
+      "file": "chunks/000145.json",
+      "records": 173,
+      "bytes": 65360,
+      "sha256": "289a406ec6d976eceba8a8f96f5f9213303f6e8f4a537bb17aa01bedd959b641",
+      "selectionPrefixes": [
+        "pas",
+        "pat"
+      ]
+    },
+    {
+      "file": "chunks/000146.json",
+      "records": 160,
+      "bytes": 65469,
+      "sha256": "3a4ee67e5b1727b5eeddb08f59093c291d04de305616879ee296227c538a71e2",
+      "selectionPrefixes": [
+        "pat"
+      ]
+    },
+    {
+      "file": "chunks/000147.json",
+      "records": 133,
+      "bytes": 65479,
+      "sha256": "2b9ce0bddbbcd3f66605f83100a305f038968cac5cdbf45b823508f14b7e8856",
+      "selectionPrefixes": [
+        "pat"
+      ]
+    },
+    {
+      "file": "chunks/000148.json",
+      "records": 139,
+      "bytes": 65254,
+      "sha256": "a1b88799c89b10d153bfe5eb651ae784a42a653489b5dbca2ef0a5ed6ce2655a",
+      "selectionPrefixes": [
+        "pat",
+        "pau",
+        "pav"
+      ]
+    },
+    {
+      "file": "chunks/000149.json",
+      "records": 176,
+      "bytes": 65240,
+      "sha256": "00cf787a2a1c81499bc29fc3ce722d59154d95d5aa6e505a80ad08624b580cf3",
+      "selectionPrefixes": [
+        "pav",
+        "pač",
+        "paį",
+        "paš",
+        "paū",
+        "paž"
+      ]
+    },
+    {
+      "file": "chunks/000150.json",
+      "records": 160,
+      "bytes": 65482,
+      "sha256": "e9a7a71470864955711744be6541c118883349eef0263c3898ee676dee216efd",
+      "selectionPrefixes": [
+        "paž",
+        "ped",
+        "pei",
+        "pel",
+        "pen",
+        "per"
+      ]
+    },
+    {
+      "file": "chunks/000151.json",
+      "records": 146,
+      "bytes": 65415,
+      "sha256": "7fbb6a528d61b103be9bc5e908a7fbb286f07e80db78b85eb8beb6d9cbb86115",
+      "selectionPrefixes": [
+        "per"
+      ]
+    },
+    {
+      "file": "chunks/000152.json",
+      "records": 165,
+      "bytes": 65299,
+      "sha256": "813b7c108299a9b1b78d7a6934ea7d2fae4b3309c6cbae59fb664052a19970f9",
+      "selectionPrefixes": [
+        "per",
+        "pet",
+        "peč",
+        "pie",
+        "pig",
+        "pik",
+        "pil"
+      ]
+    },
+    {
+      "file": "chunks/000153.json",
+      "records": 180,
+      "bytes": 65315,
+      "sha256": "2505adff40c8417c558f528e8078b9d67e7bf9c9b83fafd9ad0d1970388210f4",
+      "selectionPrefixes": [
+        "pil",
+        "pin",
+        "pip",
+        "pir",
+        "pis",
+        "piž",
+        "pja",
+        "pje",
+        "pla"
+      ]
+    },
+    {
+      "file": "chunks/000154.json",
+      "records": 165,
+      "bytes": 65446,
+      "sha256": "c477231613636d0090b9818b394a798a574b1c5984737e16d91a8c8a4e63e171",
+      "selectionPrefixes": [
+        "pla",
+        "ple",
+        "pli",
+        "plo",
+        "plu",
+        "ply",
+        "plė"
+      ]
+    },
+    {
+      "file": "chunks/000155.json",
+      "records": 161,
+      "bytes": 65142,
+      "sha256": "524b79eb78b92806279ee80d2f392dda7c7c94619cd8c8791f701567a2204aff",
+      "selectionPrefixes": [
+        "plė",
+        "plū",
+        "po",
+        "pob",
+        "poc",
+        "poe",
+        "pog",
+        "poi",
+        "poj",
+        "pok",
+        "pol"
+      ]
+    },
+    {
+      "file": "chunks/000156.json",
+      "records": 164,
+      "bytes": 65378,
+      "sha256": "6d2d3f8a74685132e7dad6a57361de56b583878d7444b15d55871b4876b22d81",
+      "selectionPrefixes": [
+        "pol",
+        "pom",
+        "pon",
+        "pop",
+        "por",
+        "pos",
+        "pot"
+      ]
+    },
+    {
+      "file": "chunks/000157.json",
+      "records": 152,
+      "bytes": 65417,
+      "sha256": "4c7f102b54aa4841abd467d76b3aa2e237aab9ea3212059bccea15b2b1de72fe",
+      "selectionPrefixes": [
+        "pot",
+        "pov",
+        "poz",
+        "pož",
+        "pra"
+      ]
+    },
+    {
+      "file": "chunks/000158.json",
+      "records": 166,
+      "bytes": 65321,
+      "sha256": "f51e20323cebd868ed1cbfda8d077772cc385a662499ac0557cd44f7ce016389",
+      "selectionPrefixes": [
+        "pra"
+      ]
+    },
+    {
+      "file": "chunks/000159.json",
+      "records": 166,
+      "bytes": 65500,
+      "sha256": "2382d7e6aa72e251b3389e1d0eb5394995d1f6c01d1f1eaa0f45e966e18988c1",
+      "selectionPrefixes": [
+        "pra",
+        "pre"
+      ]
+    },
+    {
+      "file": "chunks/000160.json",
+      "records": 158,
+      "bytes": 65337,
+      "sha256": "399e93f6b077f1b16dbe7be1533060588068e6332c756af4f025cd972081bee8",
+      "selectionPrefixes": [
+        "pre",
+        "pri"
+      ]
+    },
+    {
+      "file": "chunks/000161.json",
+      "records": 142,
+      "bytes": 65175,
+      "sha256": "dc714a207c4331326813b89ad370d9f6d24903f13880f54b3f15967cbc2a85a8",
+      "selectionPrefixes": [
+        "pri"
+      ]
+    },
+    {
+      "file": "chunks/000162.json",
+      "records": 170,
+      "bytes": 65335,
+      "sha256": "30aa818fca0a818375fd005cc80286b85715f1941126ad1c33b4c53f4651aa7f",
+      "selectionPrefixes": [
+        "pri"
+      ]
+    },
+    {
+      "file": "chunks/000163.json",
+      "records": 161,
+      "bytes": 65165,
+      "sha256": "6d465f06c79f2d01309c608b079c1b3ebf85d39e790ca26c5dc85b47299fc782",
+      "selectionPrefixes": [
+        "pri"
+      ]
+    },
+    {
+      "file": "chunks/000164.json",
+      "records": 154,
+      "bytes": 65133,
+      "sha256": "d5e711cab33b891becaca9f6184587f2f00bead53ceb09efbbe01b0767aeb370",
+      "selectionPrefixes": [
+        "pri",
+        "pro"
+      ]
+    },
+    {
+      "file": "chunks/000165.json",
+      "records": 138,
+      "bytes": 65328,
+      "sha256": "5f8456074f3a162c4a7415451db1152202f0859463df76ee701be3f05aa3c655",
+      "selectionPrefixes": [
+        "pro"
+      ]
+    },
+    {
+      "file": "chunks/000166.json",
+      "records": 149,
+      "bytes": 65415,
+      "sha256": "b416bb3abc4104fb6405ecbb45daa375645875ab5ea2bec45a0190ffffbf3e74",
+      "selectionPrefixes": [
+        "pro",
+        "pru",
+        "psi"
+      ]
+    },
+    {
+      "file": "chunks/000167.json",
+      "records": 158,
+      "bytes": 65213,
+      "sha256": "7ad8a4b56e080b0c24bd009c65d324ef665efa94ab08a15e784878dd44cc3bdb",
+      "selectionPrefixes": [
+        "psi",
+        "pta",
+        "pts",
+        "pub",
+        "pui",
+        "pul",
+        "pum",
+        "pun",
+        "puo",
+        "pup",
+        "pur",
+        "pus"
+      ]
+    },
+    {
+      "file": "chunks/000168.json",
+      "records": 175,
+      "bytes": 65209,
+      "sha256": "b72c461f70c2dd1d29990d7af090b2424b1ae3bf6248b8a6e477a4b1fd5b9d9b",
+      "selectionPrefixes": [
+        "pus",
+        "put",
+        "pvz",
+        "pyk",
+        "pyr",
+        "pēt",
+        "pėd",
+        "pės",
+        "pūs",
+        "r =",
+        "r.",
+        "raa",
+        "rac",
+        "rad",
+        "rag",
+        "rai",
+        "raj"
+      ]
+    },
+    {
+      "file": "chunks/000169.json",
+      "records": 181,
+      "bytes": 64709,
+      "sha256": "360a943ba72e2797ba864dfe9a7815f0f558a2504db329b88e4742059f387a9f",
+      "selectionPrefixes": [
+        "raj",
+        "rak",
+        "ram",
+        "ran",
+        "rao",
+        "ras",
+        "rat",
+        "rau",
+        "rav",
+        "raz",
+        "raš",
+        "raž",
+        "rea"
+      ]
+    },
+    {
+      "file": "chunks/000170.json",
+      "records": 142,
+      "bytes": 64831,
+      "sha256": "0e31f79ff830961d42bf87fa4077c401a4e40f869fcafa766bf8713efe2bb4bd",
+      "selectionPrefixes": [
+        "rea",
+        "rec",
+        "red",
+        "ree",
+        "ref",
+        "reg"
+      ]
+    },
+    {
+      "file": "chunks/000171.json",
+      "records": 128,
+      "bytes": 65396,
+      "sha256": "d886eafe75ef4250d7668b3acc459fcefa12bcba633a60224b1c7303843e8aab",
+      "selectionPrefixes": [
+        "reg",
+        "rei"
+      ]
+    },
+    {
+      "file": "chunks/000172.json",
+      "records": 168,
+      "bytes": 64966,
+      "sha256": "cf06401f6804ec4e8b48458b3b21f5d400c74ea3bbba9772dc667f77ca036fce",
+      "selectionPrefixes": [
+        "rei",
+        "rek",
+        "rel",
+        "rem"
+      ]
+    },
+    {
+      "file": "chunks/000173.json",
+      "records": 146,
+      "bytes": 64854,
+      "sha256": "c68e161edf342d5d979d8b947241600f848379073d4116cab36e785e41790e05",
+      "selectionPrefixes": [
+        "rem",
+        "ren",
+        "rep",
+        "res"
+      ]
+    },
+    {
+      "file": "chunks/000174.json",
+      "records": 163,
+      "bytes": 65175,
+      "sha256": "611fa34201f03f2cf050b3f829f293214df04091ded195742b175ad2d4e44175",
+      "selectionPrefixes": [
+        "res",
+        "ret",
+        "rez",
+        "rež",
+        "ria",
+        "rib",
+        "ric",
+        "rie",
+        "rig",
+        "rik",
+        "rim",
+        "rin"
+      ]
+    },
+    {
+      "file": "chunks/000175.json",
+      "records": 164,
+      "bytes": 65504,
+      "sha256": "051aa94cfb0b29a74f549795358c1b72e8ebaa37b4c9fcab74fe189391e2ee06",
+      "selectionPrefixes": [
+        "rin",
+        "rit",
+        "riz",
+        "rič",
+        "rms",
+        "rod",
+        "roj",
+        "rok",
+        "rom",
+        "ron",
+        "rop",
+        "ros",
+        "rot",
+        "rpb",
+        "rub"
+      ]
+    },
+    {
+      "file": "chunks/000176.json",
+      "records": 163,
+      "bytes": 65217,
+      "sha256": "625fe7e7580fe10b7e795b81c728d70267d793aaeb7d0bb17a63d8286cf79a08",
+      "selectionPrefixes": [
+        "rub",
+        "rud",
+        "rug",
+        "ruk",
+        "rum",
+        "run",
+        "ruo",
+        "rup",
+        "rus",
+        "rut",
+        "ruz",
+        "ruž",
+        "rym",
+        "ryt",
+        "ryš"
+      ]
+    },
+    {
+      "file": "chunks/000177.json",
+      "records": 170,
+      "bytes": 65265,
+      "sha256": "5103415de923edfb25ff03f7822e9bfa17658b071dea72175b7842f1a05ec15f",
+      "selectionPrefixes": [
+        "ryš",
+        "ryž",
+        "rėk",
+        "rėm",
+        "rėž",
+        "rūb",
+        "rūg",
+        "rūk",
+        "rūm",
+        "rūp",
+        "rūs",
+        "rūt",
+        "rūš",
+        "s.",
+        "sa",
+        "sad",
+        "sai",
+        "sak",
+        "sal"
+      ]
+    },
+    {
+      "file": "chunks/000178.json",
+      "records": 157,
+      "bytes": 65259,
+      "sha256": "5fae0efa515b404168ebf7b260145a981a0862a48ddadbfd5c1814a6eb033dec",
+      "selectionPrefixes": [
+        "sal",
+        "sam",
+        "san",
+        "sap",
+        "sar",
+        "sat",
+        "sau"
+      ]
+    },
+    {
+      "file": "chunks/000179.json",
+      "records": 146,
+      "bytes": 64572,
+      "sha256": "7950ef862c1ec7b6afd6203d550198bc40123db78826fcd4dc20ae28f3357460",
+      "selectionPrefixes": [
+        "sau",
+        "sav"
+      ]
+    },
+    {
+      "file": "chunks/000180.json",
+      "records": 151,
+      "bytes": 65401,
+      "sha256": "9d08d76e43237439640476e5a24de2794d502d2fed51e7d4f375769fc21b25c4",
+      "selectionPrefixes": [
+        "sav",
+        "sb",
+        "sba",
+        "scc",
+        "sce",
+        "sch",
+        "sds",
+        "seg",
+        "sei",
+        "sek"
+      ]
+    },
+    {
+      "file": "chunks/000181.json",
+      "records": 172,
+      "bytes": 65337,
+      "sha256": "1daf27319a79f67e29016ddb53a73452c92eea8dd48160e00e7fab49cabacef0",
+      "selectionPrefixes": [
+        "sek",
+        "sem",
+        "sen",
+        "sep",
+        "ser",
+        "ses",
+        "sez",
+        "sfe",
+        "sia"
+      ]
+    },
+    {
+      "file": "chunks/000182.json",
+      "records": 169,
+      "bytes": 65249,
+      "sha256": "f7640815bcc91e0ec447ca6569715976c2d141751498fa7fc9020229232d4e77",
+      "selectionPrefixes": [
+        "sia",
+        "sie",
+        "sii",
+        "sij",
+        "sil",
+        "sim",
+        "sin",
+        "sir",
+        "sis",
+        "sit"
+      ]
+    },
+    {
+      "file": "chunks/000183.json",
+      "records": 142,
+      "bytes": 65016,
+      "sha256": "8bd43034a79e354f2a77e44353a263ab44a3d64bdbf3133c0ed9613b8ee42db7",
+      "selectionPrefixes": [
+        "sit",
+        "siu",
+        "siū",
+        "sių",
+        "ska"
+      ]
+    },
+    {
+      "file": "chunks/000184.json",
+      "records": 165,
+      "bytes": 65407,
+      "sha256": "d5298bb3928cea584d4008dd23099465f2325908a3b5f90b920ebda6aa8342b0",
+      "selectionPrefixes": [
+        "ska",
+        "ske",
+        "ski"
+      ]
+    },
+    {
+      "file": "chunks/000185.json",
+      "records": 174,
+      "bytes": 65296,
+      "sha256": "e0689ea623c20f320dee994b665e59a8cac4f236fa976a6e02a64c309a3cf255",
+      "selectionPrefixes": [
+        "ski",
+        "skl",
+        "sko",
+        "skr",
+        "sku",
+        "sky"
+      ]
+    },
+    {
+      "file": "chunks/000186.json",
+      "records": 157,
+      "bytes": 65320,
+      "sha256": "5ae7ef238e73d7613b3cab0af4738f5462df4f23cd13d4090b53deb179bb840f",
+      "selectionPrefixes": [
+        "sky",
+        "skų",
+        "sla",
+        "slo",
+        "slu",
+        "sly",
+        "slė",
+        "sma",
+        "sme",
+        "smi",
+        "smo",
+        "smu"
+      ]
+    },
+    {
+      "file": "chunks/000187.json",
+      "records": 135,
+      "bytes": 65361,
+      "sha256": "7a9824dc73dd451af514a0df6274972f7ba9d7f897767819bb10995fd3eb4c84",
+      "selectionPrefixes": [
+        "smu",
+        "smė",
+        "smū",
+        "sna",
+        "sni",
+        "snu",
+        "soc",
+        "sod",
+        "sof",
+        "soj",
+        "sol",
+        "som",
+        "sos",
+        "sot",
+        "sov"
+      ]
+    },
+    {
+      "file": "chunks/000188.json",
+      "records": 155,
+      "bytes": 65055,
+      "sha256": "b9e1c78f1dabec1c1cbc1c4561d8100c24f5c46c136ad0f9d78823c7532f8c2e",
+      "selectionPrefixes": [
+        "sov",
+        "soč",
+        "spa",
+        "spe",
+        "spi"
+      ]
+    },
+    {
+      "file": "chunks/000189.json",
+      "records": 179,
+      "bytes": 65246,
+      "sha256": "12dca9c85fd3575ae1afc20e65da1355376320060a5351e7bfc6f4e5afa1d568",
+      "selectionPrefixes": [
+        "spi",
+        "spo",
+        "spr",
+        "spu",
+        "spy",
+        "spė",
+        "sra",
+        "sri",
+        "ssd",
+        "ssr",
+        "sss",
+        "sta"
+      ]
+    },
+    {
+      "file": "chunks/000190.json",
+      "records": 150,
+      "bytes": 65470,
+      "sha256": "1a134475e98ecb93a428b8d01c7e072551f756dd29e257b689a746933bf986a8",
+      "selectionPrefixes": [
+        "sta",
+        "ste"
+      ]
+    },
+    {
+      "file": "chunks/000191.json",
+      "records": 148,
+      "bytes": 65200,
+      "sha256": "5538960d76e681a9f21524f7883c5c64e433d8c25e3d7a310efa7b87824f568c",
+      "selectionPrefixes": [
+        "ste",
+        "sti",
+        "sto",
+        "str"
+      ]
+    },
+    {
+      "file": "chunks/000192.json",
+      "records": 145,
+      "bytes": 65340,
+      "sha256": "131bc6fe2327fdef245f7bbaa8034e3e96026332a46afbe8f03877b393062aa8",
+      "selectionPrefixes": [
+        "str",
+        "stt",
+        "stu"
+      ]
+    },
+    {
+      "file": "chunks/000193.json",
+      "records": 139,
+      "bytes": 65313,
+      "sha256": "c9b5c6a74e73cd53efddc6bf778544ffa1cb75336c07a1feb96792709499c05d",
+      "selectionPrefixes": [
+        "stu",
+        "stv",
+        "sty",
+        "stū",
+        "su",
+        "sua",
+        "sub",
+        "sud"
+      ]
+    },
+    {
+      "file": "chunks/000194.json",
+      "records": 160,
+      "bytes": 65094,
+      "sha256": "9d61f400acea4aa93e6a3b59ae901fe29cf4956b25590fc90b252a9c4bf42485",
+      "selectionPrefixes": [
+        "sud",
+        "sue",
+        "suf",
+        "sug",
+        "sui",
+        "suj",
+        "suk"
+      ]
+    },
+    {
+      "file": "chunks/000195.json",
+      "records": 167,
+      "bytes": 65410,
+      "sha256": "f6c5c6371afb8dd632a4e87bb07850072b5892b6ceb7258efb62e6347ff4fb24",
+      "selectionPrefixes": [
+        "suk",
+        "sul",
+        "sum"
+      ]
+    },
+    {
+      "file": "chunks/000196.json",
+      "records": 153,
+      "bytes": 64821,
+      "sha256": "8480fcb36addc785ad5717a11e31b587257a9948e0a4163ef03c8a38bd86b3f0",
+      "selectionPrefixes": [
+        "sum",
+        "sun",
+        "suo",
+        "sup"
+      ]
+    },
+    {
+      "file": "chunks/000197.json",
+      "records": 181,
+      "bytes": 65482,
+      "sha256": "afd4842ea4526b39f5e1a651f574e92f66d7c6c825a0831793c07b595efa0be2",
+      "selectionPrefixes": [
+        "sup",
+        "sur",
+        "sus"
+      ]
+    },
+    {
+      "file": "chunks/000198.json",
+      "records": 166,
+      "bytes": 65467,
+      "sha256": "cb7368d8b2f4cc157b7f285eac3a8562279d9f635a93c1283440b48d29f39df7",
+      "selectionPrefixes": [
+        "sus"
+      ]
+    },
+    {
+      "file": "chunks/000199.json",
+      "records": 152,
+      "bytes": 65391,
+      "sha256": "8df21a5bb3b1fdca581e12079abdc48082a8dbc7818f89c2b82e85c80b383fbe",
+      "selectionPrefixes": [
+        "sus",
+        "sut"
+      ]
+    },
+    {
+      "file": "chunks/000200.json",
+      "records": 167,
+      "bytes": 65178,
+      "sha256": "81c305a3384c8e78ea93c3b77a382e410d281574ea8c2d91f70334d742b49c07",
+      "selectionPrefixes": [
+        "sut",
+        "suv",
+        "suš",
+        "suž",
+        "sva"
+      ]
+    },
+    {
+      "file": "chunks/000201.json",
+      "records": 159,
+      "bytes": 65311,
+      "sha256": "482f7f1b8192a3c7fc570e22cda4076c73718fff8e7d59f97bda67a12cf14410",
+      "selectionPrefixes": [
+        "sva",
+        "sve",
+        "svi",
+        "svo",
+        "syk",
+        "sąj"
+      ]
+    },
+    {
+      "file": "chunks/000202.json",
+      "records": 152,
+      "bytes": 65153,
+      "sha256": "5eb86a6ee3b843354ad0f182b60425236eee0efd7852baede87aec2c02ddabf0",
+      "selectionPrefixes": [
+        "sąj",
+        "sąl",
+        "sąm",
+        "sąn",
+        "sąr",
+        "sąs",
+        "sąv",
+        "sąž"
+      ]
+    },
+    {
+      "file": "chunks/000203.json",
+      "records": 169,
+      "bytes": 65069,
+      "sha256": "4463efa22cbcd8fcbbf30ae78ab2d6e8c1c4a43a6fb10c090bbd3c08ec09f2f1",
+      "selectionPrefixes": [
+        "sąž",
+        "sėd",
+        "sėk",
+        "sės",
+        "sūd",
+        "sūk",
+        "sūn",
+        "sūr",
+        "t",
+        "t 5",
+        "t.",
+        "tab",
+        "tad",
+        "tai"
+      ]
+    },
+    {
+      "file": "chunks/000204.json",
+      "records": 142,
+      "bytes": 65131,
+      "sha256": "2e1edab2b6ae04e7af9ea90f2d1f92b7e19bcb5efa325a7a81a4fa2321aa7b1c",
+      "selectionPrefixes": [
+        "tai",
+        "tak",
+        "tal",
+        "tam",
+        "tan",
+        "tap"
+      ]
+    },
+    {
+      "file": "chunks/000205.json",
+      "records": 153,
+      "bytes": 65136,
+      "sha256": "82a3235efdb5831a5a00f1e9254d63597d008f171d1d1776b2c45d96119fe1b4",
+      "selectionPrefixes": [
+        "tap",
+        "tar",
+        "tas"
+      ]
+    },
+    {
+      "file": "chunks/000206.json",
+      "records": 165,
+      "bytes": 65469,
+      "sha256": "f3e498de7201f6c17d005226b005bd3516373dc9942bce35fc9a200e920c595b",
+      "selectionPrefixes": [
+        "tas",
+        "tau",
+        "tač",
+        "taš",
+        "tea",
+        "teb",
+        "tec",
+        "ted",
+        "tef",
+        "teg",
+        "tei"
+      ]
+    },
+    {
+      "file": "chunks/000207.json",
+      "records": 141,
+      "bytes": 65495,
+      "sha256": "fe2c2cc54bb8a84f9ee9d0dbb108f8574f79178802ffc6aa6ace17fc665fb20e",
+      "selectionPrefixes": [
+        "tei"
+      ]
+    },
+    {
+      "file": "chunks/000208.json",
+      "records": 164,
+      "bytes": 65242,
+      "sha256": "f5a4d4eb2f21b55bcf258d5de6c13d3d8fb16600a579c8e3db7a953cffca1c29",
+      "selectionPrefixes": [
+        "tei",
+        "tek",
+        "tel",
+        "tem",
+        "ten"
+      ]
+    },
+    {
+      "file": "chunks/000209.json",
+      "records": 145,
+      "bytes": 65513,
+      "sha256": "d73118ad6be3bc1cda28431ac91608097af1fb83cc41cc387c34a24e72be0a7c",
+      "selectionPrefixes": [
+        "ten",
+        "teo",
+        "tep",
+        "ter",
+        "tes",
+        "tev",
+        "teš",
+        "tie"
+      ]
+    },
+    {
+      "file": "chunks/000210.json",
+      "records": 158,
+      "bytes": 65514,
+      "sha256": "637b265821d4c9f6f6bc85543c4950f9c2d6dfc3c3daa5b51d1b4e18e1c144d8",
+      "selectionPrefixes": [
+        "tie",
+        "tig",
+        "tik"
+      ]
+    },
+    {
+      "file": "chunks/000211.json",
+      "records": 169,
+      "bytes": 65481,
+      "sha256": "b5ca2a87c6e50afc3e15c8e277077b2af3bce3d732f72936bd7b8f2a592d3918",
+      "selectionPrefixes": [
+        "tik",
+        "til",
+        "tin"
+      ]
+    },
+    {
+      "file": "chunks/000212.json",
+      "records": 155,
+      "bytes": 65241,
+      "sha256": "1656e2b0434ba74fd28f89db188ac33db68dba4774a83320ae57fc0c3020be73",
+      "selectionPrefixes": [
+        "tin",
+        "tip",
+        "tir",
+        "tit",
+        "to",
+        "tob",
+        "tod",
+        "tok",
+        "tol"
+      ]
+    },
+    {
+      "file": "chunks/000213.json",
+      "records": 159,
+      "bytes": 65487,
+      "sha256": "5cf83206a343eba1a49073bfdea66312f32b76a09d8224da20a35b96d335fff8",
+      "selectionPrefixes": [
+        "tol",
+        "tom",
+        "ton",
+        "tor",
+        "tos",
+        "tot",
+        "tra",
+        "tre"
+      ]
+    },
+    {
+      "file": "chunks/000214.json",
+      "records": 165,
+      "bytes": 65519,
+      "sha256": "38a3a49b2447cb88f0336b3aa6677f8a35a7ba856d7d81ffb3fbec46e4a6784a",
+      "selectionPrefixes": [
+        "tre",
+        "trf",
+        "tri",
+        "tro",
+        "tru",
+        "try"
+      ]
+    },
+    {
+      "file": "chunks/000215.json",
+      "records": 177,
+      "bytes": 65445,
+      "sha256": "6f4ccbae59b1aac6a5463c6b014712e4fbaabedc4a7b8939c57f058c3ce5b122",
+      "selectionPrefixes": [
+        "try",
+        "trū",
+        "tsr",
+        "tu",
+        "tua",
+        "tul",
+        "tun",
+        "tuo",
+        "tur"
+      ]
+    },
+    {
+      "file": "chunks/000216.json",
+      "records": 165,
+      "bytes": 65394,
+      "sha256": "1cae52c0a0d346d409fe9dd5ce71e06c7bfd2663e3a9440a2d05c37343f22095",
+      "selectionPrefixes": [
+        "tur",
+        "tuz",
+        "tuč",
+        "tuš",
+        "tv",
+        "tva",
+        "tvf",
+        "tvi",
+        "tvo",
+        "tvy",
+        "tyl",
+        "tyr"
+      ]
+    },
+    {
+      "file": "chunks/000217.json",
+      "records": 161,
+      "bytes": 65332,
+      "sha256": "f4513f428c8de7516d6dadeeca5425f4b09ab0e973574e4b61566012f795c33a",
+      "selectionPrefixes": [
+        "tyr",
+        "tys",
+        "tyč",
+        "tąd",
+        "tėv",
+        "tęs",
+        "tįs",
+        "tūk",
+        "tūn",
+        "tūz",
+        "uab",
+        "ugd",
+        "ugn"
+      ]
+    },
+    {
+      "file": "chunks/000218.json",
+      "records": 178,
+      "bytes": 65233,
+      "sha256": "e2ac6d941a21807fa2696ba422e308e9325d24fba4440c2f7e3304f04c6e8ec6",
+      "selectionPrefixes": [
+        "ugn",
+        "ukr",
+        "ulp",
+        "ult",
+        "uni",
+        "uod",
+        "uog",
+        "uol",
+        "uoš",
+        "upė",
+        "ura",
+        "urb",
+        "urg",
+        "usp",
+        "utė",
+        "uša",
+        "už",
+        "uža",
+        "užb",
+        "užd"
+      ]
+    },
+    {
+      "file": "chunks/000219.json",
+      "records": 177,
+      "bytes": 65465,
+      "sha256": "52fb227e46d2912bac9e13d7e7f98e14939ed108796323008049eeb369d11e7a",
+      "selectionPrefixes": [
+        "užd",
+        "uže",
+        "užg",
+        "uži",
+        "užj",
+        "užk",
+        "užl",
+        "užm",
+        "užp",
+        "užr",
+        "užs"
+      ]
+    },
+    {
+      "file": "chunks/000220.json",
+      "records": 167,
+      "bytes": 65303,
+      "sha256": "1ce6443dedbffa6d1ca4e8da446577a45bce96772efd19ced0dacfe8038939a7",
+      "selectionPrefixes": [
+        "užs",
+        "užt"
+      ]
+    },
+    {
+      "file": "chunks/000221.json",
+      "records": 173,
+      "bytes": 65393,
+      "sha256": "9e293515adee182cb33f44ae7fd49fccc1c945ff9e8fa754e01ed29ca61577d7",
+      "selectionPrefixes": [
+        "užt",
+        "užu",
+        "užv",
+        "užš",
+        "v",
+        "v.",
+        "vab",
+        "vac",
+        "vad",
+        "vaf",
+        "vag",
+        "vai"
+      ]
+    },
+    {
+      "file": "chunks/000222.json",
+      "records": 188,
+      "bytes": 65489,
+      "sha256": "05a901c0da99111f53700c260370eb9c4bcc12dd29da7e7a8afa274f5977ce10",
+      "selectionPrefixes": [
+        "vai",
+        "vak"
+      ]
+    },
+    {
+      "file": "chunks/000223.json",
+      "records": 160,
+      "bytes": 65346,
+      "sha256": "02221876a994b053abe041b0ee8a08a596741af5abca65c1c2e1a08437821cd4",
+      "selectionPrefixes": [
+        "vak",
+        "val"
+      ]
+    },
+    {
+      "file": "chunks/000224.json",
+      "records": 178,
+      "bytes": 65301,
+      "sha256": "45688999cb39b48891fbf74eb50d1d3520fe9495ded079d844bffb033eae50c0",
+      "selectionPrefixes": [
+        "val",
+        "vam",
+        "van",
+        "vap",
+        "var",
+        "vas"
+      ]
+    },
+    {
+      "file": "chunks/000225.json",
+      "records": 165,
+      "bytes": 65154,
+      "sha256": "405cbc43d7637916b9da9c2d42f5ead6aa4de716734c6155c7c2bea958aaef9f",
+      "selectionPrefixes": [
+        "vas",
+        "vaš",
+        "važ",
+        "vdu",
+        "ved",
+        "vei"
+      ]
+    },
+    {
+      "file": "chunks/000226.json",
+      "records": 151,
+      "bytes": 65434,
+      "sha256": "e082f7bf6522008e2a07324ba162f37ca538454e99c4c9cd69de5fc49d1aa353",
+      "selectionPrefixes": [
+        "vei",
+        "vej",
+        "vel",
+        "ven",
+        "ver"
+      ]
+    },
+    {
+      "file": "chunks/000227.json",
+      "records": 158,
+      "bytes": 65463,
+      "sha256": "876d55c079d818e5c5fa8edf816a5ece72dbd7606cff9ed4811658305314d14c",
+      "selectionPrefixes": [
+        "ver",
+        "ves",
+        "vet",
+        "vež",
+        "vi",
+        "via",
+        "vic",
+        "vid"
+      ]
+    },
+    {
+      "file": "chunks/000228.json",
+      "records": 161,
+      "bytes": 65352,
+      "sha256": "2a2ff82e4c9955f7c15052f3c0c951eb34a000890e1af239551a38c6e2916427",
+      "selectionPrefixes": [
+        "vid",
+        "vie"
+      ]
+    },
+    {
+      "file": "chunks/000229.json",
+      "records": 178,
+      "bytes": 65375,
+      "sha256": "d893b18db30dffdd051bf64ff5e50f4d4cada2fe20b8c2a84852009b0de04eb0",
+      "selectionPrefixes": [
+        "vie",
+        "vii",
+        "vik",
+        "vil",
+        "vin",
+        "vir"
+      ]
+    },
+    {
+      "file": "chunks/000230.json",
+      "records": 166,
+      "bytes": 65252,
+      "sha256": "404123a5a700969f0a0733bd6358b4a04d6daad2a50601627c4d08de3074ef4f",
+      "selectionPrefixes": [
+        "vir",
+        "vis"
+      ]
+    },
+    {
+      "file": "chunks/000231.json",
+      "records": 165,
+      "bytes": 65517,
+      "sha256": "9e04d4c3ae6dcbd951381f03e2edda07eee3c734a2fa575c97ca2a5ea2b6d2d4",
+      "selectionPrefixes": [
+        "vis",
+        "vit",
+        "viz",
+        "viš",
+        "vku",
+        "vla",
+        "vok",
+        "vol",
+        "von",
+        "vor",
+        "vos",
+        "vov",
+        "vrk",
+        "vsa",
+        "vst",
+        "vul",
+        "vw",
+        "vyc",
+        "vyg",
+        "vyk",
+        "vyn"
+      ]
+    },
+    {
+      "file": "chunks/000232.json",
+      "records": 166,
+      "bytes": 65386,
+      "sha256": "41bab042608e5d3bae2262492df608c44f6c48e66d56014747d4c28ba6e59ccd",
+      "selectionPrefixes": [
+        "vyr",
+        "vys",
+        "vyt",
+        "vyš",
+        "vėj",
+        "vėl",
+        "vės",
+        "vėž",
+        "wal",
+        "wc",
+        "whi",
+        "xix",
+        "xvi",
+        "xx",
+        "xxi"
+      ]
+    },
+    {
+      "file": "chunks/000233.json",
+      "records": 172,
+      "bytes": 65518,
+      "sha256": "d775f0b01d8c068461d6feab5eb58514145efb541cfd4a4132a82855a1be08f0",
+      "selectionPrefixes": [
+        "xxi",
+        "y.",
+        "ypa",
+        "yra",
+        "ysr",
+        "z.",
+        "zab",
+        "zag",
+        "zen",
+        "zit",
+        "zon",
+        "zoo",
+        "zuo",
+        "č.",
+        "čer",
+        "čes",
+        "čež",
+        "čia",
+        "čib",
+        "čig",
+        "čik",
+        "čil",
+        "čiu",
+        "čor",
+        "ėji",
+        "ėst",
+        "į"
+      ]
+    },
+    {
+      "file": "chunks/000234.json",
+      "records": 166,
+      "bytes": 65381,
+      "sha256": "268d234ce8fabe0a66d4a687550489db65f5a19850656b1bf07f896d7bedddb8",
+      "selectionPrefixes": [
+        "į",
+        "įba",
+        "įde",
+        "įdi",
+        "įdo",
+        "įdu",
+        "įdė",
+        "įel",
+        "įfo",
+        "įga",
+        "įgu",
+        "įgy",
+        "įgū",
+        "įju",
+        "įka",
+        "įke",
+        "įku",
+        "įkv"
+      ]
+    },
+    {
+      "file": "chunks/000235.json",
+      "records": 168,
+      "bytes": 65192,
+      "sha256": "6c8f28f365055e0fb0cdfd18310923bb45dc55bb49e1eb48504a42e8de98a3d6",
+      "selectionPrefixes": [
+        "įkv",
+        "įky",
+        "įką",
+        "įkū",
+        "įle",
+        "įma",
+        "įme",
+        "įmo",
+        "įmu",
+        "įna",
+        "įni",
+        "įpa",
+        "įpe",
+        "įpi",
+        "įpl",
+        "įpr",
+        "įra"
+      ]
+    },
+    {
+      "file": "chunks/000236.json",
+      "records": 160,
+      "bytes": 64804,
+      "sha256": "cc92abd6b4badfe7ff6d915adddff868fcc659230f84d66fac70b5c0e06e7841",
+      "selectionPrefixes": [
+        "įra",
+        "įre",
+        "įro",
+        "įsa",
+        "įsi"
+      ]
+    },
+    {
+      "file": "chunks/000237.json",
+      "records": 144,
+      "bytes": 65265,
+      "sha256": "1d3d89a396813c06467717387450f583c7dd3a606c81e33fa02badd822dc8660",
+      "selectionPrefixes": [
+        "įsi",
+        "įsk",
+        "įsp"
+      ]
+    },
+    {
+      "file": "chunks/000238.json",
+      "records": 146,
+      "bytes": 65265,
+      "sha256": "19b08ef969dbdd742836962de4019c3687ab44af34ed274a4ba80420c9a7728d",
+      "selectionPrefixes": [
+        "įsp",
+        "įst",
+        "įsu",
+        "įsė",
+        "įta",
+        "įte",
+        "įti",
+        "įtr"
+      ]
+    },
+    {
+      "file": "chunks/000239.json",
+      "records": 144,
+      "bytes": 65091,
+      "sha256": "507bbac85f5a9e6723c404515ad58576d3fd57c5358a5053b40ac3144256aa19",
+      "selectionPrefixes": [
+        "įtr",
+        "įtv",
+        "įv-",
+        "įva",
+        "įve"
+      ]
+    },
+    {
+      "file": "chunks/000240.json",
+      "records": 159,
+      "bytes": 65353,
+      "sha256": "442e5e8df728078d8394124e4eddc0ad853b6c2589f8e312b98bd8effef4a92a",
+      "selectionPrefixes": [
+        "įve",
+        "įvy",
+        "įža",
+        "įže",
+        "įžv",
+        "įžy",
+        "įžū",
+        "ķim",
+        "š.",
+        "šak",
+        "šal",
+        "šan",
+        "šar"
+      ]
+    },
+    {
+      "file": "chunks/000241.json",
+      "records": 171,
+      "bytes": 65529,
+      "sha256": "bc99a0a782de6b660a4c103a8a092d36e1d44437edeb62a3f23970e5982d0f11",
+      "selectionPrefixes": [
+        "šau",
+        "šef",
+        "šei",
+        "šem",
+        "šen",
+        "šep",
+        "šer",
+        "šeš",
+        "šia",
+        "šie",
+        "šil",
+        "šim",
+        "šio",
+        "šir",
+        "šis"
+      ]
+    },
+    {
+      "file": "chunks/000242.json",
+      "records": 171,
+      "bytes": 65266,
+      "sha256": "bf0b96e19677a7ceb329a6d7c3d270d74c10c33a5a9059c5e44d4dea53af23bf",
+      "selectionPrefixes": [
+        "šis",
+        "šit",
+        "šiu",
+        "šiz",
+        "šią",
+        "šla",
+        "šli",
+        "šlu",
+        "šly",
+        "šmk",
+        "šmm",
+        "šna",
+        "šne",
+        "šno",
+        "šok",
+        "šon",
+        "šra",
+        "šta",
+        "što",
+        "štr",
+        "štu",
+        "šuk",
+        "šul",
+        "šun",
+        "šuo",
+        "šur"
+      ]
+    },
+    {
+      "file": "chunks/000243.json",
+      "records": 184,
+      "bytes": 65381,
+      "sha256": "0c8ba11e2c3ac713da609a9f2eeaca6b659b7fd0237737df9727ffa2c6cac566",
+      "selectionPrefixes": [
+        "šv.",
+        "šva",
+        "šve",
+        "švi",
+        "švč",
+        "švę",
+        "šyd",
+        "šyk",
+        "šyp",
+        "šėl",
+        "šįk",
+        "šįm",
+        "šįs",
+        "šūk",
+        "šūv",
+        "ūgt",
+        "ūki",
+        "ūpa",
+        "žad"
+      ]
+    },
+    {
+      "file": "chunks/000244.json",
+      "records": 188,
+      "bytes": 65258,
+      "sha256": "a14659fe70a3a238881ec818ccb60956b05d04d46cf2a736b67344d560acd6d1",
+      "selectionPrefixes": [
+        "žad",
+        "žai",
+        "žak",
+        "žal",
+        "žan",
+        "žar",
+        "žav",
+        "žei",
+        "žel",
+        "žem",
+        "žen"
+      ]
+    },
+    {
+      "file": "chunks/000245.json",
+      "records": 154,
+      "bytes": 65460,
+      "sha256": "10d3a2c47c08a57caba9ae509cf6215069c3011c7b5f1770f1b471198d10083b",
+      "selectionPrefixes": [
+        "žen",
+        "žia",
+        "žib",
+        "žid",
+        "žie",
+        "žil",
+        "žim",
+        "žin",
+        "žio",
+        "žir",
+        "žiu",
+        "žiū"
+      ]
+    },
+    {
+      "file": "chunks/000246.json",
+      "records": 182,
+      "bytes": 65287,
+      "sha256": "f83c6dfd082733f7029c4bab7ec8733af909b3c1bf6381ce0514eda241917215",
+      "selectionPrefixes": [
+        "žiū",
+        "žlu",
+        "žmo",
+        "žod",
+        "žol",
+        "žud",
+        "žuk",
+        "žum",
+        "žur",
+        "žuv",
+        "žva",
+        "žve",
+        "žvi",
+        "žvė",
+        "žyg",
+        "žym"
+      ]
+    },
+    {
+      "file": "chunks/000247.json",
+      "records": 36,
+      "bytes": 19501,
+      "sha256": "8595cb829bcb7746b7ef7c6d8529a13a30cbc7e58c66f8341034d622211aedd2",
+      "selectionPrefixes": [
+        "žym",
+        "žąs",
+        "žėr",
+        "žūt"
+      ]
+    }
+  ]
+}

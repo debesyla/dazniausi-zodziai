@@ -8,6 +8,7 @@
   let catalogError = $state<string | null>(null);
   let selectedDatasetId = $state('');
   const dataProductsCatalog = `${import.meta.env.BASE_URL}data-products/catalog.json`;
+  const syntaxExplorerUrl = `${import.meta.env.BASE_URL}sintakse`;
 
   let selectedDataset = $derived(catalog?.datasets.find((dataset) => dataset.id === selectedDatasetId));
 
@@ -72,6 +73,12 @@
     <p>{t('dataProductsDescription')}</p>
     <a href={dataProductsCatalog}>{t('openDataProducts')}</a>
   </section>
+
+  <section class="syntax-context" aria-labelledby="syntax-context-title">
+    <h2 id="syntax-context-title">ALKSNIS sintaksės kontekstai</h2>
+    <p>Patyrinėkite šaltinio pateiktus priklausomybių ryšius ir sakinių kontekstus pagal lemą, neatsisiųsdami viso medyno.</p>
+    <a href={syntaxExplorerUrl}>Atverti sintaksės kontekstų tyrinėjimą</a>
+  </section>
 </main>
 
 <style>
@@ -130,7 +137,15 @@
   }
 
   .data-products h2,
-  .data-products p {
+  .data-products p,
+  .syntax-context h2,
+  .syntax-context p {
     margin-bottom: var(--sm);
+  }
+
+  .syntax-context {
+    margin-top: var(--lg);
+    padding: var(--md);
+    border: 1px solid var(--border-color);
   }
 </style>
