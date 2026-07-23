@@ -1,7 +1,9 @@
 <script lang="ts">
   import { loadPublicDataProducts, type DataProductType, type PublicDataProduct } from '$lib/publication';
+  import { base } from '$app/paths';
+  import { site } from '$lib/site';
 
-  const homeUrl = import.meta.env.BASE_URL;
+  const homeUrl = `${base}/`;
   let products = $state<PublicDataProduct[]>([]);
   let loading = $state(true);
   let error = $state<string | null>(null);
@@ -44,6 +46,11 @@
 
 <svelte:head>
   <title>Metodika ir šaltiniai · Dažniausi lietuviški žodžiai</title>
+  <meta name="description" content="Sužinokite, iš kokių viešų šaltinių sudaryti šios svetainės lietuvių kalbos duomenys, kokios jų licencijos ir kaip skaityti rodiklius." />
+  <link rel="canonical" href={site.methodologyUrl} />
+  <meta property="og:title" content="Metodika ir šaltiniai · Dažniausi lietuviški žodžiai" />
+  <meta property="og:description" content="Viešų lietuvių kalbos duomenų šaltiniai, licencijos, ribos ir rodiklių paaiškinimas." />
+  <meta property="og:url" content={site.methodologyUrl} />
 </svelte:head>
 
 <main class="methodology">
