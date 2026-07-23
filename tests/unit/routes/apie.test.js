@@ -62,4 +62,17 @@ describe('Methodology page', () => {
     });
     expect(result.violations).toEqual([]);
   });
+
+  it('uses the deployed methodology URL as its canonical page', () => {
+    render(Page);
+
+    expect(document.head.querySelector('link[rel="canonical"]')).toHaveAttribute(
+      'href',
+      'https://debesyla.github.io/dazniausi-zodziai/apie'
+    );
+    expect(document.head.querySelector('meta[property="og:url"]')).toHaveAttribute(
+      'content',
+      'https://debesyla.github.io/dazniausi-zodziai/apie'
+    );
+  });
 });

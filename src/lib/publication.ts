@@ -1,5 +1,7 @@
 /** Load the small, manifest-led public-data catalog without loading data rows. */
 
+import { base } from '$app/paths';
+
 export type DataProductType =
   | 'generic-frequency-dataset'
   | 'chunked-wordform-list'
@@ -59,7 +61,7 @@ export interface PublicDataProduct {
   manifestUrl: string;
 }
 
-const dataProductsRoot = `${import.meta.env.BASE_URL}data-products/`;
+const dataProductsRoot = `${base}/data-products/`;
 const PRODUCT_TYPES = new Set<DataProductType>([
   'generic-frequency-dataset',
   'chunked-wordform-list',

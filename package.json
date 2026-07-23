@@ -5,7 +5,7 @@
 	"type": "module",
 	"scripts": {
 		"dev": "vite dev",
-		"build": "vite build",
+		"build": "vite build && node scripts/verify-public-entry.mjs",
 		"preview": "vite preview",
 		"start": "vite build && vite preview",
 		"prepare": "svelte-kit sync || echo ''",
