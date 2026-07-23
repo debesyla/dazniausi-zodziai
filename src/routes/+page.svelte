@@ -1,14 +1,16 @@
 <script lang="ts">
   import DataLoader from '../components/DataLoader.svelte';
+  import { base } from '$app/paths';
   import { t } from '$lib/translations';
   import { loadCatalog, type DatasetCatalog } from '$lib/data';
+  import { site } from '$lib/site';
 
   let catalog = $state<DatasetCatalog | null>(null);
   let catalogLoading = $state(true);
   let catalogError = $state<string | null>(null);
   let selectedDatasetId = $state('');
-  const dataProductsCatalog = `${import.meta.env.BASE_URL}data-products/catalog.json`;
-  const methodologyUrl = `${import.meta.env.BASE_URL}apie`;
+  const dataProductsCatalog = `${base}/data-products/catalog.json`;
+  const methodologyUrl = `${base}/apie`;
 
   let selectedDataset = $derived(catalog?.datasets.find((dataset) => dataset.id === selectedDatasetId));
 
@@ -38,7 +40,24 @@
 </script>
 
 <svelte:head>
-  <title>{t('pageTitle')}</title>
+  <title>{site.name} · lietuvių kalbos dažnumo duomenys</title>
+  <meta name="description" content={site.description} />
+  <link rel="canonical" href={site.homeUrl} />
+  <meta property="og:type" content="website" />
+  <meta property="og:locale" content="lt_LT" />
+  <meta property="og:site_name" content={site.name} />
+  <meta property="og:title" content={`${site.name} · lietuvių kalbos dažnumo duomenys`} />
+  <meta property="og:description" content={site.description} />
+  <meta property="og:url" content={site.homeUrl} />
+  <meta property="og:image" content={site.socialImageUrl} />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:image:alt" content="Dažniausi lietuviški žodžiai – viešų lietuvių kalbos dažnumo sąrašų tyrinėjimas" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content={`${site.name} · lietuvių kalbos dažnumo duomenys`} />
+  <meta name="twitter:description" content={site.description} />
+  <meta name="twitter:image" content={site.socialImageUrl} />
+  <meta name="twitter:image:alt" content="Dažniausi lietuviški žodžiai – viešų lietuvių kalbos dažnumo sąrašų tyrinėjimas" />
 </svelte:head>
 
 <main>
