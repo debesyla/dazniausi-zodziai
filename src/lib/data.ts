@@ -1,5 +1,7 @@
 /** Types and loaders for the static, catalog-first dataset delivery model. */
 
+import { base } from '$app/paths';
+
 export interface Word {
   word: string;
   type?: string;
@@ -67,7 +69,7 @@ export interface DatasetCatalog {
   datasets: DatasetCatalogEntry[];
 }
 
-const dataRoot = `${import.meta.env.BASE_URL}datasets/`;
+const dataRoot = `${base}/datasets/`;
 
 function isNonEmptyString(value: unknown): value is string {
   return typeof value === 'string' && value.trim().length > 0;

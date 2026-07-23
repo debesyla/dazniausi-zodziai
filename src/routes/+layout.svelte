@@ -1,10 +1,11 @@
 <script lang="ts">
 	import favicon from '$lib/assets/favicon.svg';
+	import { base } from '$app/paths';
 	import '../app.css';
 	import { t } from '$lib/translations';
 
 	let { children } = $props();
-	const homeUrl = import.meta.env.BASE_URL;
+	const homeUrl = `${base}/`;
 	const methodologyUrl = `${homeUrl}apie`;
 </script>
 
