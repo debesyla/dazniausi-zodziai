@@ -1,0 +1,168 @@
+{
+  "schemaVersion": 1,
+  "productId": "dadurkevicius-dml6-vs-jcl-comparison",
+  "profileId": "dml6-jcl-coverage-by-frequency-band",
+  "bandId": "one-thousand-plus",
+  "coverageCode": 3,
+  "recordEncoding": "array",
+  "fields": [
+    {
+      "id": "word",
+      "label": "Word form",
+      "type": "string"
+    },
+    {
+      "id": "jclTokenCount",
+      "label": "JCL token count",
+      "type": "raw-token-count",
+      "unit": "tokens"
+    }
+  ],
+  "ordering": {
+    "field": "jclTokenCount",
+    "direction": "descending",
+    "tieBreak": "word-ascending"
+  },
+  "records": [
+    [
+      "of",
+      1768428
+    ],
+    [
+      "min",
+      307716
+    ],
+    [
+      "kt",
+      161572
+    ],
+    [
+      "pan",
+      115039
+    ],
+    [
+      "pvz",
+      106242
+    ],
+    [
+      "žr",
+      32738
+    ],
+    [
+      "dz",
+      28447
+    ],
+    [
+      "dll",
+      27961
+    ],
+    [
+      "var",
+      27480
+    ],
+    [
+      "sport",
+      14266
+    ],
+    [
+      "spec",
+      13131
+    ],
+    [
+      "med",
+      12771
+    ],
+    [
+      "plg",
+      10958
+    ],
+    [
+      "įv",
+      7219
+    ],
+    [
+      "chem",
+      5793
+    ],
+    [
+      "asm",
+      4004
+    ],
+    [
+      "lit",
+      3498
+    ],
+    [
+      "kom",
+      3395
+    ],
+    [
+      "buv",
+      3169
+    ],
+    [
+      "įst",
+      3078
+    ],
+    [
+      "nuos",
+      2823
+    ],
+    [
+      "tech",
+      2687
+    ],
+    [
+      "iron",
+      2386
+    ],
+    [
+      "av",
+      2122
+    ],
+    [
+      "mit",
+      1792
+    ],
+    [
+      "kilm",
+      1595
+    ],
+    [
+      "naud",
+      1524
+    ],
+    [
+      "farm",
+      1509
+    ],
+    [
+      "fin",
+      1465
+    ],
+    [
+      "vet",
+      1290
+    ],
+    [
+      "viet",
+      1263
+    ],
+    [
+      "vns",
+      1200
+    ],
+    [
+      "kul",
+      1104
+    ],
+    [
+      "stat",
+      1048
+    ],
+    [
+      "sant",
+      1024
+    ]
+  ]
+}

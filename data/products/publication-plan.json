@@ -170,6 +170,29 @@
             { "id": "jclTokenCount", "label": "JCL token count", "type": "raw-token-count", "unit": "tokens", "sourceColumn": 1 }
           ]
         }
+      ],
+      "analysisProfiles": [
+        {
+          "id": "dml6-jcl-coverage-by-frequency-band",
+          "type": "frequency-band-coverage",
+          "sourceRole": "types-coverage",
+          "title": "DML6 coverage by JCL frequency band",
+          "description": "Counts of JCL word forms and their raw token mass in transparent frequency bands, split by labelled DML6 coverage category.",
+          "summaryMaxBytes": 32768,
+          "frequencyBands": [
+            { "id": "one", "label": "1", "minimum": 1, "maximum": 1 },
+            { "id": "two-to-four", "label": "2–4", "minimum": 2, "maximum": 4 },
+            { "id": "five-to-nine", "label": "5–9", "minimum": 5, "maximum": 9 },
+            { "id": "ten-to-ninety-nine", "label": "10–99", "minimum": 10, "maximum": 99 },
+            { "id": "one-hundred-to-nine-hundred-ninety-nine", "label": "100–999", "minimum": 100, "maximum": 999 },
+            { "id": "one-thousand-plus", "label": "1,000+", "minimum": 1000, "maximum": null }
+          ],
+          "drilldown": {
+            "limit": 50,
+            "maxBytes": 16384,
+            "ordering": { "field": "jclTokenCount", "direction": "descending", "tieBreak": "word-ascending" }
+          }
+        }
       ]
     },
     {

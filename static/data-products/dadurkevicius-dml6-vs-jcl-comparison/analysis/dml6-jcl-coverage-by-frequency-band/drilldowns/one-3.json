@@ -1,0 +1,44 @@
+{
+  "schemaVersion": 1,
+  "productId": "dadurkevicius-dml6-vs-jcl-comparison",
+  "profileId": "dml6-jcl-coverage-by-frequency-band",
+  "bandId": "one",
+  "coverageCode": 3,
+  "recordEncoding": "array",
+  "fields": [
+    {
+      "id": "word",
+      "label": "Word form",
+      "type": "string"
+    },
+    {
+      "id": "jclTokenCount",
+      "label": "JCL token count",
+      "type": "raw-token-count",
+      "unit": "tokens"
+    }
+  ],
+  "ordering": {
+    "field": "jclTokenCount",
+    "direction": "descending",
+    "tieBreak": "word-ascending"
+  },
+  "records": [
+    [
+      "euf",
+      1
+    ],
+    [
+      "klnt",
+      1
+    ],
+    [
+      "poez",
+      1
+    ],
+    [
+      "šauksm",
+      1
+    ]
+  ]
+}
