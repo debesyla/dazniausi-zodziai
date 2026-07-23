@@ -76,6 +76,17 @@ as a labelled category, exposes form counts and JCL token counts separately,
 and contains at most 50 frequency-ordered examples per category. It is not a
 generic frequency view and must not turn a coverage code into a numeric score.
 
+`utka-ccll2-war-ukraine-comparison/analysis/ccll2-wartime-normalized-contrast/`
+is a bounded exact-form lookup profile. Its compact routing manifest sends a
+query to one lookup bucket containing normalized form and source-row pointers,
+then the browser requests only the one or two existing source chunks needed to
+show the six source metrics. The lookup buckets deliberately do not duplicate
+the metrics. The profile preserves all token/document denominators, raw null
+counts, a 100-per-100-million minimum-rate rule, and the formula
+`log2(numeratorRate / denominatorRate)`. Duplicate normalized forms are not
+summed: compatible sparse source rows are combined only when a visitor asks for
+that form, while contradictory values are rejected.
+
 ## Published collection coverage
 
 - `utka-2018-lemmatized-totals`, `dadurkevicius-2020-jcl-lemmas`, and
@@ -89,7 +100,9 @@ generic frequency view and must not turn a coverage code into a numeric score.
   the public dictionary-coverage explorer without downloading the 4.97-million
   row comparison view.
 - `utka-ccll2-war-ukraine-comparison` keeps all six normalized token/document
-  metrics separate. Source absence is JSON `null`, not zero.
+  metrics separate. Source absence is JSON `null`, not zero. Its routed
+  analytical profile supports an on-demand word-form comparison without loading
+  the 2.26-million-row source view.
 - `bielinskiene-2019-delfi-1grams` publishes all 1,030,562 raw one-gram rows
   in bounded chunks. Its counts are not lemma frequencies.
 - `rimkute-2024-matas-v3-frequencies` derives separate lemma/POS and

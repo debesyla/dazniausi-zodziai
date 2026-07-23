@@ -1,7 +1,7 @@
 import { createHash } from 'node:crypto';
 import { spawn } from 'node:child_process';
 import { createReadStream } from 'node:fs';
-import { mkdir, readFile, realpath, rm, writeFile } from 'node:fs/promises';
+import { appendFile, mkdir, readFile, realpath, rm, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { createInterface } from 'node:readline';
 import { fileURLToPath } from 'node:url';
@@ -41,7 +41,7 @@ const CHUNKED_PRODUCT_TYPES = new Set([
   'chunked-derived-frequency-list',
   'chunked-lexical-collection'
 ]);
-const ANALYSIS_PROFILE_TYPES = new Set(['frequency-band-coverage']);
+const ANALYSIS_PROFILE_TYPES = new Set(['frequency-band-coverage', 'normalized-contrast-lookup']);
 
 function fail(message) {
   throw new Error(`Data-product preparation failed: ${message}`);
@@ -234,11 +234,8 @@ function validateFrequencyBand(band, description, previousBand) {
   return band;
 }
 
-function validateAnalysisProfile(profile, description) {
-  if (!isPlainObject(profile) || !isSafeId(profile.id) || !ANALYSIS_PROFILE_TYPES.has(profile.type)
-    || !isSafeId(profile.sourceRole) || !normalizeString(profile.title) || !normalizeString(profile.description)
-    || !Array.isArray(profile.frequencyBands) || profile.frequencyBands.length === 0
-    || !Number.isSafeInteger(profile.summaryMaxBytes) || profile.summaryMaxBytes < 1024
+function validateFrequencyBandCoverageProfile(profile, description) {
+  if (!Array.isArray(profile.frequencyBands) || profile.frequencyBands.length === 0
     || !isPlainObject(profile.drilldown) || !Number.isSafeInteger(profile.drilldown.limit)
     || profile.drilldown.limit < 1 || profile.drilldown.limit > 100
     || !Number.isSafeInteger(profile.drilldown.maxBytes) || profile.drilldown.maxBytes < 1024
@@ -258,6 +255,50 @@ function validateAnalysisProfile(profile, description) {
   }
   if (previousBand?.maximum !== null) {
     fail(`${description}.frequencyBands must finish with an open-ended band`);
+  }
+}
+
+function validateNormalizedContrastLookupProfile(profile, description) {
+  if (!isPlainObject(profile.lookup) || !Number.isSafeInteger(profile.lookup.maxBucketBytes)
+    || profile.lookup.maxBucketBytes < 8192 || profile.lookup.maxBucketBytes > 262144
+    || profile.lookup.normalization !== 'trim-nfc-uppercase-lt'
+    || !Number.isSafeInteger(profile.lookup.maxSourceRowsPerWord) || profile.lookup.maxSourceRowsPerWord < 1
+    || profile.lookup.maxSourceRowsPerWord > 16 || !Array.isArray(profile.sources) || profile.sources.length < 2
+    || !Array.isArray(profile.pairs) || profile.pairs.length === 0
+    || !Number.isSafeInteger(profile.minimumRate) || profile.minimumRate < 1) {
+    fail(`${description} is invalid`);
+  }
+  const sourceIds = new Set();
+  for (const [index, source] of profile.sources.entries()) {
+    if (!isPlainObject(source) || !isSafeId(source.id) || !normalizeString(source.label)
+      || !isSafeFieldId(source.tokenField) || !isSafeFieldId(source.documentField)
+      || source.tokenField === source.documentField || sourceIds.has(source.id)) {
+      fail(`${description}.sources[${index}] is invalid`);
+    }
+    sourceIds.add(source.id);
+  }
+  const pairIds = new Set();
+  for (const [index, pair] of profile.pairs.entries()) {
+    if (!isPlainObject(pair) || !isSafeId(pair.id) || !normalizeString(pair.label)
+      || !isSafeId(pair.numeratorSource) || !isSafeId(pair.denominatorSource)
+      || pair.numeratorSource === pair.denominatorSource || !sourceIds.has(pair.numeratorSource)
+      || !sourceIds.has(pair.denominatorSource) || pairIds.has(pair.id)) {
+      fail(`${description}.pairs[${index}] is invalid`);
+    }
+    pairIds.add(pair.id);
+  }
+}
+
+function validateAnalysisProfile(profile, description) {
+  if (!isPlainObject(profile) || !isSafeId(profile.id) || !ANALYSIS_PROFILE_TYPES.has(profile.type)
+    || !isSafeId(profile.sourceRole) || !normalizeString(profile.title) || !normalizeString(profile.description)
+    || !Number.isSafeInteger(profile.summaryMaxBytes) || profile.summaryMaxBytes < 1024) {
+    fail(`${description} is invalid`);
+  }
+  if (profile.type === 'frequency-band-coverage') {
+    validateFrequencyBandCoverageProfile(profile, description);
+  } else if (profile.type === 'normalized-contrast-lookup') {
+    validateNormalizedContrastLookupProfile(profile, description);
   }
 }
 
@@ -1194,6 +1235,450 @@ async function buildFrequencyBandCoverageProfile({ contract, productId, productD
   };
 }
 
+function normalizeLookupWord(value) {
+  const word = normalizeString(value);
+  return word ? word.normalize('NFC').toLocaleUpperCase('lt-LT') : '';
+}
+
+function publicNormalizedMetricField(field) {
+  return {
+    id: field.id,
+    label: field.label,
+    type: field.type,
+    unit: field.unit,
+    nullable: field.nullable === true,
+    normalization: field.normalization
+  };
+}
+
+function findNormalizedContrastLookupFields(profile, views) {
+  const matchingViews = views.filter((view) => view.sourceRole === profile.sourceRole);
+  if (matchingViews.length !== 1) {
+    fail(`${profile.id} requires exactly one row view for source role ${profile.sourceRole}`);
+  }
+  const sourceView = matchingViews[0];
+  const wordFields = sourceView.fields.filter((field) => field.type === 'string');
+  if (wordFields.length !== 1) fail(`${profile.id} requires exactly one word field`);
+  const fieldsById = new Map(sourceView.fields.map((field) => [field.id, field]));
+  const usedFields = new Set();
+  const sources = profile.sources.map((source) => {
+    const tokenField = fieldsById.get(source.tokenField);
+    const documentField = fieldsById.get(source.documentField);
+    if (!tokenField || !documentField || tokenField.type !== 'normalized-token-count'
+      || documentField.type !== 'normalized-document-count' || tokenField.nullable !== true
+      || documentField.nullable !== true || tokenField.normalization.sourceTokens !== documentField.normalization.sourceTokens
+      || tokenField.normalization.targetTokens !== documentField.normalization.targetTokens
+      || usedFields.has(tokenField.id) || usedFields.has(documentField.id)) {
+      fail(`${profile.id} sources must name distinct nullable normalized token and document fields`);
+    }
+    usedFields.add(tokenField.id);
+    usedFields.add(documentField.id);
+    return {
+      id: source.id,
+      label: source.label,
+      tokenField,
+      documentField
+    };
+  });
+  const targetTokens = sources[0].tokenField.normalization.targetTokens;
+  if (sources.some((source) => source.tokenField.normalization.targetTokens !== targetTokens)) {
+    fail(`${profile.id} source token measures must share a target denominator`);
+  }
+  return { sourceView, wordField: wordFields[0], sources, targetTokens };
+}
+
+function createLookupNode(id, prefix) {
+  return {
+    id,
+    prefix,
+    depth: Array.from(prefix).length,
+    childStats: new Map(),
+    transitions: new Map(),
+    terminalStats: null,
+    terminalGroup: null
+  };
+}
+
+function addLookupStats(existing, payloadBytes) {
+  if (!existing) return { records: 1, payloadBytes };
+  existing.records += 1;
+  existing.payloadBytes += payloadBytes;
+  return existing;
+}
+
+function lookupPayloadBytes(normalizedWord, sourceRow) {
+  return Buffer.byteLength(JSON.stringify([normalizedWord, sourceRow]), 'utf8') + 1;
+}
+
+async function scanLookupRoutingNodes({ sourceFile, sourcePath, sourceDisplayPath, wordField, pendingNodes }) {
+  const nodesByDepth = new Map();
+  for (const node of pendingNodes) {
+    const entries = nodesByDepth.get(node.depth) ?? new Map();
+    if (entries.has(node.prefix)) fail(`lookup routing has a duplicate pending prefix ${node.prefix}`);
+    entries.set(node.prefix, node);
+    nodesByDepth.set(node.depth, entries);
+  }
+  const lines = createInterface({
+    input: createReadStream(sourcePath, { encoding: 'utf8' }),
+    crlfDelay: Infinity
+  });
+  const delimiter = sourceFile.delimiter ?? '\t';
+  let physicalLineNumber = 0;
+  let sourceRows = 0;
+  for await (const line of lines) {
+    physicalLineNumber += 1;
+    if (sourceFile.hasHeader === true && physicalLineNumber === 1) continue;
+    const values = parseDelimitedLine(line, delimiter);
+    if (values.length !== sourceFile.columns) {
+      fail(`${sourceDisplayPath} line ${sourceRows + 1} has ${values.length} columns; expected ${sourceFile.columns}`);
+    }
+    const normalizedWord = normalizeLookupWord(values[wordField.sourceColumn]);
+    if (!normalizedWord) fail(`${sourceDisplayPath} line ${sourceRows + 1} has an empty ${wordField.id} value`);
+    const characters = Array.from(normalizedWord);
+    for (const [depth, nodes] of nodesByDepth) {
+      if (characters.length < depth) continue;
+      const node = nodes.get(characters.slice(0, depth).join(''));
+      if (!node) continue;
+      const payloadBytes = lookupPayloadBytes(normalizedWord, sourceRows);
+      if (characters.length === depth) {
+        node.terminalStats = addLookupStats(node.terminalStats, payloadBytes);
+      } else {
+        const character = characters[depth];
+        node.childStats.set(character, addLookupStats(node.childStats.get(character), payloadBytes));
+      }
+      break;
+    }
+    sourceRows += 1;
+  }
+  if (sourceRows !== sourceFile.rows) {
+    fail(`${sourceDisplayPath} row count does not match the source contract while building lookup routing`);
+  }
+}
+
+function routeLookupBucket(root, normalizedWord) {
+  let node = root;
+  const characters = Array.from(normalizedWord);
+  let index = 0;
+  while (true) {
+    if (index === characters.length) return node.terminalGroup?.bucket ?? null;
+    const transition = node.transitions.get(characters[index]);
+    if (!transition) return null;
+    if (transition.kind === 'bucket') return transition.bucket;
+    node = transition.node;
+    index += 1;
+  }
+}
+
+async function buildLookupRouting({ sourceFile, sourcePath, sourceDisplayPath, wordField, profile }) {
+  const payloadBudget = profile.lookup.maxBucketBytes - 2048;
+  if (payloadBudget < 1024) fail(`${profile.id} lookup bucket budget leaves no usable payload`);
+  const root = createLookupNode(0, '');
+  const nodes = [root];
+  const leafGroups = [];
+  let pendingNodes = [root];
+
+  while (pendingNodes.length > 0) {
+    await scanLookupRoutingNodes({ sourceFile, sourcePath, sourceDisplayPath, wordField, pendingNodes });
+    const nextNodes = [];
+    for (const node of pendingNodes) {
+      if (node.terminalStats) {
+        if (node.terminalStats.payloadBytes > payloadBudget) {
+          fail(`${profile.id} cannot bound the exact lookup bucket for ${node.prefix}`);
+        }
+        const group = { node, type: 'terminal', character: null, stats: node.terminalStats, bucket: null };
+        node.terminalGroup = group;
+        leafGroups.push(group);
+      }
+      for (const [character, stats] of [...node.childStats.entries()].sort(([left], [right]) => left.localeCompare(right, 'lt'))) {
+        if (stats.payloadBytes <= payloadBudget) {
+          const group = { node, type: 'child', character, stats, bucket: null };
+          node.transitions.set(character, { kind: 'bucket', bucket: null, group });
+          leafGroups.push(group);
+          continue;
+        }
+        const child = createLookupNode(nodes.length, `${node.prefix}${character}`);
+        nodes.push(child);
+        node.transitions.set(character, { kind: 'node', node: child });
+        nextNodes.push(child);
+      }
+      node.childStats.clear();
+    }
+    pendingNodes = nextNodes;
+  }
+
+  const buckets = [];
+  for (const group of [...leafGroups].sort((left, right) => right.stats.payloadBytes - left.stats.payloadBytes || left.node.prefix.localeCompare(right.node.prefix, 'lt'))) {
+    let bucket = buckets.find((candidate) => candidate.payloadBytes + group.stats.payloadBytes <= payloadBudget);
+    if (!bucket) {
+      bucket = { id: buckets.length, groups: [], payloadBytes: 0, records: 0 };
+      buckets.push(bucket);
+    }
+    bucket.groups.push(group);
+    bucket.payloadBytes += group.stats.payloadBytes;
+    bucket.records += group.stats.records;
+    group.bucket = bucket;
+    if (group.type === 'terminal') {
+      group.node.terminalGroup = group;
+    } else {
+      const transition = group.node.transitions.get(group.character);
+      transition.bucket = bucket;
+    }
+  }
+
+  if (buckets.length === 0) fail(`${profile.id} lookup produced no buckets`);
+  return { root, nodes, buckets };
+}
+
+async function writeCompactJsonWithByteBudget(filename, value, maxBytes, description) {
+  const buffer = Buffer.from(`${JSON.stringify(value)}\n`, 'utf8');
+  if (buffer.byteLength > maxBytes) fail(`${description} exceeds its ${maxBytes}-byte budget`);
+  await mkdir(path.dirname(filename), { recursive: true });
+  await writeFile(filename, buffer);
+  return buffer;
+}
+
+async function writeNormalizedContrastLookupBuckets({
+  productId,
+  productDirectory,
+  profile,
+  sourceFile,
+  sourcePath,
+  sourceDisplayPath,
+  sourceView,
+  wordField,
+  routing
+}) {
+  const profileDirectory = path.join(productDirectory, 'analysis', profile.id);
+  const bucketDirectory = path.join(profileDirectory, 'buckets');
+  const temporaryDirectory = path.join(productDirectory, `.lookup-staging-${profile.id}`);
+  const delimiter = sourceFile.delimiter ?? '\t';
+  const bucketBuffers = new Map();
+  const bufferLimit = 32768;
+  const temporaryFile = (bucket) => path.join(temporaryDirectory, `${String(bucket.id + 1).padStart(6, '0')}.jsonl`);
+
+  async function flushBucket(bucket) {
+    const buffered = bucketBuffers.get(bucket.id);
+    if (!buffered?.text) return;
+    await appendFile(temporaryFile(bucket), buffered.text, 'utf8');
+    bucketBuffers.delete(bucket.id);
+  }
+
+  await rm(temporaryDirectory, { recursive: true, force: true });
+  await mkdir(temporaryDirectory, { recursive: true });
+  const numericTotals = fieldTotals(sourceView.fields);
+  const nullCounts = fieldNullCounts(sourceView.fields);
+  let sourceRows = 0;
+  try {
+    const lines = createInterface({
+      input: createReadStream(sourcePath, { encoding: 'utf8' }),
+      crlfDelay: Infinity
+    });
+    let physicalLineNumber = 0;
+    for await (const line of lines) {
+      physicalLineNumber += 1;
+      if (sourceFile.hasHeader === true && physicalLineNumber === 1) continue;
+      const values = parseDelimitedLine(line, delimiter);
+      if (values.length !== sourceFile.columns) {
+        fail(`${sourceDisplayPath} line ${sourceRows + 1} has ${values.length} columns; expected ${sourceFile.columns}`);
+      }
+      const record = sourceView.fields.map((field) => parseFieldValue(field, values[field.sourceColumn], sourceDisplayPath, sourceRows + 1));
+      for (const [index, field] of sourceView.fields.entries()) {
+        const value = record[index];
+        if (value === null) {
+          nullCounts[field.id] += 1;
+        } else if (SUMMARIZED_FIELD_TYPES.has(field.type)) {
+          numericTotals[field.id] += value;
+        }
+      }
+      const normalizedWord = normalizeLookupWord(record[sourceView.fields.indexOf(wordField)]);
+      if (!normalizedWord) fail(`${sourceDisplayPath} line ${sourceRows + 1} has an empty ${wordField.id} value`);
+      const bucket = routeLookupBucket(routing.root, normalizedWord);
+      if (!bucket) fail(`${profile.id} has no lookup route for ${normalizedWord}`);
+      const recordJson = JSON.stringify([normalizedWord, sourceRows]);
+      const appended = `${recordJson}\n`;
+      const bytes = Buffer.byteLength(appended, 'utf8');
+      const buffered = bucketBuffers.get(bucket.id) ?? { text: '', bytes: 0 };
+      if (buffered.bytes + bytes > bufferLimit && buffered.text) {
+        bucketBuffers.set(bucket.id, buffered);
+        await flushBucket(bucket);
+      }
+      const next = bucketBuffers.get(bucket.id) ?? { text: '', bytes: 0 };
+      next.text += appended;
+      next.bytes += bytes;
+      bucketBuffers.set(bucket.id, next);
+      sourceRows += 1;
+    }
+    for (const bucket of routing.buckets) await flushBucket(bucket);
+    const sourceSummary = { sourceRows, recordCount: sourceRows, numericTotals, nullCounts };
+    assertContractSummary(sourceFile, sourceView.fields, sourceSummary, sourceDisplayPath);
+
+    const descriptors = [];
+    let uniqueNormalizedWordForms = 0;
+    let duplicateNormalizedWordForms = 0;
+    let extraDuplicateRows = 0;
+    let maxSourceRowsPerWord = 0;
+    for (const bucket of routing.buckets) {
+      const records = (await readFile(temporaryFile(bucket), 'utf8')).trimEnd().split('\n').map((line) => parseJson(line, `${profile.id} lookup bucket staging record`));
+      if (records.length !== bucket.records) {
+        fail(`${profile.id} lookup bucket ${bucket.id} does not reconcile with its routing count`);
+      }
+      const wordOccurrences = new Map();
+      for (const record of records) {
+        if (!Array.isArray(record) || record.length !== 2 || !normalizeLookupWord(record[0])
+          || !Number.isSafeInteger(record[1]) || record[1] < 0 || record[1] >= sourceRows) {
+          fail(`${profile.id} lookup bucket ${bucket.id} has an invalid lookup record`);
+        }
+        const normalizedWord = normalizeLookupWord(record[0]);
+        if (normalizedWord !== record[0]) fail(`${profile.id} lookup bucket ${bucket.id} has a non-normalized lookup word`);
+        wordOccurrences.set(normalizedWord, (wordOccurrences.get(normalizedWord) ?? 0) + 1);
+      }
+      for (const occurrences of wordOccurrences.values()) {
+        uniqueNormalizedWordForms += 1;
+        maxSourceRowsPerWord = Math.max(maxSourceRowsPerWord, occurrences);
+        if (occurrences > 1) {
+          duplicateNormalizedWordForms += 1;
+          extraDuplicateRows += occurrences - 1;
+        }
+      }
+      if (maxSourceRowsPerWord > profile.lookup.maxSourceRowsPerWord) {
+        fail(`${profile.id} lookup has more source rows per word than its declared bound`);
+      }
+      const filename = `${String(bucket.id + 1).padStart(6, '0')}.json`;
+      const buffer = await writeCompactJsonWithByteBudget(
+        path.join(bucketDirectory, filename),
+        {
+          schemaVersion: 1,
+          productId,
+          profileId: profile.id,
+          bucketId: bucket.id,
+          recordEncoding: 'array',
+          records
+        },
+        profile.lookup.maxBucketBytes,
+        `${productId}/${profile.id}/buckets/${filename}`
+      );
+      descriptors.push({
+        id: bucket.id,
+        file: `buckets/${filename}`,
+        records: records.length,
+        bytes: buffer.byteLength,
+        sha256: createHash('sha256').update(buffer).digest('hex')
+      });
+    }
+    return {
+      sourceSummary,
+      lookupSummary: {
+        lookupRecords: sourceRows,
+        uniqueNormalizedWordForms,
+        duplicateNormalizedWordForms,
+        extraDuplicateRows,
+        maxSourceRowsPerWord
+      },
+      bucketDescriptors: descriptors
+    };
+  } finally {
+    await rm(temporaryDirectory, { recursive: true, force: true });
+  }
+}
+
+async function buildNormalizedContrastLookupProfile({ contract, productId, productDirectory, profile, views, sourceRoot }) {
+  const { sourceView, wordField, sources, targetTokens } = findNormalizedContrastLookupFields(profile, views);
+  const filesByRole = new Map(contract.source.files.map((file) => [file.role, file]));
+  const sourceFile = filesByRole.get(profile.sourceRole);
+  if (!sourceFile) fail(`${profile.id} has no source file with role ${profile.sourceRole}`);
+  const { realRoot, sourcePath } = await resolveSourcePath(sourceRoot, sourceFile.path);
+  const sourceDisplayPath = sourceRelativePath(realRoot, sourcePath);
+  const routing = await buildLookupRouting({ sourceFile, sourcePath, sourceDisplayPath, wordField, profile });
+  const { sourceSummary, lookupSummary, bucketDescriptors } = await writeNormalizedContrastLookupBuckets({
+    productId,
+    productDirectory,
+    profile,
+    sourceFile,
+    sourcePath,
+    sourceDisplayPath,
+    sourceView,
+    wordField,
+    routing
+  });
+  const routingNodes = routing.nodes.map((node) => ({
+    terminalBucket: node.terminalGroup?.bucket?.id ?? null,
+    children: [...node.transitions.entries()]
+      .sort(([left], [right]) => left.localeCompare(right, 'lt'))
+      .map(([character, transition]) => [character, transition.kind === 'bucket' ? transition.bucket.id : -transition.node.id - 1])
+  }));
+  const profileDirectory = path.join(productDirectory, 'analysis', profile.id);
+  const manifest = {
+    schemaVersion: 1,
+    productId,
+    profileId: profile.id,
+    profileType: profile.type,
+    title: profile.title,
+    description: profile.description,
+    sourceView: {
+      id: sourceView.id,
+      sourceRole: profile.sourceRole,
+      index: `views/${sourceView.id}/index.json`,
+      fields: sourceView.fields,
+      wordField: { id: wordField.id, label: wordField.label },
+      summary: sourceSummary
+    },
+    sources: sources.map((source) => ({
+      id: source.id,
+      label: source.label,
+      tokenField: publicNormalizedMetricField(source.tokenField),
+      documentField: publicNormalizedMetricField(source.documentField)
+    })),
+    contrast: {
+      minimumRate: profile.minimumRate,
+      unit: sources[0].tokenField.unit,
+      targetTokens,
+      formula: 'log2(numeratorRate / denominatorRate)',
+      pairs: profile.pairs
+    },
+    provenance: {
+      sourceUrl: contract.source.sourceUrl,
+      licence: contract.source.licence,
+      citation: contract.source.citation,
+      sourceFile: publicSourceFile(sourceFile)
+    },
+    delivery: {
+      summaryMaxBytes: profile.summaryMaxBytes,
+      lookupBucketMaxBytes: profile.lookup.maxBucketBytes,
+      maxSourceRowsPerWord: profile.lookup.maxSourceRowsPerWord
+    },
+    lookup: {
+      normalization: profile.lookup.normalization,
+      recordEncoding: 'array',
+      fields: [
+        { id: 'normalizedWord', label: 'Normalized lookup word form', type: 'string' },
+        { id: 'sourceRow', label: 'Zero-based source row', type: 'source-row' }
+      ],
+      routing: {
+        root: 0,
+        nodes: routingNodes,
+        buckets: bucketDescriptors
+      }
+    },
+    summary: {
+      ...lookupSummary,
+      sourceRows: sourceSummary.sourceRows
+    }
+  };
+  await writeCompactJsonWithByteBudget(
+    path.join(profileDirectory, 'manifest.json'),
+    manifest,
+    profile.summaryMaxBytes,
+    `${productId}/${profile.id}/manifest.json`
+  );
+  return {
+    id: profile.id,
+    type: profile.type,
+    title: profile.title,
+    description: profile.description,
+    manifest: `analysis/${profile.id}/manifest.json`
+  };
+}
+
 function validateGenericDataset(dataset, filename) {
   if (!isPlainObject(dataset) || dataset.schemaVersion !== 1 || !isSafeId(dataset.id)
     || !normalizeString(dataset.title) || !normalizeString(dataset.author)
@@ -1323,6 +1808,15 @@ async function buildContractProduct({ contract, contractProduct, sourceRepositor
         views: contractProduct.views,
         sourceRoot
       }));
+    } else if (profile.type === 'normalized-contrast-lookup') {
+      analysisProfiles.push(await buildNormalizedContrastLookupProfile({
+        contract,
+        productId: contract.id,
+        productDirectory,
+        profile,
+        views: contractProduct.views,
+        sourceRoot
+      }));
     } else {
       fail(`${contract.id} has an unsupported analysis profile type: ${profile.type}`);
     }
@@ -1437,7 +1931,10 @@ function parseArguments(args) {
     }
     const value = args[index + 1];
     if (!value || value.startsWith('--')) fail(`option ${option} requires a value`);
-    options[option.slice(2).replace(/-([a-z])/g, (_, letter) => letter.toUpperCase())] = value;
+    const key = option === '--output' ? 'outputRoot'
+      : option === '--static-root' ? 'staticRoot'
+        : option.slice(2).replace(/-([a-z])/g, (_, letter) => letter.toUpperCase());
+    options[key] = value;
     index += 1;
   }
   return options;
