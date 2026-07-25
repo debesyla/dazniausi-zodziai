@@ -5,7 +5,7 @@
 	"type": "module",
 	"scripts": {
 		"dev": "vite dev",
-		"build": "vite build",
+		"build": "vite build && node scripts/verify-public-entry.mjs",
 		"preview": "vite preview",
 		"start": "vite build && vite preview",
 		"prepare": "svelte-kit sync || echo ''",
@@ -17,9 +17,12 @@
 		"products:build": "node scripts/prepare-data-products.mjs",
 		"products:verify": "node scripts/verify-data-products.mjs",
 		"test": "vitest run",
+		"test:browser": "playwright test",
+		"test:browser:deployed": "playwright test",
 		"test:watch": "vitest"
 	},
 	"devDependencies": {
+		"@playwright/test": "^1.61.1",
 		"@sveltejs/adapter-static": "^3.0.10",
 		"@sveltejs/kit": "^2.43.2",
 		"@sveltejs/vite-plugin-svelte": "^6.2.0",

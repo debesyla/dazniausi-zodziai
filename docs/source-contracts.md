@@ -25,16 +25,37 @@ copying the raw source repository into the application source tree.
 | Contract | Decision | What it can support | Publication gate |
 | --- | --- | --- | --- |
 | `utka-ccll-wordforms` | Published chunked JSON | Wordform token counts for the aggregate and five named subcorpora | Static manifest, source-order index, and bounded chunks; a future interactive explorer must still meet the budgets below |
-| `dadurkevicius-dml6-vs-jcl-comparison` | Published chunked comparison JSON | JCL token counts, DML6 coverage categories, lemma/POS occurrences, and missing types | Three separate views with explicit fields and labels |
+| `dadurkevicius-dml6-vs-jcl-comparison` | Published chunked comparison JSON and coverage profile | JCL token counts, DML6 coverage categories, lemma/POS occurrences, missing types, and form/token shares by six transparent frequency bands | Three separate views plus a compact, checksum-described profile with on-demand bounded examples |
 | `utka-ccll2-war-ukraine-comparison` | Published chunked comparison JSON | Six normalized token/document metrics across three source collections | Null-preserving view with source denominators in every field definition |
 | `bielinskiene-2019-delfi-1grams` | Published chunked frequency JSON | Every raw CSV one-gram and its raw count | CSV quoting, header handling, and integer-valued scientific notation are verified before chunking |
 | `rimkute-2024-matas-v3-frequencies` | Published chunked derived-frequency JSON | Non-punctuation MATAS lemma/POS and wordform/POS frequencies | The original ZIP and its CoNLL-U member are checksummed; derivation totals and record counts are pinned per view |
+| `zemriete-2025-lithuanian-homoforms` | Published chunked lexical JSON | Homoform, lemma, morphology, two separate MATAS-related counts, and type/subtype | The original ZIP and 177,226-row TSV are checksummed; source order is retained because it is not a consistent frequency order |
+| `raskinis-2025-foreign-name-transliterations` | Published chunked lexical JSON | Source left and parenthesized name strings plus a source match count | Every one of 68,167 source lines must match the reviewed pair grammar; source string direction and documented noise remain literal |
+| `birvinskaite-2026-lithuanian-basketball-slang` | Published chunked lexical JSON | Entry, source, senses, definitions, examples, variants, user groups, and compilers | The original ZIP and 2,286-line NVH file are checksummed; parser totals pin 223 entries despite the record page's 233-entry claim |
+| `rimkute-2019-alksnis-syntactic-context` | Published prefix-chunked syntax-context JSON | ALKSNIS dependency-relation and genre totals, non-punctuation lemmas, and bounded sentence contexts | The original ZIP and canonical sorted-member hash are pinned; source sentence-count discrepancy, root rows, punctuation exclusion, direction, and context cap are explicit |
 | `rimkute-morphemic-dictionary` | Published metadata-only JSON | Citation and source-file inventory only | Licensable machine-readable source and reuse terms, tracked in [issue #41](https://github.com/debesyla/dazniausi-zodziai/issues/41) |
 
 The comparison contracts deliberately have no generic `frequency` field. A
 coverage code is categorical, document counts are not token counts, and a
 normalized count cannot be compared with a raw count without its denominator.
 Missing source metrics remain `null`; they are not converted to zero.
+
+## DML6 coverage profile delivery
+
+The DML6/JCL comparison has a separate public profile for the question “how do
+dictionary coverage categories change across JCL frequency bands?” It has six
+contiguous bands from one occurrence to `1,000+`. Each band reports the number
+of word forms and the JCL token mass for each labelled coverage category.
+Those quantities are intentionally separate: a category's share of forms is
+not necessarily its share of tokens.
+
+The profile manifest is compact and contains no source rows. Selecting a
+band/category fetches at most 50 precomputed examples, ordered by descending
+JCL token count and then wordform. The coverage code is never summed,
+averaged, or treated as a numeric ranking. The builder verifies the source-row
+and token totals before generating the profile; the product verifier checks
+every optional example file's checksum, byte budget, interval, category, and
+order.
 
 ## CCLL delivery and future explorer budget
 
@@ -75,6 +96,45 @@ wordform plus Universal POS. A blank source POS is retained as
 `UNSPECIFIED`, rather than silently dropping the token. The index marks the
 count field as derived and pins the reviewed source-row, output-row, and total
 counts for each view.
+
+## Special lexical collections
+
+The three special lexical products use `chunked-lexical-collection`, rather
+than a generic frequency-list shape. Homoform rows preserve both the source's
+MATAS total and its separate component count; neither is a site-wide rank.
+Foreign-name pairs preserve the source's first and parenthesized strings, and
+their match count is an extraction count from the cited news-source work—not a
+general frequency measure or a spelling decision. The source itself documents
+noise and inconsistent transliteration direction, so the build does not infer
+either.
+
+The basketball collection is parsed from NVH into structured JSON with a
+single source object, one or more senses, and arrays for definitions, examples,
+user groups, variants, and compilers. Blank source fields, blank sense labels,
+and explicitly blank examples are emitted as JSON `null`; all supplied lexical
+evidence is retained. It must never be ranked or labelled
+as frequency data. Its catalogue page says 233 entries, but the retained NVH
+file contains 223 top-level `entry` records; both numbers are pinned in the
+public derivation metadata so the discrepancy is visible rather than hidden.
+
+## ALKSNIS syntactic-context views
+
+ALKSNIS v3.0 is stored as its original public ZIP archive. The product builder
+lists and sorts its 76 CoNLL-U members, hashes the member path-plus-bytes stream,
+and parses integer-ID rows sentence by sentence. The contract pins 70,047
+integer-ID rows, 57,156 non-punctuation rows, 3,642 delivered sentence IDs,
+and 3,643 as the repository's stated count. It also pins 104 source relation
+labels across all integer rows and 92 after the public punctuation exclusion.
+
+For each retained token, the builder keeps the source relation and its
+dependent/head direction. `HEAD=0` becomes an explicit `root` context with
+`ROOT` values rather than a guessed head. A non-punctuation lemma index records
+source token rows and its retained dependent/head/root roles. The sentence view
+keeps at most 12 source-order contexts per lemma and is prefix-chunked so the
+browser requests it only after a lemma has been selected. Source document,
+genre, sentence ID, and sentence text remain attached to every published
+context. These are source-scoped annotations, not cross-corpus frequency,
+similarity, or statistical-significance claims.
 
 ## Updating a contract
 

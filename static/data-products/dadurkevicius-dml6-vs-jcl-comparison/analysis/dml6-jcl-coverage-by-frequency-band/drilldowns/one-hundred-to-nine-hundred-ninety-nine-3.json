@@ -1,0 +1,136 @@
+{
+  "schemaVersion": 1,
+  "productId": "dadurkevicius-dml6-vs-jcl-comparison",
+  "profileId": "dml6-jcl-coverage-by-frequency-band",
+  "bandId": "one-hundred-to-nine-hundred-ninety-nine",
+  "coverageCode": 3,
+  "recordEncoding": "array",
+  "fields": [
+    {
+      "id": "word",
+      "label": "Word form",
+      "type": "string"
+    },
+    {
+      "id": "jclTokenCount",
+      "label": "JCL token count",
+      "type": "raw-token-count",
+      "unit": "tokens"
+    }
+  ],
+  "ordering": {
+    "field": "jclTokenCount",
+    "direction": "descending",
+    "tieBreak": "word-ascending"
+  },
+  "records": [
+    [
+      "užs",
+      898
+    ],
+    [
+      "žem",
+      781
+    ],
+    [
+      "muz",
+      738
+    ],
+    [
+      "fil",
+      731
+    ],
+    [
+      "subsp",
+      571
+    ],
+    [
+      "vak",
+      538
+    ],
+    [
+      "fiz",
+      509
+    ],
+    [
+      "archit",
+      500
+    ],
+    [
+      "ped",
+      453
+    ],
+    [
+      "tts",
+      402
+    ],
+    [
+      "aukšt",
+      395
+    ],
+    [
+      "polit",
+      363
+    ],
+    [
+      "fam",
+      347
+    ],
+    [
+      "ppr",
+      292
+    ],
+    [
+      "prp",
+      291
+    ],
+    [
+      "ntk",
+      277
+    ],
+    [
+      "agr",
+      272
+    ],
+    [
+      "biol",
+      241
+    ],
+    [
+      "pažym",
+      234
+    ],
+    [
+      "vard",
+      234
+    ],
+    [
+      "tekst",
+      201
+    ],
+    [
+      "išt",
+      180
+    ],
+    [
+      "psich",
+      178
+    ],
+    [
+      "liep",
+      158
+    ],
+    [
+      "teatr",
+      149
+    ],
+    [
+      "ekon",
+      141
+    ],
+    [
+      "savyb",
+      136
+    ]
+  ]
+}

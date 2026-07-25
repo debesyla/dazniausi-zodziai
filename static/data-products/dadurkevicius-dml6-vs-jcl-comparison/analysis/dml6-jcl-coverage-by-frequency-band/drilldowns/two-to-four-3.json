@@ -1,0 +1,56 @@
+{
+  "schemaVersion": 1,
+  "productId": "dadurkevicius-dml6-vs-jcl-comparison",
+  "profileId": "dml6-jcl-coverage-by-frequency-band",
+  "bandId": "two-to-four",
+  "coverageCode": 3,
+  "recordEncoding": "array",
+  "fields": [
+    {
+      "id": "word",
+      "label": "Word form",
+      "type": "string"
+    },
+    {
+      "id": "jclTokenCount",
+      "label": "JCL token count",
+      "type": "raw-token-count",
+      "unit": "tokens"
+    }
+  ],
+  "ordering": {
+    "field": "jclTokenCount",
+    "direction": "descending",
+    "tieBreak": "word-ascending"
+  },
+  "records": [
+    [
+      "lingv",
+      4
+    ],
+    [
+      "nežym",
+      4
+    ],
+    [
+      "prš",
+      4
+    ],
+    [
+      "fiziol",
+      3
+    ],
+    [
+      "jng",
+      3
+    ],
+    [
+      "žemd",
+      3
+    ],
+    [
+      "mžb",
+      2
+    ]
+  ]
+}

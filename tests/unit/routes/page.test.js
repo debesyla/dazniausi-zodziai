@@ -45,6 +45,32 @@ describe('Page', () => {
     expect(select).toHaveValue('second');
     expect(select.querySelectorAll('option')).toHaveLength(2);
     expect(select).toHaveTextContent('First dataset (2024)');
+    expect(getByRole('link', { name: 'Tyrinėti DML6 žodyno aprėptį pagal dažnumą' })).toHaveAttribute('href', '/zodyno-apreptis');
+    expect(getByRole('link', { name: 'Palyginti CCLL2 ir karo laikotarpio žodžių formas' })).toHaveAttribute('href', '/karo-zodziu-palyginimas');
     expect(getByRole('link', { name: 'openDataProducts' })).toHaveAttribute('href', '/data-products/catalog.json');
+    expect(getByRole('link', { name: 'openMethodology' })).toHaveAttribute('href', '/apie');
+  });
+
+  it('publishes a specific, canonical Lithuanian discovery preview', () => {
+    render(Page);
+
+    expect(document.title).toBe('Dažniausi lietuviški žodžiai · lietuvių kalbos dažnumo duomenys');
+    expect(document.head.querySelector('meta[name="description"]')).toHaveAttribute(
+      'content',
+      'Naršykite viešus lietuvių kalbos lemų ir žodžių formų dažnumo sąrašus: ieškokite, filtruokite, analizuokite rodiklius ir atsisiųskite duomenis su jų šaltiniais.'
+    );
+    expect(document.head.querySelector('link[rel="canonical"]')).toHaveAttribute(
+      'href',
+      'https://debesyla.github.io/dazniausi-zodziai/'
+    );
+    expect(document.head.querySelector('meta[property="og:url"]')).toHaveAttribute(
+      'content',
+      'https://debesyla.github.io/dazniausi-zodziai/'
+    );
+    expect(document.head.querySelector('meta[property="og:image"]')).toHaveAttribute(
+      'content',
+      'https://debesyla.github.io/dazniausi-zodziai/social-preview.png'
+    );
+    expect(document.head.querySelector('meta[name="twitter:card"]')).toHaveAttribute('content', 'summary_large_image');
   });
 });
