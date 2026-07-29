@@ -4,6 +4,8 @@ Every maintained collection has a public JSON product. The compact catalog is
 published at `data-products/catalog.json` on the site. It points to one
 `manifest.json` per collection; a manifest then either points to the existing
 generic dataset JSON or to a set of independently fetchable chunk indexes.
+Visitors can browse the same products, their source scope, licence, access, and
+interpretation limits at `/duomenu-katalogas` before following a JSON link.
 
 The generated files live under `static/data-products/` and are checked in with
 the application. This keeps the GitHub Pages deployment self-contained: the

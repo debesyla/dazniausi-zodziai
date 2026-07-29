@@ -7,6 +7,7 @@
 	let { children } = $props();
 	const homeUrl = `${base}/`;
 	const methodologyUrl = `${homeUrl}apie`;
+	const catalogueUrl = `${homeUrl}duomenu-katalogas`;
 </script>
 
 <svelte:head>
@@ -16,6 +17,7 @@
 <header class="site-header">
 	<nav class="site-navigation" aria-label={t('siteNavigation')}>
 		<a href={homeUrl}>{t('exploreData')}</a>
+		<a href={catalogueUrl}>{t('dataProductsCatalogue')}</a>
 		<a href={methodologyUrl}>{t('methodologyAndSources')}</a>
 	</nav>
 </header>

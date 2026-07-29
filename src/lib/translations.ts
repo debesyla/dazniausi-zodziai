@@ -77,6 +77,7 @@ export const translations = {
     // Main page
     pageTitle: 'Dažniausi lietuviški žodžiai',
     exploreData: 'Tyrinėti duomenis',
+    dataProductsCatalogue: 'Duomenų katalogas',
     methodologyAndSources: 'Metodika ir šaltiniai',
     siteNavigation: 'Pagrindinė navigacija',
     siteIntroduction: 'Tyrinėkite pasirinktų lietuvių kalbos šaltinių žodžių dažnumą. Kiekvieno rinkinio kilmę, licenciją ir ribas rasite metodikos puslapyje.',
@@ -86,8 +87,9 @@ export const translations = {
     errorLoadingCatalog: 'Klaida kraunant duomenų katalogą',
     noDatasets: 'Duomenų kataloge nėra rinkinių.',
     dataProductsTitle: 'Vieši duomenų produktai',
-    dataProductsDescription: 'Dideli žodžių formų sąrašai ir palyginamieji rinkiniai pateikiami atskirais dokumentuotais JSON failais, kad jų rodikliai nebūtų supainioti su įprastu dažnumu.',
-    openDataProducts: 'Atverti viešų duomenų produktų katalogą (JSON)',
+    dataProductsDescription: 'Dideli žodžių formų sąrašai, palyginimai ir leksiniai rinkiniai turi atskirą katalogą su jų apimtimi, licencija ir interpretavimo ribomis.',
+    openDataProducts: 'Naršyti viešų duomenų katalogą',
+    openDataProductsJson: 'Atverti mašininiu būdu nuskaitomą katalogą (JSON)',
     footerText: 'Turi pasiūlymų? Parašyk! ',
     footerEmail: 'labas@dago.lt',
   }

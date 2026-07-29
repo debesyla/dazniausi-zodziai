@@ -4,6 +4,7 @@
   import { site } from '$lib/site';
 
   const homeUrl = `${base}/`;
+  const catalogueUrl = `${base}/duomenu-katalogas`;
   let products = $state<PublicDataProduct[]>([]);
   let loading = $state(true);
   let error = $state<string | null>(null);
@@ -73,6 +74,7 @@
   <section aria-labelledby="sources-title">
     <h2 id="sources-title">Vieši rinkiniai ir jų kilmė</h2>
     <p>Kiekvienam čia pateiktam rinkiniui nurodoma šaltinio citata, licencija ir nuoroda į pirminį įrašą. Dideli rinkiniai pateikiami JSON dalimis, kad jų metrikos nebūtų supainiotos su naršyklės dažnumo lentele.</p>
+    <p><a href={catalogueUrl}>Naršyti viešų duomenų katalogą</a></p>
 
     {#if loading}
       <p class="loading" role="status" aria-live="polite">Kraunami šaltinių metaduomenys…</p>

@@ -39,7 +39,12 @@ function manifest(id: string, productType: string, status: 'published' | 'metada
     id,
     title: id === 'lemmas' ? 'Lemma list' : 'Blocked source',
     productType,
-    publication: { status, scope: 'Fixture scope.', access: 'Fixture access.' },
+    publication: {
+      status,
+      scope: 'Fixture scope.',
+      access: 'Fixture access.',
+      ...(id === 'blocked' ? { reason: 'Fixture restriction.' } : {})
+    },
     provenance: {
       sourceUrl: 'https://example.test/source',
       licence: status === 'published' ? 'CC BY 4.0' : 'unresolved',
@@ -72,7 +77,12 @@ describe('loadPublicDataProducts', () => {
 
     await expect(loadPublicDataProducts()).resolves.toEqual([
       expect.objectContaining({ id: 'lemmas', productType: 'generic-frequency-dataset', content: { entryKind: 'lemma' }, views: [], viewCount: 1 }),
-      expect.objectContaining({ id: 'blocked', publication: expect.objectContaining({ status: 'metadata-only' }), views: [], viewCount: 0 })
+      expect.objectContaining({
+        id: 'blocked',
+        publication: expect.objectContaining({ status: 'metadata-only', reason: 'Fixture restriction.' }),
+        views: [],
+        viewCount: 0
+      })
     ]);
     expect(fetch.mock.calls.map(([url]) => String(url))).toEqual([
       expect.stringMatching(/data-products\/catalog\.json$/),
