@@ -107,6 +107,11 @@ that form, while contradictory values are rejected.
   metrics separate. Source absence is JSON `null`, not zero. Its routed
   analytical profile supports an on-demand word-form comparison without loading
   the 2.26-million-row source view.
+- `kapociute-dzikiene-2017-parliament-frequency-aggregates` publishes separate
+  corpus-wide wordform and lemma totals from a legislative-speech corpus. It
+  contains no text, quotations, document rows, calendar bins, source IDs,
+  speaker or author data, or rankings; its counts are not general Lithuanian
+  frequency claims.
 - `bielinskiene-2019-delfi-1grams` publishes all 1,030,562 raw one-gram rows
   in bounded chunks. Its counts are not lemma frequencies.
 - `rimkute-2024-matas-v3-frequencies` derives separate lemma/POS and

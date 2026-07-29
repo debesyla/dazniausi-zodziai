@@ -123,6 +123,16 @@
       "recordCount": null
     },
     {
+      "id": "kapociute-dzikiene-2017-parliament-frequency-aggregates",
+      "title": "Lithuanian Parliament Corpus corpus-wide frequency aggregates",
+      "productType": "chunked-frequency-list",
+      "publicationStatus": "published",
+      "manifest": "kapociute-dzikiene-2017-parliament-frequency-aggregates/manifest.json",
+      "licence": "CC BY 4.0",
+      "viewCount": 2,
+      "recordCount": null
+    },
+    {
       "id": "rimkute-morphemic-dictionary",
       "title": "Dažninis lietuvių kalbos morfemikos žodynas",
       "productType": "metadata-only",

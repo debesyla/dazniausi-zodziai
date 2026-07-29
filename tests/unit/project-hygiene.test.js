@@ -46,7 +46,8 @@ describe('project hygiene', () => {
 			'Lithuanian Treebank ALKSNIS v3.0',
 			'Rimkutė morphemic dictionary',
 			'Utka CCLL word lists',
-			'Utka CCLL2 vs war in Ukraine'
+			'Utka CCLL2 vs war in Ukraine',
+			'Lithuanian Parliament Corpus'
 		]) {
 			expect(sourceCatalog).toContain(collection);
 		}
@@ -71,12 +72,18 @@ describe('project hygiene', () => {
 			'raskinis-2025-foreign-name-transliterations',
 			'birvinskaite-2026-lithuanian-basketball-slang',
 			'rimkute-2019-alksnis-syntactic-context',
+			'kapociute-dzikiene-2017-parliament-frequency-aggregates',
 			'rimkute-morphemic-dictionary'
 		]);
 		expect(plan.contractProducts.find((product) => product.contractId === 'rimkute-2019-alksnis-syntactic-context')).toMatchObject({
 			productType: 'chunked-syntactic-context',
 			publication: { status: 'published' },
 			syntaxContext: { maxExamplesPerLemma: 12, contextPrefixCodePoints: 3 }
+		});
+		expect(plan.contractProducts.find((product) => product.contractId === 'kapociute-dzikiene-2017-parliament-frequency-aggregates')).toMatchObject({
+			productType: 'chunked-frequency-list',
+			publication: { status: 'published' },
+			views: [{ id: 'wordforms-by-frequency' }, { id: 'lemmas-by-frequency' }]
 		});
 		expect(plan.contractProducts.find((product) => product.contractId === 'rimkute-morphemic-dictionary')).toMatchObject({
 			productType: 'metadata-only',
