@@ -38,7 +38,7 @@ describe('verifySourceContracts', () => {
     await writeFile(path.join(sourceRoot, 'comparison.tsv'), source);
     const contractPath = path.join(sourceRoot, 'contract.json');
     await writeFile(contractPath, JSON.stringify(manifestFor({
-      path: 'comparison.tsv',
+      artifactId: 'fixture-comparison',
       bytes: Buffer.byteLength(source),
       rows: 2,
       sha256: checksum(source),
@@ -59,7 +59,7 @@ describe('verifySourceContracts', () => {
     await writeFile(path.join(sourceRoot, 'comparison.tsv'), source);
     const contractPath = path.join(sourceRoot, 'contract.json');
     await writeFile(contractPath, JSON.stringify(manifestFor({
-      path: 'comparison.tsv',
+      artifactId: 'fixture-comparison',
       bytes: Buffer.byteLength(source),
       rows: 1,
       sha256: checksum(source),
@@ -77,7 +77,7 @@ describe('verifySourceContracts', () => {
     await writeFile(path.join(sourceRoot, 'onegrams.csv'), source);
     const contractPath = path.join(sourceRoot, 'contract.json');
     await writeFile(contractPath, JSON.stringify(manifestFor({
-      path: 'onegrams.csv',
+      artifactId: 'fixture-onegrams',
       bytes: Buffer.byteLength(source),
       rows: 2,
       sha256: checksum(source),
@@ -98,7 +98,7 @@ describe('verifySourceContracts', () => {
     await writeFile(path.join(sourceRoot, 'homoforms.tsv'), source);
     const contractPath = path.join(sourceRoot, 'contract.json');
     await writeFile(contractPath, JSON.stringify(manifestFor({
-      path: 'homoforms.tsv',
+      artifactId: 'fixture-homoforms',
       bytes: Buffer.byteLength(source),
       rows: 2,
       sha256: checksum(source),
@@ -111,14 +111,14 @@ describe('verifySourceContracts', () => {
     await expect(verifySourceContracts({ contractPath, sourceRoot })).resolves.toEqual({ contracts: 1, files: 1 });
   });
 
-  it('rejects a source symlink that escapes the configured root', async () => {
+  it('ignores a source symlink that escapes the configured root', async () => {
     const sourceRoot = await makeDirectory();
     const outsideRoot = await makeDirectory();
     await writeFile(path.join(outsideRoot, 'outside.tsv'), 'word\tcount\nir\t1\n');
     await symlink(path.join(outsideRoot, 'outside.tsv'), path.join(sourceRoot, 'linked.tsv'));
     const contractPath = path.join(sourceRoot, 'contract.json');
     await writeFile(contractPath, JSON.stringify(manifestFor({
-      path: 'linked.tsv',
+      artifactId: 'fixture-linked',
       bytes: 18,
       rows: 2,
       sha256: checksum('word\tcount\nir\t1\n'),
@@ -126,6 +126,6 @@ describe('verifySourceContracts', () => {
       numericColumns: [1]
     })));
 
-    await expect(verifySourceContracts({ contractPath, sourceRoot })).rejects.toThrow('escapes the configured root');
+    await expect(verifySourceContracts({ contractPath, sourceRoot })).rejects.toThrow('must resolve to exactly one verified regular file');
   });
 });

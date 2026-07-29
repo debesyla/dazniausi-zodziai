@@ -3,7 +3,7 @@
 The machine-readable inventory in
 [`data/contracts/deferred-sources.json`](../data/contracts/deferred-sources.json)
 is the provenance boundary for the larger and non-generic collections. It
-records the source revision, exact input files, byte counts, checksums,
+records content-bound source artifact IDs, byte counts, checksums,
 row-level shape, representative samples, metric meaning, and public-delivery
 constraints. [`data/products/publication-plan.json`](../data/products/publication-plan.json)
 turns those reviewed contracts into public JSON manifests, indexes, and chunks.
@@ -11,11 +11,11 @@ turns those reviewed contracts into public JSON manifests, indexes, and chunks.
 Verify the checked-in contract against the raw-data repository with:
 
 ```bash
-npm run source:verify -- --source-root /path/to/source-repository-redacted
+npm run source:verify -- --source-root /path/to/reviewed-source-root
 ```
 
-The verifier rejects changed bytes, path traversal, symlinks that leave the
-source root, invalid UTF-8, wrong row/column counts, invalid numeric values,
+The verifier rejects absent or ambiguous content matches, symbolic links,
+changed bytes, invalid UTF-8, wrong row/column counts, invalid numeric values,
 unexpected coverage codes, changed totals, changed null counts, or missing
 representative samples. This keeps every conversion reproducible without
 copying the raw source repository into the application source tree.
@@ -28,11 +28,11 @@ copying the raw source repository into the application source tree.
 | `dadurkevicius-dml6-vs-jcl-comparison` | Published chunked comparison JSON and coverage profile | JCL token counts, DML6 coverage categories, lemma/POS occurrences, missing types, and form/token shares by six transparent frequency bands | Three separate views plus a compact, checksum-described profile with on-demand bounded examples |
 | `utka-ccll2-war-ukraine-comparison` | Published chunked comparison JSON | Six normalized token/document metrics across three source collections | Null-preserving view with source denominators in every field definition |
 | `bielinskiene-2019-delfi-1grams` | Published chunked frequency JSON | Every raw CSV one-gram and its raw count | CSV quoting, header handling, and integer-valued scientific notation are verified before chunking |
-| `rimkute-2024-matas-v3-frequencies` | Published chunked derived-frequency JSON | Non-punctuation MATAS lemma/POS and wordform/POS frequencies | The original ZIP and its CoNLL-U member are checksummed; derivation totals and record counts are pinned per view |
-| `zemriete-2025-lithuanian-homoforms` | Published chunked lexical JSON | Homoform, lemma, morphology, two separate MATAS-related counts, and type/subtype | The original ZIP and 177,226-row TSV are checksummed; source order is retained because it is not a consistent frequency order |
+| `rimkute-2024-matas-v3-frequencies` | Published chunked derived-frequency JSON | Non-punctuation MATAS lemma/POS and wordform/POS frequencies | The reviewed ZIP is checksummed; the single CoNLL-U member is selected during a verified build, and derivation totals and record counts are pinned per view |
+| `zemriete-2025-lithuanian-homoforms` | Published chunked lexical JSON | Homoform, lemma, morphology, two separate MATAS-related counts, and type/subtype | The reviewed artifacts are checksummed; source order is retained because it is not a consistent frequency order |
 | `raskinis-2025-foreign-name-transliterations` | Published chunked lexical JSON | Source left and parenthesized name strings plus a source match count | Every one of 68,167 source lines must match the reviewed pair grammar; source string direction and documented noise remain literal |
-| `birvinskaite-2026-lithuanian-basketball-slang` | Published chunked lexical JSON | Entry, source, senses, definitions, examples, variants, user groups, and compilers | The original ZIP and 2,286-line NVH file are checksummed; parser totals pin 223 entries despite the record page's 233-entry claim |
-| `rimkute-2019-alksnis-syntactic-context` | Published prefix-chunked syntax-context JSON | ALKSNIS dependency-relation and genre totals, non-punctuation lemmas, and bounded sentence contexts | The original ZIP and canonical sorted-member hash are pinned; source sentence-count discrepancy, root rows, punctuation exclusion, direction, and context cap are explicit |
+| `birvinskaite-2026-lithuanian-basketball-slang` | Published chunked lexical JSON | Entry, source, senses, definitions, examples, variants, user groups, and compilers | The reviewed artifacts are checksummed; parser totals pin 223 entries despite the record page's 233-entry claim |
+| `rimkute-2019-alksnis-syntactic-context` | Published prefix-chunked syntax-context JSON | ALKSNIS dependency-relation and genre totals, non-punctuation lemmas, and bounded sentence contexts | The reviewed ZIP and canonical sorted-member hash are pinned; source sentence-count discrepancy, root rows, punctuation exclusion, direction, and context cap are explicit |
 | `rimkute-morphemic-dictionary` | Published metadata-only JSON | Citation and source-file inventory only | Licensable machine-readable source and reuse terms, tracked in [issue #41](https://github.com/debesyla/dazniausi-zodziai/issues/41) |
 
 The comparison contracts deliberately have no generic `frequency` field. A
@@ -138,11 +138,11 @@ similarity, or statistical-significance claims.
 
 ## Updating a contract
 
-1. Record the reviewed source revision and source URL.
+1. Record the public source URL and a safe content-bound artifact ID.
 2. Recompute every listed file’s bytes and SHA-256 from the raw source root.
 3. Recheck row shape, totals, null counts, allowed values, and representative
    samples.
 4. Update the visitor-facing metric and delivery rules before changing a public
    product configuration.
 5. Run `npm run source:verify`, `npm run products:build`,
-   `npm run products:verify`, and the full project verification suite.
+   `npm run products:verify`, `npm run public:verify`, and the full project verification suite.

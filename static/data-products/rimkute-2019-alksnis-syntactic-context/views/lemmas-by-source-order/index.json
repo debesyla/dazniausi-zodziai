@@ -45,11 +45,10 @@
   },
   "sourceFile": {
     "role": "alksnis-treebank",
-    "path": "alksnis-2019-10-24-lithuanian-treebank/original/Alksnis-3.0.zip",
+    "artifactId": "rimkute-2019-alksnis-syntactic-context-archive",
     "format": "zip-conllu-treebank",
     "bytes": 2713010,
     "sha256": "95af1a9ba62960d1321f89bc5a6dc9a9fafa71c4c15c62336a469d2896ec84c0",
-    "archiveDirectory": "Alksnis-3.0",
     "conlluSummary": {
       "documents": 76,
       "sentences": 3642,

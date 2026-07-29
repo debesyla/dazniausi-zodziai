@@ -21,9 +21,8 @@ export interface PartOfSpeechScheme {
 }
 
 export interface SourceSnapshot {
-  repositoryUrl: string;
-  revision: string;
-  path: string;
+  artifactId: string;
+  bytes: number;
   encoding: 'utf-8';
   sha256: string;
 }
@@ -117,6 +116,10 @@ function isSafeRelativePath(value: unknown): value is string {
   }
 }
 
+function isSafeArtifactId(value: unknown): value is string {
+  return typeof value === 'string' && /^[a-z0-9][a-z0-9-]*$/.test(value);
+}
+
 function isSha256(value: unknown): value is string {
   return typeof value === 'string' && /^[a-f0-9]{64}$/.test(value);
 }
@@ -128,7 +131,8 @@ function validateProvenance(value: unknown): DatasetProvenance | null {
     return null;
   }
   const snapshot = provenance.sourceSnapshot;
-  if (!snapshot || !isHttpUrl(snapshot.repositoryUrl) || !isNonEmptyString(snapshot.revision) || !isSafeRelativePath(snapshot.path) || snapshot.encoding !== 'utf-8' || !isSha256(snapshot.sha256)) {
+  if (!snapshot || !isSafeArtifactId(snapshot.artifactId) || !isPositiveInteger(snapshot.bytes)
+    || snapshot.encoding !== 'utf-8' || !isSha256(snapshot.sha256)) {
     return null;
   }
   if (provenance.partOfSpeech !== undefined) {

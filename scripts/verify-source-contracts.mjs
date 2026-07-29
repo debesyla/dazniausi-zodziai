@@ -3,18 +3,13 @@ import { readFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { parseDelimitedLine } from './prepare-dataset.mjs';
+import { createSourceArtifactResolver } from './source-artifacts.mjs';
 
 const repositoryRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const defaultContractPath = path.join(repositoryRoot, 'data', 'contracts', 'deferred-sources.json');
 
 function fail(message) {
   throw new Error(`Source contract verification failed: ${message}`);
-}
-
-function isSafeRelativePath(value) {
-  if (typeof value !== 'string' || value.length === 0 || path.isAbsolute(value) || value.includes('\\')) return false;
-  const parts = value.split('/');
-  return !parts.includes('..') && !value.includes('\0');
 }
 
 function countLines(text) {
@@ -34,16 +29,8 @@ function parseInteger(value, description) {
   return BigInt(parsed);
 }
 
-async function resolveSourcePath(sourceRoot, relativePath) {
-  if (!isSafeRelativePath(relativePath)) fail(`source path is not safe: ${relativePath}`);
-  const root = await import('node:fs/promises').then(({ realpath }) => realpath(sourceRoot));
-  const candidate = path.resolve(root, relativePath);
-  const resolved = await import('node:fs/promises').then(({ realpath }) => realpath(candidate));
-  const relative = path.relative(root, resolved);
-  if (relative.startsWith(`..${path.sep}`) || relative === '..' || path.isAbsolute(relative)) {
-    fail(`source path escapes the configured root after resolving symbolic links: ${relativePath}`);
-  }
-  return resolved;
+function sourceLabel(file) {
+  return `source artifact "${file.artifactId}"`;
 }
 
 function verifyTextFile(file, buffer) {
@@ -51,13 +38,13 @@ function verifyTextFile(file, buffer) {
   try {
     text = new TextDecoder('utf-8', { fatal: true }).decode(buffer);
   } catch {
-    fail(`source file is not valid UTF-8: ${file.path}`);
+    fail(`${sourceLabel(file)} is not valid UTF-8`);
   }
 
   const physicalLines = countLines(text);
   const lines = file.hasHeader === true ? physicalLines.slice(1) : physicalLines;
-  if (file.hasHeader === true && physicalLines.length === 0) fail(`${file.path} is missing its header`);
-  if (lines.length !== file.rows) fail(`${file.path} row count mismatch: expected ${file.rows}, received ${lines.length}`);
+  if (file.hasHeader === true && physicalLines.length === 0) fail(`${sourceLabel(file)} is missing its header`);
+  if (lines.length !== file.rows) fail(`${sourceLabel(file)} row count mismatch: expected ${file.rows}, received ${lines.length}`);
 
   const delimiter = file.delimiter ?? '\t';
   const totals = new Map((Object.keys(file.numericTotals ?? {})).map((column) => [Number(column), 0n]));
@@ -69,7 +56,7 @@ function verifyTextFile(file, buffer) {
 
   for (const [lineIndex, line] of lines.entries()) {
     const columns = parseDelimitedLine(line, delimiter);
-    if (columns.length !== file.columns) fail(`${file.path} column count mismatch at row ${lineIndex + 1}: expected ${file.columns}, received ${columns.length}`);
+    if (columns.length !== file.columns) fail(`${sourceLabel(file)} column count mismatch at row ${lineIndex + 1}: expected ${file.columns}, received ${columns.length}`);
 
     for (const column of nullableColumns) {
       if (columns[column] === '') counts.set(column, (counts.get(column) ?? 0) + 1);
@@ -80,13 +67,13 @@ function verifyTextFile(file, buffer) {
       if (value === '' && nullableColumns.has(column)) {
         continue;
       }
-      const parsed = parseInteger(value, `${file.path} row ${lineIndex + 1} column ${column}`);
+      const parsed = parseInteger(value, `${sourceLabel(file)} row ${lineIndex + 1} column ${column}`);
       if (totals.has(column)) totals.set(column, totals.get(column) + parsed);
     }
 
     for (const [column, values] of Object.entries(allowedValues)) {
       const index = Number(column);
-      if (!values.map(String).includes(columns[index])) fail(`${file.path} has an unexpected value at row ${lineIndex + 1} column ${column}: ${columns[index]}`);
+      if (!values.map(String).includes(columns[index])) fail(`${sourceLabel(file)} has an unexpected value at row ${lineIndex + 1} column ${column}: ${columns[index]}`);
       const key = `${column}\u0000${columns[index]}`;
       valueCounts.set(key, (valueCounts.get(key) ?? 0) + 1);
     }
@@ -94,20 +81,20 @@ function verifyTextFile(file, buffer) {
 
   for (const [column, expected] of Object.entries(file.numericTotals ?? {})) {
     const actual = totals.get(Number(column));
-    if (actual !== BigInt(expected)) fail(`${file.path} total mismatch for column ${column}: expected ${expected}, received ${actual}`);
+    if (actual !== BigInt(expected)) fail(`${sourceLabel(file)} total mismatch for column ${column}: expected ${expected}, received ${actual}`);
   }
   for (const [column, expected] of Object.entries(file.missingCounts ?? {})) {
     const actual = counts.get(Number(column)) ?? 0;
-    if (actual !== expected) fail(`${file.path} missing-value count mismatch for column ${column}: expected ${expected}, received ${actual}`);
+    if (actual !== expected) fail(`${sourceLabel(file)} missing-value count mismatch for column ${column}: expected ${expected}, received ${actual}`);
   }
   for (const [column, expectedValues] of Object.entries(file.valueCounts ?? {})) {
     for (const [value, expected] of Object.entries(expectedValues)) {
       const actual = valueCounts.get(`${column}\u0000${value}`) ?? 0;
-      if (actual !== expected) fail(`${file.path} value count mismatch for column ${column}, value ${value}: expected ${expected}, received ${actual}`);
+      if (actual !== expected) fail(`${sourceLabel(file)} value count mismatch for column ${column}, value ${value}: expected ${expected}, received ${actual}`);
     }
   }
   for (const sample of file.samples ?? []) {
-    if (!lines.includes(sample)) fail(`${file.path} representative sample is missing: ${sample}`);
+    if (!lines.includes(sample)) fail(`${sourceLabel(file)} representative sample is missing: ${sample}`);
   }
 }
 
@@ -116,27 +103,28 @@ function verifyNvhFile(file, buffer) {
   try {
     text = new TextDecoder('utf-8', { fatal: true }).decode(buffer);
   } catch {
-    fail(`source file is not valid UTF-8: ${file.path}`);
+    fail(`${sourceLabel(file)} is not valid UTF-8`);
   }
   const lines = countLines(text);
   if (lines.length !== file.rows) {
-    fail(`${file.path} row count mismatch: expected ${file.rows}, received ${lines.length}`);
+    fail(`${sourceLabel(file)} row count mismatch: expected ${file.rows}, received ${lines.length}`);
   }
 }
 
-export async function verifySourceContracts({ contractPath = defaultContractPath, sourceRoot }) {
+export async function verifySourceContracts({ contractPath = defaultContractPath, sourceRoot, sourceResolver }) {
   if (!sourceRoot) fail('a --source-root directory is required');
   const manifest = JSON.parse(await readFile(contractPath, 'utf8'));
   if (manifest.schemaVersion !== 1 || !Array.isArray(manifest.contracts)) fail('contract manifest must use schemaVersion 1 and contain contracts');
+  const resolver = sourceResolver ?? await createSourceArtifactResolver(sourceRoot);
 
   let verifiedFiles = 0;
   for (const contract of manifest.contracts) {
     for (const file of contract.source.files ?? []) {
-      const sourcePath = await resolveSourcePath(sourceRoot, file.path);
+      const sourcePath = await resolver.resolve(file);
       const buffer = await readFile(sourcePath);
       const checksum = createHash('sha256').update(buffer).digest('hex');
-      if (buffer.byteLength !== file.bytes) fail(`${file.path} byte count mismatch: expected ${file.bytes}, received ${buffer.byteLength}`);
-      if (checksum !== file.sha256) fail(`${file.path} checksum mismatch: expected ${file.sha256}, received ${checksum}`);
+      if (buffer.byteLength !== file.bytes) fail(`${sourceLabel(file)} byte count mismatch: expected ${file.bytes}, received ${buffer.byteLength}`);
+      if (checksum !== file.sha256) fail(`${sourceLabel(file)} checksum mismatch: expected ${file.sha256}, received ${checksum}`);
       if (file.format === 'nvh') verifyNvhFile(file, buffer);
       else if (!['binary', 'zip-conllu', 'zip-conllu-treebank'].includes(file.format)) verifyTextFile(file, buffer);
       verifiedFiles += 1;

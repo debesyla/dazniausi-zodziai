@@ -24,7 +24,7 @@
   },
   "sourceFile": {
     "role": "aggregate-alphabetical-index",
-    "path": "utka-2016-11-17-CCLL-Wordlists/original/byalphabet-2022/freq-visas-abc.txt",
+    "artifactId": "utka-ccll-wordforms-alphabetical-index",
     "format": "text",
     "bytes": 25251347,
     "sha256": "58baa109d29b8910b888346ad89524efe0b1694c33c277d4f80e6dd52e0c5d84",

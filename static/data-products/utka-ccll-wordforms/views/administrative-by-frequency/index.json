@@ -24,7 +24,7 @@
   },
   "sourceFile": {
     "role": "subcorpus-administrative",
-    "path": "utka-2016-11-17-CCLL-Wordlists/original/byfrequency-2022/freq-administracine-dzn.txt",
+    "artifactId": "utka-ccll-wordforms-administrative",
     "format": "text",
     "bytes": 3258546,
     "sha256": "82a81a00c4cda21041d657690b9b6f80a5b1136dd248f0868ff15fe567ece191",

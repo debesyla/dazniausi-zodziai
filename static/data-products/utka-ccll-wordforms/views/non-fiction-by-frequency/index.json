@@ -24,7 +24,7 @@
   },
   "sourceFile": {
     "role": "subcorpus-non-fiction",
-    "path": "utka-2016-11-17-CCLL-Wordlists/original/byfrequency-2022/freq-negrozine-dzn.txt",
+    "artifactId": "utka-ccll-wordforms-non-fiction",
     "format": "text",
     "bytes": 9289384,
     "sha256": "0684ecbe43ba16b294f0d0ceee442b2ec53a2c6da8d46ea8e63dfea5dffd3fbe",

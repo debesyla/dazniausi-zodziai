@@ -30,13 +30,12 @@
   },
   "sourceFile": {
     "role": "source-name-pairs",
-    "path": "raskinis-2025-04-23-foreign-name-transliteration/original/data_0.txt",
+    "artifactId": "raskinis-2025-foreign-name-transliterations-records",
     "format": "text",
     "bytes": 2834637,
     "sha256": "5b35a574bbc9c1c0f65d8b29a49f7d98acdfa64e54bbc87b326f7c6517db1c27",
     "rows": 68167,
-    "columns": 1,
-    "archiveMember": "data_0.txt"
+    "columns": 1
   },
   "derivation": {
     "type": "name-transliteration",

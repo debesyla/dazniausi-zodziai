@@ -24,7 +24,7 @@
   },
   "sourceFile": {
     "role": "missing-types",
-    "path": "dadurkevicius-2020-06-30-DML6_vs_JCL/original/JCL_types_missing_in_DML6_(filtered_list).txt",
+    "artifactId": "dadurkevicius-dml6-vs-jcl-missing-types",
     "format": "text",
     "bytes": 4031628,
     "sha256": "befafd13559f4f8f633e46f4b15d96a6b4404f3cf0a330b0ddb65b4425707f45",

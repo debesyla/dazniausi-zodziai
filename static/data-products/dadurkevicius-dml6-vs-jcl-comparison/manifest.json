@@ -9,17 +9,13 @@
     "access": "Static JSON chunks with separate views for coverage, lemma occurrences, and missing types."
   },
   "provenance": {
-    "sourceRepository": {
-      "repositoryUrl": "source-repository-redacted",
-      "revision": "8ddc7197fa01c3e185bbfc0ac4214ea529ae56c6"
-    },
     "sourceUrl": "https://clarin-repo.lt/items/b03a5f31-cd2b-4035-9c1b-d568e2524e37",
     "licence": "CC BY 4.0",
     "citation": "Dadurkevičius, V., Petrauskaitė, R. 2020. Corpus based methods for assessment of the traditional dictionaries.",
     "files": [
       {
         "role": "types-coverage",
-        "path": "dadurkevicius-2020-06-30-DML6_vs_JCL/original/JCL_types_vs_DML6.txt",
+        "artifactId": "dadurkevicius-dml6-vs-jcl-types-coverage",
         "format": "text",
         "bytes": 77300496,
         "sha256": "6a67d41b3004209c535e711b65ec943e338a6ac02b58256ffbb104ac419445e1",
@@ -28,7 +24,7 @@
       },
       {
         "role": "lemma-occurrences",
-        "path": "dadurkevicius-2020-06-30-DML6_vs_JCL/original/DML6_lemmas_vs_JCL.txt",
+        "artifactId": "dadurkevicius-dml6-vs-jcl-lemma-occurrences",
         "format": "text",
         "bytes": 1424602,
         "sha256": "93e4c3583366d792937d118b662f7d2115d54098bf9bc4097c4bc9ef1040159e",
@@ -37,7 +33,7 @@
       },
       {
         "role": "missing-types",
-        "path": "dadurkevicius-2020-06-30-DML6_vs_JCL/original/JCL_types_missing_in_DML6_(filtered_list).txt",
+        "artifactId": "dadurkevicius-dml6-vs-jcl-missing-types",
         "format": "text",
         "bytes": 4031628,
         "sha256": "befafd13559f4f8f633e46f4b15d96a6b4404f3cf0a330b0ddb65b4425707f45",

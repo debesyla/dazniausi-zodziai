@@ -9,29 +9,24 @@
     "access": "Static JSON chunks retain the source's left and parenthesized strings without normalizing their direction."
   },
   "provenance": {
-    "sourceRepository": {
-      "repositoryUrl": "source-repository-redacted",
-      "revision": "8ddc7197fa01c3e185bbfc0ac4214ea529ae56c6"
-    },
     "sourceUrl": "https://clarin-repo.lt/items/bf567c29-aa7a-4f0f-ad21-f13ba10e7f7d",
     "licence": "CC BY 4.0",
     "citation": "Foreign-name transliteration data. 2025. CLARIN-LT Repository. https://hdl.handle.net/20.500.11821/68.",
     "files": [
       {
-        "path": "raskinis-2025-04-23-foreign-name-transliteration/original/data_0.zip",
+        "artifactId": "raskinis-2025-foreign-name-transliterations-archive",
         "format": "binary",
         "bytes": 767551,
         "sha256": "fa33e4b3169b38f32606406f5b8f65f8eaa47c3d2b790ee0b942e85e379365b4"
       },
       {
         "role": "source-name-pairs",
-        "path": "raskinis-2025-04-23-foreign-name-transliteration/original/data_0.txt",
+        "artifactId": "raskinis-2025-foreign-name-transliterations-records",
         "format": "text",
         "bytes": 2834637,
         "sha256": "5b35a574bbc9c1c0f65d8b29a49f7d98acdfa64e54bbc87b326f7c6517db1c27",
         "rows": 68167,
-        "columns": 1,
-        "archiveMember": "data_0.txt"
+        "columns": 1
       }
     ]
   },

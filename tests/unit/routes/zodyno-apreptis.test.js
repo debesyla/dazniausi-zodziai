@@ -16,7 +16,7 @@ const profile = {
     frequencyField: { id: 'jclTokenCount', label: 'JCL token count', unit: 'tokens' },
     coverageField: { id: 'dml6CoverageCode', label: 'DML6 coverage', values: { 0: 'not in DML6', 1: 'main entry' } }
   },
-  provenance: { sourceUrl: 'https://example.test/source', licence: 'CC BY 4.0', citation: 'Fixture citation', sourceFile: { path: 'types.tsv', rows: 3, sha256: 'a'.repeat(64) } },
+  provenance: { sourceUrl: 'https://example.test/source', licence: 'CC BY 4.0', citation: 'Fixture citation', sourceFile: { artifactId: 'fixture-types', bytes: 42, rows: 3, sha256: 'a'.repeat(64) } },
   delivery: { summaryMaxBytes: 4096 },
   drilldown: {
     limit: 50, maxBytes: 4096, recordEncoding: 'array',

@@ -80,7 +80,7 @@ export interface WarContrastProfile {
     sourceUrl: string;
     licence: string;
     citation: string;
-    sourceFile: { path: string; rows: number; sha256: string };
+    sourceFile: { artifactId: string; rows: number; sha256: string };
   };
   delivery: {
     summaryMaxBytes: number;
@@ -307,7 +307,7 @@ export function validateWarContrastProfile(value: unknown): WarContrastProfile {
   const delivery = value.delivery as WarContrastProfile['delivery'];
   const provenance = value.provenance;
   if (!isHttpUrl(provenance.sourceUrl) || !isNonEmptyString(provenance.licence) || !isNonEmptyString(provenance.citation)
-    || !isObject(provenance.sourceFile) || !isSafeRelativePath(provenance.sourceFile.path)
+    || !isObject(provenance.sourceFile) || !isSafeId(provenance.sourceFile.artifactId)
     || !isPositiveInteger(provenance.sourceFile.rows) || typeof provenance.sourceFile.sha256 !== 'string'
     || !/^[a-f0-9]{64}$/.test(provenance.sourceFile.sha256) || provenance.sourceFile.rows !== sourceView.summary.sourceRows) {
     fail('netinkama kilmės informacija');

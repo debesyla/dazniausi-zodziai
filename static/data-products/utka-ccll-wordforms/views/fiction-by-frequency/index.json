@@ -24,7 +24,7 @@
   },
   "sourceFile": {
     "role": "subcorpus-fiction",
-    "path": "utka-2016-11-17-CCLL-Wordlists/original/byfrequency-2022/freq-grozine-dzn.txt",
+    "artifactId": "utka-ccll-wordforms-fiction",
     "format": "text",
     "bytes": 8193921,
     "sha256": "0a2650da314d3b6deddb266f30d66dcf201dec39a8303bb283cc9bab0de3f262",

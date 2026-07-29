@@ -23,12 +23,11 @@
   },
   "sourceFile": {
     "role": "basketball-slang-entries",
-    "path": "birvinskaite-2026-02-23-lithuanian-basketball-slang/original/Krepsinio_zargono_leksine_baze_2026-02-23_versija.nvh",
+    "artifactId": "birvinskaite-2026-lithuanian-basketball-slang-records",
     "format": "nvh",
     "bytes": 79501,
     "sha256": "59148e9853d57b4cfd8d73490e3c6f9b3ed94bd67bdb434607086331787419da",
-    "rows": 2286,
-    "archiveMember": "Krepsinio_zargono_leksine_baze_2026-02-23_versija.nvh"
+    "rows": 2286
   },
   "derivation": {
     "type": "nvh-lexicon",

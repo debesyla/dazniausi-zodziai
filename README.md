@@ -40,6 +40,7 @@ npm test
 npx playwright install chromium firefox webkit # once per machine
 npm run test:browser
 npm run products:verify
+npm run public:verify
 npm run build
 ```
 
@@ -61,11 +62,12 @@ Larger and non-generic collections have implementation-ready source contracts in
 delivery model is documented in [docs/data-products.md](docs/data-products.md).
 
 ```bash
-npm run data:build -- --config data/datasets/utka-2018-lemmatized-totals.json --source-root /path/to/source-repository-redacted --output static/datasets/utka-2018-lemmatized-totals.json --catalog static/datasets/catalog.json
-npm run data:verify -- --source-root /path/to/source-repository-redacted
-npm run source:verify -- --source-root /path/to/source-repository-redacted
-npm run products:build -- --source-root /path/to/source-repository-redacted
+npm run data:build -- --config data/datasets/utka-2018-lemmatized-totals.json --source-root /path/to/reviewed-source-root --output static/datasets/utka-2018-lemmatized-totals.json --catalog static/datasets/catalog.json
+npm run data:verify -- --source-root /path/to/reviewed-source-root
+npm run source:verify -- --source-root /path/to/reviewed-source-root
+npm run products:build -- --source-root /path/to/reviewed-source-root
 npm run products:verify
+npm run public:verify
 ```
 
 Review provenance, licence, citation, source snapshot, summary totals, and the
@@ -81,13 +83,12 @@ The public visual and interaction baseline is documented in
 
 ## Deployment
 
-GitHub Pages deploys automatically after a successful push to `main` through
-`.github/workflows/deploy.yml`. Repository Settings → Pages must use **GitHub
-Actions** as its source. Pull requests run the separate verification workflow
-in `.github/workflows/verify.yml`. The checked-in public data products are
-verified before each deployment and copied unchanged into the static site.
-Maintainers rebuild them locally from raw source revision
-`8ddc7197fa01c3e185bbfc0ac4214ea529ae56c6` before updating a product.
+GitHub Pages remains offline unless a maintainer manually starts the gated
+deployment workflow and explicitly confirms a reviewed release. Pull requests
+run the separate verification workflow in `.github/workflows/verify.yml`. The
+checked-in public data products are verified before a release build and copied
+unchanged into the static site. Maintainers rebuild them locally from the
+reviewed source root before updating a product.
 
 ## Analytics and privacy
 

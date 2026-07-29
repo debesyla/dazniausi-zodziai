@@ -24,7 +24,7 @@
   },
   "sourceFile": {
     "role": "all-by-frequency",
-    "path": "bielinskiene-2019-lithuanian-1gram-dataset/original/unigrams_frequency.csv",
+    "artifactId": "bielinskiene-2019-delfi-1grams-all-by-frequency",
     "format": "text",
     "bytes": 13791422,
     "sha256": "f9405c785817c493a301dbcf8434de494827fe2ec19da7f18fd5dd1f55d52926",
