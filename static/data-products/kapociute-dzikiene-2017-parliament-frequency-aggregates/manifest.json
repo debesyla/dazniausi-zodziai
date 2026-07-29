@@ -1,0 +1,82 @@
+{
+  "schemaVersion": 1,
+  "id": "kapociute-dzikiene-2017-parliament-frequency-aggregates",
+  "title": "Lithuanian Parliament Corpus corpus-wide frequency aggregates",
+  "productType": "chunked-frequency-list",
+  "publication": {
+    "status": "published",
+    "scope": "Corpus-wide wordform and lemma totals from the reviewed Lithuanian Parliament Corpus aggregate outputs. The scope is legislative speech only and excludes every document, speaker, author, source identifier, and temporal grouping.",
+    "access": "A compact manifest loads first. Static JSON chunks then expose only the selected corpus-wide frequency view.",
+    "reason": "This is a privacy-safe aggregate product, not an authorship, politician-ranking, quotation, or calendar-analysis feature."
+  },
+  "provenance": {
+    "sourceUrl": "https://clarin-repo.lt/items/18f3514c-1e02-4c60-bb7c-75926a289dd7",
+    "licence": "CC BY 4.0",
+    "citation": "Kapočiūtė-Dzikienė, Jurgita, Šarkutė, Ligita, and Utka, Andrius. 2017. Lithuanian Parliament Corpus for Authorship Attribution. Vytautas Magnus University. CLARIN-LT Repository. https://hdl.handle.net/20.500.11821/17.",
+    "files": [
+      {
+        "role": "wordforms-by-frequency",
+        "artifactId": "kapociute-dzikiene-2017-parliament-wordforms-aggregate",
+        "format": "text",
+        "bytes": 3803971,
+        "sha256": "48fe7dccc8f60755de4a2760b7150a33a438c4efbb2b1bc5eaa69b1d429a2934",
+        "rows": 274349,
+        "columns": 2,
+        "hasHeader": true
+      },
+      {
+        "role": "lemmas-by-frequency",
+        "artifactId": "kapociute-dzikiene-2017-parliament-lemmas-aggregate",
+        "format": "text",
+        "bytes": 1138495,
+        "sha256": "e0763bd559cfdeca07917c349827bf9de21b0aae0bcaece37053244fea247d21",
+        "rows": 84640,
+        "columns": 2,
+        "hasHeader": true
+      }
+    ]
+  },
+  "delivery": {
+    "mode": "static-chunked-json",
+    "constraints": [
+      "Describe the product as a legislative-speech corpus, not as general Lithuanian language use.",
+      "Publish only corpus-wide wordform and lemma totals; do not add raw text, excerpts, sample sentences, document records, source identifiers, speaker or author names, rankings, or author-level statistics.",
+      "Do not add calendar, day, session, or speaker-level views without a separate documented disclosure review and minimum-cell policy tracked in issue #68.",
+      "Keep wordform and lemma counts as separate source-scoped measures; do not imply that either total is the repository's general corpus word-count claim."
+    ]
+  },
+  "views": [
+    {
+      "id": "wordforms-by-frequency",
+      "title": "Lithuanian Parliament Corpus word forms",
+      "description": "Every reviewed corpus-wide wordform total, ordered by descending source count. This measures the legislative-speech corpus only.",
+      "index": "views/wordforms-by-frequency/index.json",
+      "sourceRole": "wordforms-by-frequency",
+      "recordEncoding": "array",
+      "summary": {
+        "sourceRows": 274349,
+        "recordCount": 274349,
+        "numericTotals": {
+          "count": 23326508
+        },
+        "nullCounts": {}
+      }
+    },
+    {
+      "id": "lemmas-by-frequency",
+      "title": "Lithuanian Parliament Corpus lemmas",
+      "description": "Every reviewed corpus-wide lemma total, ordered by descending source count. This measures the legislative-speech corpus only.",
+      "index": "views/lemmas-by-frequency/index.json",
+      "sourceRole": "lemmas-by-frequency",
+      "recordEncoding": "array",
+      "summary": {
+        "sourceRows": 84640,
+        "recordCount": 84640,
+        "numericTotals": {
+          "count": 23332097
+        },
+        "nullCounts": {}
+      }
+    }
+  ]
+}

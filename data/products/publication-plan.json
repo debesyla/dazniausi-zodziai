@@ -872,6 +872,70 @@
       }
     },
     {
+      "contractId": "kapociute-dzikiene-2017-parliament-frequency-aggregates",
+      "productType": "chunked-frequency-list",
+      "publication": {
+        "status": "published",
+        "scope": "Corpus-wide wordform and lemma totals from the reviewed Lithuanian Parliament Corpus aggregate outputs. The scope is legislative speech only and excludes every document, speaker, author, source identifier, and temporal grouping.",
+        "access": "A compact manifest loads first. Static JSON chunks then expose only the selected corpus-wide frequency view.",
+        "reason": "This is a privacy-safe aggregate product, not an authorship, politician-ranking, quotation, or calendar-analysis feature."
+      },
+      "views": [
+        {
+          "id": "wordforms-by-frequency",
+          "sourceRole": "wordforms-by-frequency",
+          "title": "Lithuanian Parliament Corpus word forms",
+          "description": "Every reviewed corpus-wide wordform total, ordered by descending source count. This measures the legislative-speech corpus only.",
+          "ordering": {
+            "field": "count",
+            "direction": "descending"
+          },
+          "chunkBytes": 65536,
+          "fields": [
+            {
+              "id": "word",
+              "label": "Word form",
+              "type": "string",
+              "sourceColumn": 0
+            },
+            {
+              "id": "count",
+              "label": "Corpus-wide token count",
+              "type": "raw-token-count",
+              "unit": "tokens in the reviewed legislative-speech aggregate",
+              "sourceColumn": 1
+            }
+          ]
+        },
+        {
+          "id": "lemmas-by-frequency",
+          "sourceRole": "lemmas-by-frequency",
+          "title": "Lithuanian Parliament Corpus lemmas",
+          "description": "Every reviewed corpus-wide lemma total, ordered by descending source count. This measures the legislative-speech corpus only.",
+          "ordering": {
+            "field": "count",
+            "direction": "descending"
+          },
+          "chunkBytes": 65536,
+          "fields": [
+            {
+              "id": "lemma",
+              "label": "Lemma",
+              "type": "string",
+              "sourceColumn": 0
+            },
+            {
+              "id": "count",
+              "label": "Corpus-wide token count",
+              "type": "raw-token-count",
+              "unit": "tokens in the reviewed legislative-speech aggregate",
+              "sourceColumn": 1
+            }
+          ]
+        }
+      ]
+    },
+    {
       "contractId": "rimkute-morphemic-dictionary",
       "productType": "metadata-only",
       "publication": {
