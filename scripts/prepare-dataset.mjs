@@ -1,7 +1,8 @@
 import { createHash } from 'node:crypto';
-import { mkdir, readFile, realpath, writeFile } from 'node:fs/promises';
+import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { createSourceArtifactResolver } from './source-artifacts.mjs';
 
 const ENTRY_KINDS = new Set(['lemma', 'wordform']);
 const DUPLICATE_POLICIES = new Set(['keep', 'aggregate-word-type']);
@@ -12,13 +13,8 @@ function fail(message) {
   throw new Error(`Dataset preparation failed: ${message}`);
 }
 
-function isPathInside(root, candidate) {
-  const relative = path.relative(root, candidate);
-  return relative === '' || (!relative.startsWith(`..${path.sep}`) && relative !== '..' && !path.isAbsolute(relative));
-}
-
-function isSafeRelativeSourcePath(value) {
-  return normalizeString(value).length > 0 && !path.isAbsolute(value) && !value.includes('\\') && !value.split('/').includes('..');
+function isArtifactId(value) {
+  return typeof value === 'string' && /^[a-z0-9][a-z0-9-]*$/.test(value);
 }
 
 function normalizeString(value) {
@@ -46,11 +42,8 @@ function validateSourceSnapshot(snapshot) {
   if (!snapshot || typeof snapshot !== 'object' || Array.isArray(snapshot)) {
     fail('"input.snapshot" is required');
   }
-  if (!isHttpUrl(snapshot.repositoryUrl)) {
-    fail('"input.snapshot.repositoryUrl" must be an HTTP(S) URL');
-  }
-  if (!normalizeString(snapshot.revision)) {
-    fail('"input.snapshot.revision" is required');
+  if (!isPositiveSafeInteger(snapshot.bytes)) {
+    fail('"input.snapshot.bytes" must be a positive safe integer');
   }
   if (typeof snapshot.sha256 !== 'string' || !SHA_256_PATTERN.test(snapshot.sha256)) {
     fail('"input.snapshot.sha256" must be a lowercase SHA-256 checksum');
@@ -126,8 +119,8 @@ function validateConfig(config) {
   if (!input || typeof input !== 'object') {
     fail('"input" must be an object');
   }
-  if (!isSafeRelativeSourcePath(input.path)) {
-    fail('"input.path" must be a safe relative path');
+  if (!isArtifactId(input.artifactId)) {
+    fail('"input.artifactId" must use lowercase letters, numbers, and hyphens');
   }
   if (input.encoding !== 'utf-8') {
     fail('"input.encoding" must be "utf-8"');
@@ -352,28 +345,23 @@ async function updateCatalog(catalogPath, dataset, outputPath) {
 
 export async function buildDataset({ config, sourceRoot, outputPath, catalogPath }) {
   const validConfig = validateConfig(config);
-  const resolvedSourceRoot = path.resolve(sourceRoot);
-  const sourcePath = path.resolve(resolvedSourceRoot, validConfig.input.path);
-  if (!isPathInside(resolvedSourceRoot, sourcePath)) {
-    fail('"input.path" must stay inside "sourceRoot"');
-  }
-
-  const [realSourceRoot, realSourcePath] = await Promise.all([realpath(resolvedSourceRoot), realpath(sourcePath)]);
-  if (!isPathInside(realSourceRoot, realSourcePath)) {
-    fail('"input.path" must stay inside "sourceRoot" after resolving symbolic links');
-  }
-
-  const sourceBytes = await readFile(realSourcePath);
+  const sourceResolver = await createSourceArtifactResolver(sourceRoot);
+  const sourcePath = await sourceResolver.resolve({
+    artifactId: validConfig.input.artifactId,
+    bytes: validConfig.input.snapshot.bytes,
+    sha256: validConfig.input.snapshot.sha256
+  });
+  const sourceBytes = await readFile(sourcePath);
   const sourceChecksum = createHash('sha256').update(sourceBytes).digest('hex');
   if (sourceChecksum !== validConfig.input.snapshot.sha256) {
-    fail(`source checksum mismatch for "${validConfig.input.path}": expected ${validConfig.input.snapshot.sha256}, received ${sourceChecksum}`);
+    fail(`source artifact "${validConfig.input.artifactId}" checksum changed while it was being read`);
   }
 
   let source;
   try {
     source = new TextDecoder(validConfig.input.encoding, { fatal: true }).decode(sourceBytes).replace(/^\uFEFF/, '');
   } catch {
-    fail(`source "${validConfig.input.path}" is not valid ${validConfig.input.encoding}`);
+    fail(`source artifact "${validConfig.input.artifactId}" is not valid ${validConfig.input.encoding}`);
   }
   const lines = source.split(/\r?\n/).filter((line) => line !== '');
   if (lines.length === 0) {
@@ -416,9 +404,8 @@ export async function buildDataset({ config, sourceRoot, outputPath, catalogPath
     provenance: {
       ...validConfig.provenance,
       sourceSnapshot: {
-        repositoryUrl: validConfig.input.snapshot.repositoryUrl,
-        revision: validConfig.input.snapshot.revision,
-        path: validConfig.input.path,
+        artifactId: validConfig.input.artifactId,
+        bytes: sourceBytes.byteLength,
         encoding: validConfig.input.encoding,
         sha256: sourceChecksum
       }

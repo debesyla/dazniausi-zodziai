@@ -35,9 +35,8 @@
       }
     },
     "sourceSnapshot": {
-      "repositoryUrl": "source-repository-redacted",
-      "revision": "d1f4c06e93d4142ec3c42a3c1d02c06b6a301e13",
-      "path": "dadurkevicius-2020-10-27-JCL_Wordlist/original/JCL_lemmas.txt",
+      "artifactId": "dadurkevicius-2020-jcl-lemmas-source",
+      "bytes": 3143255,
       "encoding": "utf-8",
       "sha256": "895d9eeb8ed3d2fc8869ee8ba337d9dd5f782af992999d5b6505267d08693679"
     }

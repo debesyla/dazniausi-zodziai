@@ -24,7 +24,7 @@
   },
   "sourceFile": {
     "role": "subcorpus-periodicals",
-    "path": "utka-2016-11-17-CCLL-Wordlists/original/byfrequency-2022/freq-publicistika-dzn.txt",
+    "artifactId": "utka-ccll-wordforms-periodicals",
     "format": "text",
     "bytes": 18794925,
     "sha256": "81818db84086cdd9f08478825410ce44ddba84630cb96e095a1bde1aa1aa46ac",

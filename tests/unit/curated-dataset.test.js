@@ -38,7 +38,8 @@ describe('curated dataset catalog', () => {
       licence: 'CC BY 4.0',
       sourceUrl: 'https://clarin-repo.lt/items/2bf241af-42ab-4a68-8dd6-c119c2dd0e1e',
       sourceSnapshot: {
-        path: 'utka-2018-01-18-Lithuanian-wordlist/modified/lemmatized_totals.csv',
+        artifactId: 'utka-2018-lemmatized-totals-source',
+        bytes: 799318,
         encoding: 'utf-8',
         sha256: 'd509af774a736534b3d638d3e46dd5e66f299ec83d11749eecbb7eb575af9c52'
       }
@@ -72,7 +73,8 @@ describe('curated dataset catalog', () => {
       citation: entry.citation,
       sourceUrl: 'https://clarin-repo.lt/items/e61bfe1a-03a9-486a-bd5b-7d31d7102723',
       sourceSnapshot: {
-        path: 'dadurkevicius-2020-10-27-JCL_Wordlist/original/JCL_lemmas.txt',
+        artifactId: 'dadurkevicius-2020-jcl-lemmas-source',
+        bytes: 3143255,
         encoding: 'utf-8',
         sha256: '895d9eeb8ed3d2fc8869ee8ba337d9dd5f782af992999d5b6505267d08693679'
       }

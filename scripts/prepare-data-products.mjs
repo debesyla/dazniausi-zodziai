@@ -1,11 +1,12 @@
 import { createHash } from 'node:crypto';
 import { spawn } from 'node:child_process';
 import { createReadStream } from 'node:fs';
-import { appendFile, mkdir, readFile, realpath, rm, writeFile } from 'node:fs/promises';
+import { appendFile, mkdir, readFile, rm, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { createInterface } from 'node:readline';
 import { fileURLToPath } from 'node:url';
 import { parseDelimitedLine } from './prepare-dataset.mjs';
+import { createSourceArtifactResolver } from './source-artifacts.mjs';
 import { verifySourceContracts } from './verify-source-contracts.mjs';
 
 const repositoryRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
@@ -403,9 +404,8 @@ function validateContractManifest(manifest) {
   if (!isPlainObject(manifest) || manifest.schemaVersion !== 1 || !Array.isArray(manifest.contracts)) {
     fail('source contract manifest must use schemaVersion 1 and contain contracts');
   }
-  if (!isPlainObject(manifest.sourceRepository) || !isHttpUrl(manifest.sourceRepository.repositoryUrl)
-    || !normalizeString(manifest.sourceRepository.revision)) {
-    fail('source contract manifest must identify the reviewed source repository and revision');
+  if (Object.hasOwn(manifest, 'sourceRepository')) {
+    fail('source contract manifest must not disclose a source repository');
   }
   return manifest;
 }
@@ -413,7 +413,7 @@ function validateContractManifest(manifest) {
 function publicSourceFile(file) {
   return {
     ...(file.role ? { role: file.role } : {}),
-    path: file.path,
+    artifactId: file.artifactId,
     format: file.format ?? 'text',
     bytes: file.bytes,
     sha256: file.sha256,
@@ -421,8 +421,6 @@ function publicSourceFile(file) {
     ...(file.columns === undefined ? {} : { columns: file.columns }),
     ...(file.delimiter === undefined ? {} : { delimiter: file.delimiter }),
     ...(file.hasHeader === undefined ? {} : { hasHeader: file.hasHeader }),
-    ...(file.archiveMember === undefined ? {} : { archiveMember: file.archiveMember }),
-    ...(file.archiveDirectory === undefined ? {} : { archiveDirectory: file.archiveDirectory }),
     ...(file.conlluSummary === undefined ? {} : { conlluSummary: file.conlluSummary })
   };
 }
@@ -472,16 +470,8 @@ function chunkPrefix(productId, viewId, chunkNumber) {
   return `{"schemaVersion":1,"productId":${JSON.stringify(productId)},"viewId":${JSON.stringify(viewId)},"chunk":${chunkNumber},"records":[`;
 }
 
-function sourceRelativePath(sourceRoot, sourcePath) {
-  return path.relative(sourceRoot, sourcePath).split(path.sep).join('/');
-}
-
-async function resolveSourcePath(sourceRoot, sourceRelativePathValue) {
-  const realRoot = await realpath(sourceRoot);
-  const candidate = resolveInside(realRoot, sourceRelativePathValue, 'source file path');
-  const resolved = await realpath(candidate);
-  if (!isPathInside(realRoot, resolved)) fail(`source file escapes the supplied source root: ${sourceRelativePathValue}`);
-  return { realRoot, sourcePath: resolved };
+function sourceDisplayName(sourceFile) {
+  return `source artifact "${sourceFile.artifactId}"`;
 }
 
 function assertContractSummary(sourceFile, fields, summary, sourcePath) {
@@ -507,9 +497,9 @@ function assertContractSummary(sourceFile, fields, summary, sourcePath) {
   }
 }
 
-async function buildChunkedView({ productId, productDirectory, view, sourceFile, sourceRoot }) {
-  const { realRoot, sourcePath } = await resolveSourcePath(sourceRoot, sourceFile.path);
-  const sourceDisplayPath = sourceRelativePath(realRoot, sourcePath);
+async function buildChunkedView({ productId, productDirectory, view, sourceFile, sourceResolver }) {
+  const sourcePath = await sourceResolver.resolve(sourceFile);
+  const sourceDisplayPath = sourceDisplayName(sourceFile);
   const delimiter = sourceFile.delimiter ?? '\t';
   const viewDirectory = path.join(productDirectory, 'views', view.id);
   const chunksDirectory = path.join(viewDirectory, 'chunks');
@@ -702,7 +692,7 @@ function publicViewDescriptor(view, summary) {
   };
 }
 
-async function buildDerivedNameTransliterationView({ productId, productDirectory, view, sourceFile, sourceRoot }) {
+async function buildDerivedNameTransliterationView({ productId, productDirectory, view, sourceFile, sourceResolver }) {
   if (view.derivation?.type !== 'name-transliteration' || sourceFile.hasHeader === true || sourceFile.columns !== 1) {
     fail(`${view.id} requires a one-column, headerless name-transliteration source`);
   }
@@ -711,8 +701,8 @@ async function buildDerivedNameTransliterationView({ productId, productDirectory
     { id: 'sourceParenthesizedName', type: 'string' },
     { id: 'sourceMatchCount', type: 'raw-token-count' }
   ]);
-  const { realRoot, sourcePath } = await resolveSourcePath(sourceRoot, sourceFile.path);
-  const sourceDisplayPath = sourceRelativePath(realRoot, sourcePath);
+  const sourcePath = await sourceResolver.resolve(sourceFile);
+  const sourceDisplayPath = sourceDisplayName(sourceFile);
   const viewDirectory = path.join(productDirectory, 'views', view.id);
   const chunksDirectory = path.join(viewDirectory, 'chunks');
   await mkdir(chunksDirectory, { recursive: true });
@@ -767,7 +757,7 @@ function sourceLines(text) {
   return lines.at(-1) === '' ? lines.slice(0, -1) : lines;
 }
 
-async function buildDerivedNvhLexiconView({ productId, productDirectory, view, sourceFile, sourceRoot }) {
+async function buildDerivedNvhLexiconView({ productId, productDirectory, view, sourceFile, sourceResolver }) {
   if (view.derivation?.type !== 'nvh-lexicon' || sourceFile.format !== 'nvh') {
     fail(`${view.id} requires an NVH lexical-database source`);
   }
@@ -775,8 +765,8 @@ async function buildDerivedNvhLexiconView({ productId, productDirectory, view, s
     { id: 'entry', type: 'string' },
     { id: 'details', type: 'lexical-entry-details' }
   ]);
-  const { realRoot, sourcePath } = await resolveSourcePath(sourceRoot, sourceFile.path);
-  const sourceDisplayPath = sourceRelativePath(realRoot, sourcePath);
+  const sourcePath = await sourceResolver.resolve(sourceFile);
+  const sourceDisplayPath = sourceDisplayName(sourceFile);
   const viewDirectory = path.join(productDirectory, 'views', view.id);
   const chunksDirectory = path.join(viewDirectory, 'chunks');
   await mkdir(chunksDirectory, { recursive: true });
@@ -895,9 +885,8 @@ async function buildDerivedNvhLexiconView({ productId, productDirectory, view, s
 }
 
 function assertDerivedConlluView(view, sourceFile) {
-  if (sourceFile.format !== 'zip-conllu' || !isSafeRelativePath(sourceFile.archiveMember)
-    || !isPlainObject(sourceFile.conlluSummary)) {
-    fail(`${view.id} requires a zip-conllu source file with an archive member and summary`);
+  if (sourceFile.format !== 'zip-conllu' || !isPlainObject(sourceFile.conlluSummary)) {
+    fail(`${view.id} requires a zip-conllu source file and reviewed summary`);
   }
   for (const field of ['integerTokenRows', 'nonPunctuationRows', 'sentences', 'uncompressedBytes']) {
     asSafeInteger(sourceFile.conlluSummary[field], `${view.id} source ${field}`);
@@ -920,15 +909,16 @@ function compareFrequencyEntries(left, right) {
   return left.universalPos < right.universalPos ? -1 : left.universalPos > right.universalPos ? 1 : 0;
 }
 
-async function buildDerivedConlluFrequencyView({ productId, productDirectory, view, sourceFile, sourceRoot }) {
+async function buildDerivedConlluFrequencyView({ productId, productDirectory, view, sourceFile, sourceResolver }) {
   assertDerivedConlluView(view, sourceFile);
-  const { realRoot, sourcePath } = await resolveSourcePath(sourceRoot, sourceFile.path);
-  const sourceDisplayPath = sourceRelativePath(realRoot, sourcePath);
+  const sourcePath = await sourceResolver.resolve(sourceFile);
+  const sourceDisplayPath = sourceDisplayName(sourceFile);
+  const archiveMember = await onlyArchiveMemberWithSuffix(sourcePath, sourceDisplayPath, '.conllu');
   const viewDirectory = path.join(productDirectory, 'views', view.id);
   const chunksDirectory = path.join(viewDirectory, 'chunks');
   await mkdir(chunksDirectory, { recursive: true });
 
-  const child = spawn('unzip', ['-p', sourcePath, sourceFile.archiveMember], {
+  const child = spawn('unzip', ['-p', sourcePath, archiveMember], {
     stdio: ['ignore', 'pipe', 'pipe']
   });
   const childExit = new Promise((resolve, reject) => {
@@ -975,7 +965,7 @@ async function buildDerivedConlluFrequencyView({ productId, productDirectory, vi
     });
   }
   const exitCode = await childExit;
-  if (exitCode !== 0) fail(`could not read ${sourceDisplayPath} archive member ${sourceFile.archiveMember}: ${unzipError.trim()}`);
+  if (exitCode !== 0) fail(`could not read a reviewed CoNLL-U member from ${sourceDisplayPath}: ${unzipError.trim()}`);
 
   const conlluSummary = sourceFile.conlluSummary;
   if (archiveBytes !== conlluSummary.uncompressedBytes || archiveHash.digest('hex') !== conlluSummary.sha256
@@ -1108,13 +1098,13 @@ async function writeJsonWithByteBudget(filename, value, maxBytes, description) {
   return buffer;
 }
 
-async function buildFrequencyBandCoverageProfile({ contract, productId, productDirectory, profile, views, sourceRoot }) {
+async function buildFrequencyBandCoverageProfile({ contract, productId, productDirectory, profile, views, sourceResolver }) {
   const { sourceView, wordField, frequencyField, coverageField } = findFrequencyBandCoverageFields(profile, views);
   const filesByRole = new Map(contract.source.files.map((file) => [file.role, file]));
   const sourceFile = filesByRole.get(profile.sourceRole);
   if (!sourceFile) fail(`${profile.id} has no source file with role ${profile.sourceRole}`);
-  const { realRoot, sourcePath } = await resolveSourcePath(sourceRoot, sourceFile.path);
-  const sourceDisplayPath = sourceRelativePath(realRoot, sourcePath);
+  const sourcePath = await sourceResolver.resolve(sourceFile);
+  const sourceDisplayPath = sourceDisplayName(sourceFile);
   const coverageCodes = Object.keys(coverageField.values).map(Number).sort((left, right) => left - right);
   const bands = profile.frequencyBands.map((band) => ({
     ...band,
@@ -1618,13 +1608,13 @@ async function writeNormalizedContrastLookupBuckets({
   }
 }
 
-async function buildNormalizedContrastLookupProfile({ contract, productId, productDirectory, profile, views, sourceRoot }) {
+async function buildNormalizedContrastLookupProfile({ contract, productId, productDirectory, profile, views, sourceResolver }) {
   const { sourceView, wordField, sources, targetTokens } = findNormalizedContrastLookupFields(profile, views);
   const filesByRole = new Map(contract.source.files.map((file) => [file.role, file]));
   const sourceFile = filesByRole.get(profile.sourceRole);
   if (!sourceFile) fail(`${profile.id} has no source file with role ${profile.sourceRole}`);
-  const { realRoot, sourcePath } = await resolveSourcePath(sourceRoot, sourceFile.path);
-  const sourceDisplayPath = sourceRelativePath(realRoot, sourcePath);
+  const sourcePath = await sourceResolver.resolve(sourceFile);
+  const sourceDisplayPath = sourceDisplayName(sourceFile);
   const routing = await buildLookupRouting({ sourceFile, sourcePath, sourceDisplayPath, wordField, profile });
   const { sourceSummary, lookupSummary, bucketDescriptors } = await writeNormalizedContrastLookupBuckets({
     productId,
@@ -1740,9 +1730,37 @@ async function runUnzip(args, description) {
   return Buffer.concat(stdout);
 }
 
+async function reviewedArchiveMembers(sourcePath, sourceDisplayPath, suffix) {
+  const archiveListing = decodeUtf8(
+    await runUnzip(['-Z1', sourcePath], sourceDisplayPath),
+    `${sourceDisplayPath} archive listing`
+  );
+  const members = archiveListing.split(/\r?\n/)
+    .filter((member) => member.endsWith(suffix) && isSafeRelativePath(member))
+    .sort(compareStrings);
+  if (members.length === 0) fail(`${sourceDisplayPath} has no reviewed ${suffix} members`);
+  return members;
+}
+
+async function onlyArchiveMemberWithSuffix(sourcePath, sourceDisplayPath, suffix) {
+  const members = await reviewedArchiveMembers(sourcePath, sourceDisplayPath, suffix);
+  if (members.length !== 1) fail(`${sourceDisplayPath} must contain exactly one reviewed ${suffix} member`);
+  return members[0];
+}
+
+function commonDirectoryPrefix(members) {
+  const directories = members.map((member) => member.split('/').slice(0, -1));
+  const prefix = [];
+  for (let index = 0; ; index += 1) {
+    const segment = directories[0]?.[index];
+    if (!segment || directories.some((directory) => directory[index] !== segment)) break;
+    prefix.push(segment);
+  }
+  return prefix.length === 0 ? '' : `${prefix.join('/')}/`;
+}
+
 function assertTreebankSourceFile(sourceFile, configuration) {
-  if (sourceFile.format !== 'zip-conllu-treebank' || !isSafeRelativePath(sourceFile.archiveDirectory)
-    || !isPlainObject(sourceFile.conlluSummary)) {
+  if (sourceFile.format !== 'zip-conllu-treebank' || !isPlainObject(sourceFile.conlluSummary)) {
     fail(`${configuration.sourceRole} requires a zip-conllu-treebank source file and reviewed summary`);
   }
   for (const field of [
@@ -1757,7 +1775,7 @@ function assertTreebankSourceFile(sourceFile, configuration) {
   }
 }
 
-function parseConlluDocument({ text, sourceDisplayPath, member, onSentence }) {
+function parseConlluDocument({ text, sourceDisplayPath, memberLabel, onSentence }) {
   let comments = [];
   let rows = [];
   let sentenceNumber = 0;
@@ -1768,16 +1786,16 @@ function parseConlluDocument({ text, sourceDisplayPath, member, onSentence }) {
     }
     sentenceNumber += 1;
     const sourceSentenceId = normalizeString(comments.find((line) => line.startsWith('# sent_id = '))?.slice('# sent_id = '.length));
-    if (!sourceSentenceId) fail(`${sourceDisplayPath} archive member ${member} sentence ${sentenceNumber} has no sent_id`);
+    if (!sourceSentenceId) fail(`${sourceDisplayPath} ${memberLabel} sentence ${sentenceNumber} has no sent_id`);
     const tokens = new Map();
     for (const row of rows) {
       const values = row.split('\t');
-      if (values.length !== 10) fail(`${sourceDisplayPath} archive member ${member} has a malformed CoNLL-U row`);
+      if (values.length !== 10) fail(`${sourceDisplayPath} ${memberLabel} has a malformed CoNLL-U row`);
       if (!/^\d+$/.test(values[0])) continue;
       const [id, form, lemma, universalPos, , , head, relation] = values;
       if (!normalizeString(form) || !normalizeString(lemma) || !normalizeString(universalPos)
         || !normalizeString(head) || !normalizeString(relation) || !/^(?:0|[1-9]\d*)$/.test(head)) {
-        fail(`${sourceDisplayPath} archive member ${member} has an incomplete CoNLL-U token row`);
+        fail(`${sourceDisplayPath} ${memberLabel} has an incomplete CoNLL-U token row`);
       }
       tokens.set(Number(id), {
         id: Number(id),
@@ -1788,7 +1806,7 @@ function parseConlluDocument({ text, sourceDisplayPath, member, onSentence }) {
         relation: relation.trim()
       });
     }
-    if (tokens.size === 0) fail(`${sourceDisplayPath} archive member ${member} sentence ${sourceSentenceId} has no integer-ID tokens`);
+    if (tokens.size === 0) fail(`${sourceDisplayPath} ${memberLabel} sentence ${sourceSentenceId} has no integer-ID tokens`);
     const suppliedText = normalizeString(comments.find((line) => line.startsWith('# text = '))?.slice('# text = '.length));
     const sentenceText = suppliedText || [...tokens.values()].sort((left, right) => left.id - right.id).map((token) => token.form).join(' ');
     onSentence({ sourceSentenceId, tokens, sentenceText });
@@ -1926,7 +1944,7 @@ function derivedField(id, label, type, unit) {
   return { id, label, type, ...(unit === undefined ? {} : { unit }), derived: true };
 }
 
-async function buildSyntacticContextProduct({ contract, contractProduct, sourceRepository, sourceRoot, outputRoot }) {
+async function buildSyntacticContextProduct({ contract, contractProduct, sourceResolver, outputRoot }) {
   const configuration = contractProduct.syntaxContext;
   const sourceFiles = contract.source.files.filter((file) => file.role === configuration.sourceRole);
   if (sourceFiles.length !== 1 || contract.source.files.length !== 1) {
@@ -1934,16 +1952,11 @@ async function buildSyntacticContextProduct({ contract, contractProduct, sourceR
   }
   const sourceFile = sourceFiles[0];
   assertTreebankSourceFile(sourceFile, configuration);
-  const { realRoot, sourcePath } = await resolveSourcePath(sourceRoot, sourceFile.path);
-  const sourceDisplayPath = sourceRelativePath(realRoot, sourcePath);
-  const archiveListing = decodeUtf8(await runUnzip(['-Z1', sourcePath], sourceDisplayPath), `${sourceDisplayPath} archive listing`);
-  const archivePrefix = `${sourceFile.archiveDirectory}/`;
-  const members = archiveListing.split(/\r?\n/)
-    .filter((member) => member.endsWith('.conllu'))
-    .sort(compareStrings);
-  if (members.length === 0 || members.some((member) => !member.startsWith(archivePrefix))) {
-    fail(`${sourceDisplayPath} has no reviewed CoNLL-U members under ${sourceFile.archiveDirectory}`);
-  }
+  const sourcePath = await sourceResolver.resolve(sourceFile);
+  const sourceDisplayPath = sourceDisplayName(sourceFile);
+  const members = await reviewedArchiveMembers(sourcePath, sourceDisplayPath, '.conllu');
+  const archivePrefix = commonDirectoryPrefix(members);
+  if (!archivePrefix) fail(`${sourceDisplayPath} has no shared reviewed CoNLL-U archive root`);
 
   const sourceSummary = sourceFile.conlluSummary;
   const expectedGenres = new Map(Object.entries(configuration.genreLabels));
@@ -1982,13 +1995,14 @@ async function buildSyntacticContextProduct({ contract, contractProduct, sourceR
     contextRecordsByLemma.set(lemma, entries);
   }
 
-  for (const member of members) {
+  for (const [memberIndex, member] of members.entries()) {
+    const memberLabel = `reviewed CoNLL-U document ${memberIndex + 1}`;
     const relativeMember = member.slice(archivePrefix.length);
     const segments = relativeMember.split('/');
     const genreId = segments.slice(0, -1).join('/');
     const document = relativeMember;
     const genre = expectedGenres.get(genreId);
-    if (!genre || segments.length < 2) fail(`${sourceDisplayPath} archive member ${member} has an unreviewed genre`);
+    if (!genre || segments.length < 2) fail(`${sourceDisplayPath} ${memberLabel} has an unreviewed genre`);
     const genreSummary = observedGenres.get(genreId) ?? {
       genreId,
       genre,
@@ -2001,16 +2015,16 @@ async function buildSyntacticContextProduct({ contract, contractProduct, sourceR
     genreSummary.documents += 1;
     observedGenres.set(genreId, genreSummary);
 
-    const buffer = await runUnzip(['-p', sourcePath, member], `${sourceDisplayPath} archive member ${member}`);
+    const buffer = await runUnzip(['-p', sourcePath, member], `${sourceDisplayPath} ${memberLabel}`);
     membersHash.update(Buffer.from(member, 'utf8'));
     membersHash.update(Buffer.from([0]));
     membersHash.update(buffer);
     membersHash.update(Buffer.from([0]));
     uncompressedBytes += buffer.byteLength;
     parseConlluDocument({
-      text: decodeUtf8(buffer, `${sourceDisplayPath} archive member ${member}`),
+      text: decodeUtf8(buffer, `${sourceDisplayPath} ${memberLabel}`),
       sourceDisplayPath,
-      member,
+      memberLabel,
       onSentence: ({ sourceSentenceId, tokens, sentenceText }) => {
         sentences += 1;
         genreSummary.sentences += 1;
@@ -2051,7 +2065,7 @@ async function buildSyntacticContextProduct({ contract, contractProduct, sourceR
           }
           nonRootDependencyRows += 1;
           const head = tokens.get(dependent.head);
-          if (!head) fail(`${sourceDisplayPath} archive member ${member} sentence ${sourceSentenceId} has a missing dependency head`);
+          if (!head) fail(`${sourceDisplayPath} ${memberLabel} sentence ${sourceSentenceId} has a missing dependency head`);
           const contextRecord = [
             dependent.lemma, 'dependent', baseRecord.relation, baseRecord.dependentLemma, baseRecord.dependentForm,
             head.lemma, head.form, baseRecord.genreId, baseRecord.genre, baseRecord.document,
@@ -2245,7 +2259,6 @@ async function buildSyntacticContextProduct({ contract, contractProduct, sourceR
     productType: SYNTACTIC_CONTEXT_PRODUCT_TYPE,
     publication: contractProduct.publication,
     provenance: {
-      sourceRepository,
       sourceUrl: contract.source.sourceUrl,
       licence: contract.source.licence,
       citation: contract.source.citation,
@@ -2354,7 +2367,7 @@ async function buildGenericProduct({ genericProduct, staticRoot, outputRoot }) {
   };
 }
 
-function buildMetadataOnlyManifest({ contract, contractProduct, sourceRepository }) {
+function buildMetadataOnlyManifest({ contract, contractProduct }) {
   return {
     schemaVersion: 1,
     id: contract.id,
@@ -2363,7 +2376,6 @@ function buildMetadataOnlyManifest({ contract, contractProduct, sourceRepository
     publication: contractProduct.publication,
     blockedBy: contractProduct.blockedBy,
     provenance: {
-      sourceRepository,
       sourceUrl: contract.source.sourceUrl,
       licence: contract.source.licence,
       citation: contract.source.citation,
@@ -2372,10 +2384,10 @@ function buildMetadataOnlyManifest({ contract, contractProduct, sourceRepository
   };
 }
 
-async function buildContractProduct({ contract, contractProduct, sourceRepository, sourceRoot, outputRoot }) {
+async function buildContractProduct({ contract, contractProduct, sourceResolver, outputRoot }) {
   const productDirectory = path.join(outputRoot, contract.id);
   if (contractProduct.productType === 'metadata-only') {
-    const manifest = buildMetadataOnlyManifest({ contract, contractProduct, sourceRepository });
+    const manifest = buildMetadataOnlyManifest({ contract, contractProduct });
     await writeJson(path.join(productDirectory, 'manifest.json'), manifest);
     return {
       id: contract.id,
@@ -2390,7 +2402,7 @@ async function buildContractProduct({ contract, contractProduct, sourceRepositor
   }
 
   if (contractProduct.productType === SYNTACTIC_CONTEXT_PRODUCT_TYPE) {
-    return buildSyntacticContextProduct({ contract, contractProduct, sourceRepository, sourceRoot, outputRoot });
+    return buildSyntacticContextProduct({ contract, contractProduct, sourceResolver, outputRoot });
   }
 
   const sourceFilesWithRoles = contract.source.files.filter((file) => normalizeString(file.role));
@@ -2405,13 +2417,13 @@ async function buildContractProduct({ contract, contractProduct, sourceRepositor
     if (!sourceFile) fail(`${contract.id} has no source file with role ${view.sourceRole}`);
     usedSourceRoles.add(view.sourceRole);
     if (view.derivation?.type === 'conllu-frequency') {
-      views.push(await buildDerivedConlluFrequencyView({ productId: contract.id, productDirectory, view, sourceFile, sourceRoot }));
+      views.push(await buildDerivedConlluFrequencyView({ productId: contract.id, productDirectory, view, sourceFile, sourceResolver }));
     } else if (view.derivation?.type === 'name-transliteration') {
-      views.push(await buildDerivedNameTransliterationView({ productId: contract.id, productDirectory, view, sourceFile, sourceRoot }));
+      views.push(await buildDerivedNameTransliterationView({ productId: contract.id, productDirectory, view, sourceFile, sourceResolver }));
     } else if (view.derivation?.type === 'nvh-lexicon') {
-      views.push(await buildDerivedNvhLexiconView({ productId: contract.id, productDirectory, view, sourceFile, sourceRoot }));
+      views.push(await buildDerivedNvhLexiconView({ productId: contract.id, productDirectory, view, sourceFile, sourceResolver }));
     } else {
-      views.push(await buildChunkedView({ productId: contract.id, productDirectory, view, sourceFile, sourceRoot }));
+      views.push(await buildChunkedView({ productId: contract.id, productDirectory, view, sourceFile, sourceResolver }));
     }
   }
   if (usedSourceRoles.size !== sourceFilesWithRoles.length
@@ -2428,7 +2440,7 @@ async function buildContractProduct({ contract, contractProduct, sourceRepositor
         productDirectory,
         profile,
         views: contractProduct.views,
-        sourceRoot
+        sourceResolver
       }));
     } else if (profile.type === 'normalized-contrast-lookup') {
       analysisProfiles.push(await buildNormalizedContrastLookupProfile({
@@ -2437,7 +2449,7 @@ async function buildContractProduct({ contract, contractProduct, sourceRepositor
         productDirectory,
         profile,
         views: contractProduct.views,
-        sourceRoot
+        sourceResolver
       }));
     } else {
       fail(`${contract.id} has an unsupported analysis profile type: ${profile.type}`);
@@ -2451,7 +2463,6 @@ async function buildContractProduct({ contract, contractProduct, sourceRepositor
     productType: contractProduct.productType,
     publication: contractProduct.publication,
     provenance: {
-      sourceRepository,
       sourceUrl: contract.source.sourceUrl,
       licence: contract.source.licence,
       citation: contract.source.citation,
@@ -2505,7 +2516,8 @@ export async function buildDataProducts({
     fail('the publication plan must account for every source contract exactly once');
   }
 
-  await verifySourceContracts({ contractPath: path.resolve(contractPath), sourceRoot });
+  const sourceResolver = await createSourceArtifactResolver(sourceRoot);
+  await verifySourceContracts({ contractPath: path.resolve(contractPath), sourceRoot, sourceResolver });
   await rm(resolvedOutputRoot, { recursive: true, force: true });
   await mkdir(resolvedOutputRoot, { recursive: true });
 
@@ -2518,8 +2530,7 @@ export async function buildDataProducts({
     products.push(await buildContractProduct({
       contract,
       contractProduct,
-      sourceRepository: contracts.sourceRepository,
-      sourceRoot,
+      sourceResolver,
       outputRoot: resolvedOutputRoot
     }));
   }

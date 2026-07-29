@@ -9,21 +9,16 @@
     "access": "Static JSON chunks with separate lemma/POS and wordform/POS views."
   },
   "provenance": {
-    "sourceRepository": {
-      "repositoryUrl": "source-repository-redacted",
-      "revision": "8ddc7197fa01c3e185bbfc0ac4214ea529ae56c6"
-    },
     "sourceUrl": "https://clarin-repo.lt/items/298f8a26-20d6-44cf-ab33-e53538ec7df9",
     "licence": "CC BY 4.0",
     "citation": "Rimkutė, E., Bielinskienė, A., Dadurkevičius, V., Kovalevskaitė, J., Utka, A., Boizou, L. 2024. Lithuanian morphologically annotated corpus — MATAS v3.0. Institute of Digital Resources and Interdisciplinary Research (SITTI), Vytautas Magnus University. CLARIN-LT Repository. https://hdl.handle.net/20.500.11821/61.",
     "files": [
       {
         "role": "matas-conllu",
-        "path": "rimkute-2024-12-19-MATAS-v3/original/MATAS3.conllu.zip",
+        "artifactId": "rimkute-2024-matas-v3-archive",
         "format": "zip-conllu",
         "bytes": 24221501,
         "sha256": "2fb910266fd6320c6f6ba615bf44c3dd9efd014f20b9bbc75ea202028479ee03",
-        "archiveMember": "MATAS3.conllu",
         "conlluSummary": {
           "uncompressedBytes": 196453759,
           "sha256": "57a5238ec6d13928aaf0a16a6bdc511f1ae09cd99293994b0f75341a30eaf122",

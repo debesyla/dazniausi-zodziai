@@ -16,6 +16,7 @@
 		"source:verify": "node scripts/verify-source-contracts.mjs",
 		"products:build": "node scripts/prepare-data-products.mjs",
 		"products:verify": "node scripts/verify-data-products.mjs",
+		"public:verify": "node scripts/verify-public-provenance.mjs",
 		"test": "vitest run",
 		"test:browser": "playwright test",
 		"test:browser:deployed": "playwright test",

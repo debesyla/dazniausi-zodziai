@@ -24,7 +24,7 @@
   },
   "sourceFile": {
     "role": "subcorpus-speech",
-    "path": "utka-2016-11-17-CCLL-Wordlists/original/byfrequency-2022/freq-sakytine-dzn.txt",
+    "artifactId": "utka-ccll-wordforms-speech",
     "format": "text",
     "bytes": 692277,
     "sha256": "342f3cd227fc6bca6e8e4197a8a1a833b281571650a7b46f71c129f59b54f092",

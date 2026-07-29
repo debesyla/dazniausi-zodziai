@@ -36,9 +36,8 @@
       }
     },
     "sourceSnapshot": {
-      "repositoryUrl": "source-repository-redacted",
-      "revision": "d1f4c06e93d4142ec3c42a3c1d02c06b6a301e13",
-      "path": "utka-2018-01-18-Lithuanian-wordlist/modified/lemmatized_totals.csv",
+      "artifactId": "utka-2018-lemmatized-totals-source",
+      "bytes": 799318,
       "encoding": "utf-8",
       "sha256": "d509af774a736534b3d638d3e46dd5e66f299ec83d11749eecbb7eb575af9c52"
     }

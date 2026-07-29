@@ -9,7 +9,7 @@ Build one reviewed dataset from an explicit local source root:
 ```bash
 npm run data:build -- \
   --config data/datasets/dadurkevicius-2020-jcl-lemmas.json \
-  --source-root /path/to/source-repository-redacted \
+  --source-root /path/to/reviewed-source-root \
   --output static/datasets/dadurkevicius-2020-jcl-lemmas.json \
   --catalog static/datasets/catalog.json
 ```
@@ -17,10 +17,10 @@ npm run data:build -- \
 After building every configured dataset, compare each generated JSON file byte-for-byte with the committed public artifact:
 
 ```bash
-npm run data:verify -- --source-root /path/to/source-repository-redacted
+npm run data:verify -- --source-root /path/to/reviewed-source-root
 ```
 
-`--source-root` is intentionally explicit so no local machine path is committed to the repository. The importer only accepts a relative input path that remains within that root after symbolic links are resolved.
+`--source-root` is intentionally explicit so no local machine path is committed to the repository. The importer resolves each reviewed artifact by its public content identity (artifact ID, byte count, and SHA-256), ignoring symbolic links and rejecting an absent or ambiguous match.
 
 ## Dataset configuration
 
@@ -35,13 +35,12 @@ Every public dataset configuration must define its identity, field mapping, aggr
   "entryKind": "lemma",
   "duplicatePolicy": "keep",
   "input": {
-    "path": "collection/original/lemmas.tsv",
+    "artifactId": "example-2024-lemmas-source",
     "delimiter": "\t",
     "hasHeader": true,
     "encoding": "utf-8",
     "snapshot": {
-      "repositoryUrl": "https://example.org/reviewed-source-repository",
-      "revision": "reviewed-release-or-revision",
+      "bytes": 1234,
       "sha256": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
     },
     "columns": { "word": "lemma", "type": "pos", "frequency": "count" }
@@ -78,13 +77,13 @@ For a source without part-of-speech data, omit both `input.columns.type` and `pr
 
 The importer rejects a build when any of these checks fail:
 
-- the source path is absolute, escapes the supplied root, or escapes it through a symbolic link;
+- the reviewed artifact ID is unsafe, or its byte count and checksum do not resolve to exactly one regular file beneath the supplied root;
 - the raw source bytes do not match the configured SHA-256 snapshot;
 - UTF-8 decoding, headers, field mapping, quoting, words, or positive integer frequencies are invalid;
 - a typed source has missing, unmapped, or unused POS labels;
 - the generated source-row count, published-entry count, total frequency, duplicate-key count, or reviewed representative sample differs from the configuration.
 
-The generated dataset preserves `sourceSnapshot` in its public provenance: repository URL, revision, relative path, encoding, and SHA-256. The browser validates this metadata alongside every word entry and its summary before showing a dataset.
+The generated dataset preserves a location-free `sourceSnapshot` in public provenance: artifact ID, byte count, UTF-8 encoding, and SHA-256. The browser validates this metadata alongside every word entry and its summary before showing a dataset.
 
 ## Catalog behavior
 

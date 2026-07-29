@@ -9,17 +9,13 @@
     "access": "Static JSON chunks. A null metric means the word is absent from that source, not that its count is zero."
   },
   "provenance": {
-    "sourceRepository": {
-      "repositoryUrl": "source-repository-redacted",
-      "revision": "8ddc7197fa01c3e185bbfc0ac4214ea529ae56c6"
-    },
     "sourceUrl": "https://clarin-repo.lt/items/60607329-be91-4e04-8a74-62e12ae0078d",
     "licence": "CC BY 4.0",
     "citation": "Utka, A. 2024. Comparative wordlist based on CCLL2 and wartime media and social-network lexicons.",
     "files": [
       {
         "role": "normalized-comparison",
-        "path": "utka-2016-11-17-ccll2_vs_war_in_UA/original/ccll2_vs_war_in_UA.txt",
+        "artifactId": "utka-ccll2-war-ukraine-normalized-comparison",
         "format": "text",
         "bytes": 46957375,
         "sha256": "2513dc5dedc0a11e4e2856a54ca27fbc2046aaf3560259c4a9aed66170e9d3ed",

@@ -8,24 +8,27 @@ generic dataset JSON or to a set of independently fetchable chunk indexes.
 The generated files live under `static/data-products/` and are checked in with
 the application. This keeps the GitHub Pages deployment self-contained: the
 site publishes the exact reviewed JSON artifacts without requiring the raw
-source at deploy time. The public manifests still preserve the reviewed raw
-source revision, paths, checksums, source URL, licence, and citation.
+source at deploy time. The public manifests preserve safe content-bound
+artifact IDs, byte counts, checksums, source URL, licence, and citation; they
+never disclose internal source locations or revisions.
 
 ## Build and verify
 
 ```bash
-npm run products:build -- --source-root /path/to/source-repository-redacted
+npm run products:build -- --source-root /path/to/reviewed-source-root
 npm run products:verify
+npm run public:verify
 ```
 
 `products:build` first runs the byte-level source-contract verifier. It then
 replaces only `static/data-products/`, creates all manifests, view indexes, and
-chunks, and keeps the raw source paths, checksums, source URL, licence, and
-citation in public provenance. Stage the regenerated files when the reviewed
-source changes. `products:verify` re-reads every generated JSON file, checks
+chunks, and keeps content-bound source artifact IDs, checksums, source URL,
+licence, and citation in public provenance. Stage the regenerated files when
+the reviewed source changes. `products:verify` re-reads every generated JSON file, checks
 every chunk checksum and byte size, validates every record shape, recomputes
 totals and null counts, and confirms that metadata-only products do not contain
-rows.
+rows. `public:verify` rejects internal locator fields and unsafe public
+provenance before release.
 
 Use `--output`, `--static-root`, `--plan`, or `--contract` only for an isolated
 review or test build. The normal command has no hard-coded local source path.

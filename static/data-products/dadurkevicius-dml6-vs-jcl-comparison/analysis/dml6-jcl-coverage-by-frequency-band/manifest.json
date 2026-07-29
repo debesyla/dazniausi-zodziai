@@ -34,7 +34,7 @@
     "citation": "Dadurkevičius, V., Petrauskaitė, R. 2020. Corpus based methods for assessment of the traditional dictionaries.",
     "sourceFile": {
       "role": "types-coverage",
-      "path": "dadurkevicius-2020-06-30-DML6_vs_JCL/original/JCL_types_vs_DML6.txt",
+      "artifactId": "dadurkevicius-dml6-vs-jcl-types-coverage",
       "format": "text",
       "bytes": 77300496,
       "sha256": "6a67d41b3004209c535e711b65ec943e338a6ac02b58256ffbb104ac419445e1",

@@ -1,10 +1,15 @@
 name: Deploy to GitHub Pages
 
 on:
-  push:
-    branches:
-      - main
   workflow_dispatch:
+    inputs:
+      release_confirmation:
+        description: Publish the reviewed release to GitHub Pages
+        required: true
+        type: choice
+        options:
+          - do-not-publish
+          - publish-reviewed-release
 
 permissions:
   contents: read
@@ -17,6 +22,7 @@ concurrency:
 
 jobs:
   build:
+    if: ${{ inputs.release_confirmation == 'publish-reviewed-release' }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -56,6 +62,9 @@ jobs:
       - name: Verify checked-in public data products
         run: npm run products:verify
 
+      - name: Verify public provenance boundaries
+        run: npm run public:verify
+
       - name: Build
         env:
           NODE_ENV: production
@@ -68,6 +77,7 @@ jobs:
 
   deploy:
     needs: build
+    if: ${{ inputs.release_confirmation == 'publish-reviewed-release' }}
     runs-on: ubuntu-latest
     environment:
       name: github-pages

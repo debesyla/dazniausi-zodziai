@@ -51,6 +51,58 @@ function isSafeId(value) {
   return typeof value === 'string' && /^[a-z0-9][a-z0-9-]*$/.test(value);
 }
 
+function isSha256(value) {
+  return typeof value === 'string' && /^[a-f0-9]{64}$/.test(value);
+}
+
+function isHttpUrl(value) {
+  if (!normalizeString(value)) return false;
+  try {
+    const url = new URL(value);
+    return url.protocol === 'https:' || url.protocol === 'http:';
+  } catch {
+    return false;
+  }
+}
+
+function assertNoInternalSourceLocator(value, description) {
+  for (const key of ['repositoryUrl', 'sourceRepository', 'revision', 'path', 'archiveMember', 'archiveDirectory']) {
+    if (Object.hasOwn(value, key)) fail(`${description} discloses an internal source locator`);
+  }
+}
+
+function validatePublicSourceFile(value, description) {
+  if (!isPlainObject(value) || !isSafeId(value.artifactId) || !Number.isSafeInteger(value.bytes)
+    || value.bytes < 1 || !isSha256(value.sha256)) {
+    fail(`${description} is invalid`);
+  }
+  assertNoInternalSourceLocator(value, description);
+}
+
+function validateDatasetProvenance(value, description) {
+  if (!isPlainObject(value) || !isHttpUrl(value.sourceUrl) || !normalizeString(value.licence)
+    || !normalizeString(value.citation) || !isPlainObject(value.sourceSnapshot)) {
+    fail(`${description} is invalid`);
+  }
+  assertNoInternalSourceLocator(value, description);
+  const snapshot = value.sourceSnapshot;
+  if (!isSafeId(snapshot.artifactId) || !Number.isSafeInteger(snapshot.bytes) || snapshot.bytes < 1
+    || snapshot.encoding !== 'utf-8' || !isSha256(snapshot.sha256)) {
+    fail(`${description}.sourceSnapshot is invalid`);
+  }
+}
+
+function validateProductProvenance(value, description) {
+  if (!isPlainObject(value) || !isHttpUrl(value.sourceUrl) || !normalizeString(value.licence)
+    || !normalizeString(value.citation) || !Array.isArray(value.files) || value.files.length === 0) {
+    fail(`${description} is invalid`);
+  }
+  assertNoInternalSourceLocator(value, description);
+  for (const [index, file] of value.files.entries()) {
+    validatePublicSourceFile(file, `${description}.files[${index}]`);
+  }
+}
+
 function isSafeFieldId(value) {
   return typeof value === 'string' && /^[A-Za-z][A-Za-z0-9]*$/.test(value);
 }
@@ -330,6 +382,7 @@ async function verifyFrequencyBandCoverageProfile({ productManifest, productDire
     || !isPlainObject(profile.provenance.sourceFile)) {
     fail(`${productManifest.id}/${descriptor.id} profile provenance is invalid`);
   }
+  validatePublicSourceFile(profile.provenance.sourceFile, `${productManifest.id}/${descriptor.id} profile provenance.sourceFile`);
   const sourceView = productManifest.views?.find((view) => view.id === profile.sourceView.id && view.sourceRole === profile.sourceView.sourceRole);
   if (!sourceView) fail(`${productManifest.id}/${descriptor.id} profile does not reference a published source view`);
   const sourceIndexPath = resolveProductPath(productDirectory, sourceView.index, `${productManifest.id}/${descriptor.id} source index`);
@@ -469,6 +522,7 @@ async function verifyNormalizedContrastLookupProfile({ productManifest, productD
     || !isPlainObject(profile.provenance.sourceFile)) {
     fail(`${productManifest.id}/${descriptor.id} profile provenance is invalid`);
   }
+  validatePublicSourceFile(profile.provenance.sourceFile, `${productManifest.id}/${descriptor.id} profile provenance.sourceFile`);
   const sourceView = productManifest.views?.find((view) => view.id === profile.sourceView.id && view.sourceRole === profile.sourceView.sourceRole);
   if (!sourceView || profile.sourceView.index !== sourceView.index || !Array.isArray(profile.sourceView.fields)
     || !isPlainObject(profile.sourceView.wordField) || !isPlainObject(profile.sourceView.summary)) {
@@ -655,6 +709,10 @@ async function verifyGenericProduct({ manifest, productDirectory, staticRoot }) 
     || !sameObject(dataset.summary, manifest.content.summary) || dataset.words.length !== dataset.summary.entryCount) {
     fail(`${manifest.id} generic content does not match its manifest`);
   }
+  validateDatasetProvenance(dataset.provenance, `${manifest.id} generic content provenance`);
+  if (!sameObject(dataset.provenance, manifest.provenance)) {
+    fail(`${manifest.id} generic content provenance does not match its manifest`);
+  }
   return { chunkedViews: 0, chunks: 0, records: dataset.words.length, viewCount: 1 };
 }
 
@@ -679,6 +737,7 @@ async function verifyChunkedProduct({ manifest, productDirectory }) {
       || !Number.isSafeInteger(index.maxChunkBytes) || index.maxChunkBytes < 1024) {
       fail(`${manifest.id}/${view.id} index is invalid`);
     }
+    validatePublicSourceFile(index.sourceFile, `${manifest.id}/${view.id} source file`);
     const fields = index.fields;
     const fieldIds = new Set();
     for (const [fieldIndex, field] of fields.entries()) {
@@ -815,6 +874,11 @@ function validateManifest(manifest, catalogEntry) {
   if (manifest.id !== catalogEntry.id || manifest.productType !== catalogEntry.productType
     || manifest.publication.status !== catalogEntry.publicationStatus) {
     fail(`${catalogEntry.id} manifest does not match the catalog`);
+  }
+  if (manifest.productType === 'generic-frequency-dataset') {
+    validateDatasetProvenance(manifest.provenance, `${manifest.id} provenance`);
+  } else {
+    validateProductProvenance(manifest.provenance, `${manifest.id} provenance`);
   }
 }
 

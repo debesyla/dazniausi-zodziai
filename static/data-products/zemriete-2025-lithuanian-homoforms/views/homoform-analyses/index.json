@@ -50,14 +50,13 @@
   },
   "sourceFile": {
     "role": "homoform-records",
-    "path": "zemriete-2025-11-18-lithuanian-homoforms/original/Homoformos_2025-11-01.tsv",
+    "artifactId": "zemriete-2025-lithuanian-homoforms-records",
     "format": "text",
     "bytes": 17351074,
     "sha256": "a72e2fbb784df0ba6c597a79f23ab885277eab7ecf441ef887aee824fab89d9d",
     "rows": 177226,
     "columns": 17,
-    "hasHeader": true,
-    "archiveMember": "Homoformos_2025-11-01.tsv"
+    "hasHeader": true
   },
   "maxChunkBytes": 262144,
   "summary": {

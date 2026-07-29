@@ -27,13 +27,12 @@ function baseConfig(overrides = {}) {
     entryKind: 'lemma',
     duplicatePolicy: 'keep',
     input: {
-      path: 'source.tsv',
+      artifactId: 'test-source',
       delimiter: '\t',
       hasHeader: true,
       encoding: 'utf-8',
       snapshot: {
-        repositoryUrl: 'https://example.test/datasets',
-        revision: 'test-fixture',
+        bytes: 1,
         sha256: sha256('')
       },
       columns: { word: 'lemma', type: 'pos', frequency: 'count' }
@@ -68,6 +67,7 @@ function sourceConfig(source, overrides = {}) {
       ...overrides.input,
       snapshot: {
         ...config.input.snapshot,
+        bytes: Buffer.byteLength(source),
         sha256: sha256(source),
         ...overrides.input?.snapshot
       }
@@ -123,9 +123,8 @@ describe('buildDataset', () => {
       { word: 'būti', type: 'V', frequency: 5 }
     ]);
     expect(result.dataset.provenance.sourceSnapshot).toEqual({
-      repositoryUrl: 'https://example.test/datasets',
-      revision: 'test-fixture',
-      path: 'source.tsv',
+      artifactId: 'test-source',
+      bytes: Buffer.byteLength(source),
       encoding: 'utf-8',
       sha256: sha256(source)
     });
@@ -152,7 +151,6 @@ describe('buildDataset', () => {
         entryKind: 'wordform',
         duplicatePolicy: 'aggregate-word-type',
         input: {
-          path: 'source.csv',
           delimiter: ',',
           hasHeader: false,
           columns: { word: 0, type: 1, frequency: 2 }
@@ -236,7 +234,7 @@ describe('buildDataset', () => {
       config: sourceConfig(source, { input: { snapshot: { sha256: '0'.repeat(64) } } }),
       sourceRoot: workspace,
       outputPath: path.join(workspace, 'dataset.json')
-    })).rejects.toThrow('source checksum mismatch');
+    })).rejects.toThrow('must resolve to exactly one verified regular file');
   });
 
   it('fails when reviewed summary totals expose an incorrect duplicate policy', async () => {
@@ -247,7 +245,6 @@ describe('buildDataset', () => {
     await expect(buildDataset({
       config: sourceConfig(source, {
         input: {
-          path: 'source.csv',
           delimiter: ',',
           hasHeader: false,
           columns: { word: 0, type: 1, frequency: 2 }
@@ -288,17 +285,17 @@ describe('buildDataset', () => {
     })).rejects.toThrow('part-of-speech labels do not cover source code(s): N');
   });
 
-  it('rejects source path traversal before reading the source root', async () => {
+  it('rejects an unsafe public artifact identifier before reading the source root', async () => {
     const workspace = await makeWorkspace();
 
     await expect(buildDataset({
-      config: sourceConfig('', { input: { path: '../outside.tsv' } }),
+      config: sourceConfig('', { input: { artifactId: '../outside' } }),
       sourceRoot: workspace,
       outputPath: path.join(workspace, 'dataset.json')
-    })).rejects.toThrow('must be a safe relative path');
+    })).rejects.toThrow('must use lowercase letters, numbers, and hyphens');
   });
 
-  it('rejects a symbolic link that resolves outside the configured source root', async () => {
+  it('ignores a symbolic link outside the configured source root', async () => {
     const workspace = await makeWorkspace();
     const outside = await makeWorkspace();
     const source = 'lemma\tpos\tcount\nir\tC\t10\nbūti\tV\t5\n';
@@ -307,9 +304,9 @@ describe('buildDataset', () => {
     await symlink(outsidePath, path.join(workspace, 'linked.tsv'));
 
     await expect(buildDataset({
-      config: sourceConfig(source, { input: { path: 'linked.tsv' } }),
+      config: sourceConfig(source),
       sourceRoot: workspace,
       outputPath: path.join(workspace, 'dataset.json')
-    })).rejects.toThrow('after resolving symbolic links');
+    })).rejects.toThrow('must resolve to exactly one verified regular file');
   });
 });

@@ -30,7 +30,7 @@
   },
   "sourceFile": {
     "role": "lemma-occurrences",
-    "path": "dadurkevicius-2020-06-30-DML6_vs_JCL/original/DML6_lemmas_vs_JCL.txt",
+    "artifactId": "dadurkevicius-dml6-vs-jcl-lemma-occurrences",
     "format": "text",
     "bytes": 1424602,
     "sha256": "93e4c3583366d792937d118b662f7d2115d54098bf9bc4097c4bc9ef1040159e",

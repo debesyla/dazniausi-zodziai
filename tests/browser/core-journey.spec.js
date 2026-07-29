@@ -42,9 +42,8 @@ const fixtureDataset = {
     citation: 'Test citation',
     sourceUrl: 'https://example.test/source',
     sourceSnapshot: {
-      repositoryUrl: 'https://example.test/sources',
-      revision: 'test-revision',
-      path: 'source.tsv',
+      artifactId: 'test-source',
+      bytes: 42,
       encoding: 'utf-8',
       sha256: 'b'.repeat(64)
     },

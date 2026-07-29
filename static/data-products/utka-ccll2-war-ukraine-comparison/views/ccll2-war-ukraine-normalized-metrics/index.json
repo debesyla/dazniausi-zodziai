@@ -89,7 +89,7 @@
   },
   "sourceFile": {
     "role": "normalized-comparison",
-    "path": "utka-2016-11-17-ccll2_vs_war_in_UA/original/ccll2_vs_war_in_UA.txt",
+    "artifactId": "utka-ccll2-war-ukraine-normalized-comparison",
     "format": "text",
     "bytes": 46957375,
     "sha256": "2513dc5dedc0a11e4e2856a54ca27fbc2046aaf3560259c4a9aed66170e9d3ed",

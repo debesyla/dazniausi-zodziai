@@ -37,9 +37,8 @@ function genericDataset() {
       citation: 'Fixture citation',
       sourceUrl: 'https://example.test/generic',
       sourceSnapshot: {
-        repositoryUrl: 'https://example.test/source.git',
-        revision: 'fixture',
-        path: 'generic.tsv',
+        artifactId: 'fixture-generic',
+        bytes: Buffer.byteLength('generic'),
         encoding: 'utf-8',
         sha256: checksum('generic')
       }
@@ -55,10 +54,6 @@ function genericDataset() {
 function comparisonContract(source) {
   return {
     schemaVersion: 1,
-    sourceRepository: {
-      repositoryUrl: 'https://example.test/source.git',
-      revision: 'fixture-revision'
-    },
     contracts: [{
       id: 'comparison-fixture',
       title: 'Comparison fixture',
@@ -67,7 +62,7 @@ function comparisonContract(source) {
         licence: 'CC BY 4.0',
         citation: 'Fixture comparison citation',
         files: [{
-          path: 'comparison.tsv',
+          artifactId: 'fixture-comparison',
           role: 'normalized-comparison',
           bytes: Buffer.byteLength(source),
           rows: 2,
@@ -176,7 +171,6 @@ describe('public data-product preparation', () => {
     const pdf = Buffer.from('%PDF-fixture');
     const contract = {
       schemaVersion: 1,
-      sourceRepository: { repositoryUrl: 'https://example.test/source.git', revision: 'fixture-revision' },
       contracts: [{
         id: 'blocked-fixture',
         title: 'Blocked fixture',
@@ -184,7 +178,7 @@ describe('public data-product preparation', () => {
           sourceUrl: 'https://example.test/blocked',
           licence: 'unresolved',
           citation: 'Fixture citation',
-          files: [{ path: 'fixture.pdf', format: 'binary', bytes: pdf.byteLength, sha256: checksum(pdf) }]
+          files: [{ artifactId: 'fixture-pdf', format: 'binary', bytes: pdf.byteLength, sha256: checksum(pdf) }]
         },
         delivery: { constraints: ['Do not extract rows.'] }
       }]
@@ -238,7 +232,6 @@ describe('public data-product preparation', () => {
     const source = '_id,frequency\n"ir,",2.5e1\nkad,5\n';
     const contract = {
       schemaVersion: 1,
-      sourceRepository: { repositoryUrl: 'https://example.test/source.git', revision: 'fixture-revision' },
       contracts: [{
         id: 'onegrams-fixture',
         title: 'One-gram fixture',
@@ -247,7 +240,7 @@ describe('public data-product preparation', () => {
           licence: 'CC BY 4.0',
           citation: 'Fixture one-gram citation',
           files: [{
-            path: 'onegrams.csv',
+            artifactId: 'fixture-onegrams',
             role: 'all-by-frequency',
             bytes: Buffer.byteLength(source),
             rows: 2,
@@ -334,7 +327,6 @@ describe('public data-product preparation', () => {
     ].join('\n');
     const contract = {
       schemaVersion: 1,
-      sourceRepository: { repositoryUrl: 'https://example.test/source.git', revision: 'fixture-revision' },
       contracts: [
         {
           id: 'transliteration-fixture',
@@ -344,7 +336,7 @@ describe('public data-product preparation', () => {
             licence: 'CC BY 4.0',
             citation: 'Fixture transliteration citation',
             files: [{
-              path: 'transliterations.txt',
+              artifactId: 'fixture-transliterations',
               role: 'source-name-pairs',
               bytes: Buffer.byteLength(transliterations),
               rows: 2,
@@ -362,7 +354,7 @@ describe('public data-product preparation', () => {
             licence: 'CC BY 4.0',
             citation: 'Fixture NVH citation',
             files: [{
-              path: 'lexicon.nvh',
+              artifactId: 'fixture-nvh',
               role: 'lexical-entries',
               format: 'nvh',
               bytes: Buffer.byteLength(nvh),
@@ -477,7 +469,6 @@ describe('public data-product preparation', () => {
     const source = 'one\t1\t0\ntwo\t2\t1\nthree\t9\t1\nten\t10\t2\ntie-b\t10\t3\ntie-a\t10\t3\n';
     const contract = {
       schemaVersion: 1,
-      sourceRepository: { repositoryUrl: 'https://example.test/source.git', revision: 'fixture-revision' },
       contracts: [{
         id: 'coverage-fixture',
         title: 'Coverage fixture',
@@ -486,7 +477,7 @@ describe('public data-product preparation', () => {
           licence: 'CC BY 4.0',
           citation: 'Fixture coverage citation',
           files: [{
-            path: 'types.tsv',
+            artifactId: 'fixture-types',
             role: 'types-coverage',
             bytes: Buffer.byteLength(source),
             rows: 6,
@@ -588,7 +579,6 @@ describe('public data-product preparation', () => {
     ].join('\n').concat('\n');
     const contract = {
       schemaVersion: 1,
-      sourceRepository: { repositoryUrl: 'https://example.test/source.git', revision: 'fixture-revision' },
       contracts: [{
         id: 'contrast-fixture',
         title: 'Contrast fixture',
@@ -597,7 +587,7 @@ describe('public data-product preparation', () => {
           licence: 'CC BY 4.0',
           citation: 'Fixture contrast citation',
           files: [{
-            path: 'comparison.tsv',
+            artifactId: 'fixture-contrast',
             role: 'normalized-comparison',
             bytes: Buffer.byteLength(source),
             rows: 4,

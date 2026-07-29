@@ -89,7 +89,7 @@ const profile = {
     sourceUrl: 'https://example.test/source',
     licence: 'CC BY 4.0',
     citation: 'Fixture citation',
-    sourceFile: { path: 'comparison.tsv', rows: 4, sha256: 'a'.repeat(64) }
+    sourceFile: { artifactId: 'fixture-comparison', bytes: 42, rows: 4, sha256: 'a'.repeat(64) }
   },
   delivery: { summaryMaxBytes: 4096, lookupBucketMaxBytes: 4096, maxSourceRowsPerWord: 2 },
   lookup: {

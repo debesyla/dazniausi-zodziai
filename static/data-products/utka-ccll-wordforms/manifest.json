@@ -9,17 +9,13 @@
     "access": "Static JSON chunks. Consumers request a manifest and one view index before requesting only the chunks they need."
   },
   "provenance": {
-    "sourceRepository": {
-      "repositoryUrl": "source-repository-redacted",
-      "revision": "8ddc7197fa01c3e185bbfc0ac4214ea529ae56c6"
-    },
     "sourceUrl": "https://clarin-repo.lt/items/a67d3e7a-c2f0-4d0b-9f69-72fdaf2e6c0b",
     "licence": "CC BY 4.0",
     "citation": "Rimkutė, E., Kovalevskaitė, J., Melninkaitė, V., Utka, A., Vitkutė-Adžgauskienė, D. 2010. Corpus of Contemporary Lithuanian Language – the Standardised Way.",
     "files": [
       {
         "role": "aggregate",
-        "path": "utka-2016-11-17-CCLL-Wordlists/original/byfrequency-2022/freq-visas-dzn.txt",
+        "artifactId": "utka-ccll-wordforms-aggregate",
         "format": "text",
         "bytes": 25251347,
         "sha256": "541c4bac1d1741b610fef1d0ba63df11c754f6037b2831a728165e01d352e601",
@@ -28,7 +24,7 @@
       },
       {
         "role": "aggregate-alphabetical-index",
-        "path": "utka-2016-11-17-CCLL-Wordlists/original/byalphabet-2022/freq-visas-abc.txt",
+        "artifactId": "utka-ccll-wordforms-alphabetical-index",
         "format": "text",
         "bytes": 25251347,
         "sha256": "58baa109d29b8910b888346ad89524efe0b1694c33c277d4f80e6dd52e0c5d84",
@@ -38,7 +34,7 @@
       },
       {
         "role": "subcorpus-fiction",
-        "path": "utka-2016-11-17-CCLL-Wordlists/original/byfrequency-2022/freq-grozine-dzn.txt",
+        "artifactId": "utka-ccll-wordforms-fiction",
         "format": "text",
         "bytes": 8193921,
         "sha256": "0a2650da314d3b6deddb266f30d66dcf201dec39a8303bb283cc9bab0de3f262",
@@ -47,7 +43,7 @@
       },
       {
         "role": "subcorpus-non-fiction",
-        "path": "utka-2016-11-17-CCLL-Wordlists/original/byfrequency-2022/freq-negrozine-dzn.txt",
+        "artifactId": "utka-ccll-wordforms-non-fiction",
         "format": "text",
         "bytes": 9289384,
         "sha256": "0684ecbe43ba16b294f0d0ceee442b2ec53a2c6da8d46ea8e63dfea5dffd3fbe",
@@ -56,7 +52,7 @@
       },
       {
         "role": "subcorpus-administrative",
-        "path": "utka-2016-11-17-CCLL-Wordlists/original/byfrequency-2022/freq-administracine-dzn.txt",
+        "artifactId": "utka-ccll-wordforms-administrative",
         "format": "text",
         "bytes": 3258546,
         "sha256": "82a81a00c4cda21041d657690b9b6f80a5b1136dd248f0868ff15fe567ece191",
@@ -65,7 +61,7 @@
       },
       {
         "role": "subcorpus-periodicals",
-        "path": "utka-2016-11-17-CCLL-Wordlists/original/byfrequency-2022/freq-publicistika-dzn.txt",
+        "artifactId": "utka-ccll-wordforms-periodicals",
         "format": "text",
         "bytes": 18794925,
         "sha256": "81818db84086cdd9f08478825410ce44ddba84630cb96e095a1bde1aa1aa46ac",
@@ -74,7 +70,7 @@
       },
       {
         "role": "subcorpus-speech",
-        "path": "utka-2016-11-17-CCLL-Wordlists/original/byfrequency-2022/freq-sakytine-dzn.txt",
+        "artifactId": "utka-ccll-wordforms-speech",
         "format": "text",
         "bytes": 692277,
         "sha256": "342f3cd227fc6bca6e8e4197a8a1a833b281571650a7b46f71c129f59b54f092",

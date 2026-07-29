@@ -24,7 +24,7 @@
   },
   "sourceFile": {
     "role": "aggregate",
-    "path": "utka-2016-11-17-CCLL-Wordlists/original/byfrequency-2022/freq-visas-dzn.txt",
+    "artifactId": "utka-ccll-wordforms-aggregate",
     "format": "text",
     "bytes": 25251347,
     "sha256": "541c4bac1d1741b610fef1d0ba63df11c754f6037b2831a728165e01d352e601",
