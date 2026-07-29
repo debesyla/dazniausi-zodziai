@@ -163,6 +163,7 @@ function validateManifest(value: unknown, catalogEntry: DataProductCatalogEntry,
     || value.id !== catalogEntry.id || !isNonEmptyString(value.title) || value.productType !== catalogEntry.productType
     || !isRecord(value.publication) || !isPublicationStatus(value.publication.status)
     || !isNonEmptyString(value.publication.scope) || !isNonEmptyString(value.publication.access)
+    || (value.publication.reason !== undefined && !isNonEmptyString(value.publication.reason))
     || !isRecord(value.provenance) || !isHttpUrl(value.provenance.sourceUrl)
     || !isNonEmptyString(value.provenance.licence) || !isNonEmptyString(value.provenance.citation)) {
     fail(`the manifest for ${catalogEntry.id} is malformed`);
@@ -176,6 +177,7 @@ function validateManifest(value: unknown, catalogEntry: DataProductCatalogEntry,
     scope: publicationRecord.scope as string,
     access: publicationRecord.access as string
   };
+  if (publicationRecord.reason !== undefined) publication.reason = publicationRecord.reason as string;
   const provenance: Provenance = {
     sourceUrl: provenanceRecord.sourceUrl as string,
     licence: provenanceRecord.licence as string,

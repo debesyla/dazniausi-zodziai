@@ -6,7 +6,8 @@ frequency dashboard, a paginated table, and a faithful CSV export.
 
 The browser catalog includes reviewed Lithuanian lemma-frequency datasets. Their
 source licences and citations are shown in the app and preserved in dataset
-metadata; larger products are available through the public JSON catalog.
+metadata; larger products are explained in the public catalogue at
+`/duomenu-katalogas` and remain available through the public JSON catalog.
 
 ## What the app does
 
@@ -22,6 +23,8 @@ metadata; larger products are available through the public JSON catalog.
 - Export the complete active filtered and sorted result set as UTF-8 CSV.
 - Explore bounded dependency-relation and sentence contexts from the ALKSNIS
   v3.0 syntactic treebank at `/sintakse`.
+- Browse every public data product by source scope, licence, access, and
+  interpretation limit at `/duomenu-katalogas`.
 
 ## Development
 
