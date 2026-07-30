@@ -63,16 +63,16 @@ describe('Methodology page', () => {
     expect(result.violations).toEqual([]);
   });
 
-  it('uses the deployed methodology URL as its canonical page', () => {
+  it('uses the configured methodology URL as its canonical page', () => {
     render(Page);
 
     expect(document.head.querySelector('link[rel="canonical"]')).toHaveAttribute(
       'href',
-      'https://debesyla.github.io/dazniausi-zodziai/apie'
+      'http://127.0.0.1:4173/apie'
     );
     expect(document.head.querySelector('meta[property="og:url"]')).toHaveAttribute(
       'content',
-      'https://debesyla.github.io/dazniausi-zodziai/apie'
+      'http://127.0.0.1:4173/apie'
     );
   });
 });

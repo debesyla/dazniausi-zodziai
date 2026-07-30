@@ -63,15 +63,15 @@ describe('Page', () => {
     );
     expect(document.head.querySelector('link[rel="canonical"]')).toHaveAttribute(
       'href',
-      'https://debesyla.github.io/dazniausi-zodziai/'
+      'http://127.0.0.1:4173/'
     );
     expect(document.head.querySelector('meta[property="og:url"]')).toHaveAttribute(
       'content',
-      'https://debesyla.github.io/dazniausi-zodziai/'
+      'http://127.0.0.1:4173/'
     );
     expect(document.head.querySelector('meta[property="og:image"]')).toHaveAttribute(
       'content',
-      'https://debesyla.github.io/dazniausi-zodziai/social-preview.png'
+      'http://127.0.0.1:4173/social-preview.png'
     );
     expect(document.head.querySelector('meta[name="twitter:card"]')).toHaveAttribute('content', 'summary_large_image');
   });

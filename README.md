@@ -38,7 +38,7 @@ npm ci
 npm run dev
 ```
 
-Run the same checks used for pull requests and GitHub Pages deployment:
+Run the same checks used for pull requests and a self-hosted release:
 
 ```bash
 npm run check
@@ -50,8 +50,14 @@ npm run public:verify
 npm run build
 ```
 
-`npm run preview` serves the production build locally. The repeatable
-browser-release matrix and deployed-site sign-off steps are in
+Build and launch the production version locally:
+
+```bash
+npm start
+```
+
+Open `http://127.0.0.1:4173/`. The repeatable browser-release matrix and
+hosted-site sign-off steps are in
 [docs/browser-acceptance.md](docs/browser-acceptance.md); use the
 [release-record template](docs/release-record.md) for the final go/no-go
 decision.
@@ -87,14 +93,39 @@ The evidence-based plan for future statistical and contextual explorations is in
 The public visual and interaction baseline is documented in
 [docs/design-system.md](docs/design-system.md).
 
-## Deployment
+## Local launch and self-hosting
 
-GitHub Pages remains offline unless a maintainer manually starts the gated
-deployment workflow and explicitly confirms a reviewed release. Pull requests
-run the separate verification workflow in `.github/workflows/verify.yml`. The
-checked-in public data products are verified before a release build and copied
-unchanged into the static site. Maintainers rebuild them locally from the
-reviewed source root before updating a product.
+The default production build is portable and uses the domain root:
+
+```bash
+npm run build
+npm run preview
+```
+
+The complete static site is written to `build/`. A future server can publish
+that directory directly. Configure the public URL at build time so canonical,
+social-preview, sitemap, and robots metadata point to the real host:
+
+```bash
+PUBLIC_SITE_URL=https://zodziai.example.lt npm run build
+```
+
+If the server exposes the site below a path rather than at the domain root,
+configure both values and include the path in the public URL:
+
+```bash
+BASE_PATH=/lietuviu-zodziai PUBLIC_SITE_URL=https://example.lt/lietuviu-zodziai npm run build
+```
+
+Copy `.env.example` to `.env` for persistent local build settings. The static
+server must resolve extensionless routes such as `/apie` to the generated
+`apie.html`; `npm run preview` already does this.
+
+Pull requests and pushes to `main` run the verification workflow in
+`.github/workflows/verify.yml`. The checked-in public data products are
+verified before a release build and copied unchanged into the static site.
+Maintainers rebuild them locally from the reviewed source root before updating
+a product.
 
 ## Analytics and privacy
 

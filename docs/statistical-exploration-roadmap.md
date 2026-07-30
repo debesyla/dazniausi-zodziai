@@ -44,7 +44,7 @@ The same audit found zero populated `HEAD` values and zero populated `DEPREL` va
 
 ## Ranked product concepts
 
-The ranking accounts for public value, statistical clarity, delivery effort, and the data already published in static JSON. “Static feasible” means compatible with GitHub Pages; it does not mean that all rows may be loaded on the main browser thread.
+The ranking accounts for public value, statistical clarity, delivery effort, and the data already published in static JSON. “Static feasible” means compatible with ordinary static hosting; it does not mean that all rows may be loaded on the main browser thread.
 
 | Rank | Question and product | Measure and interaction | Static feasibility | Guardrails and decision |
 | --- | --- | --- | --- | --- |

@@ -131,16 +131,16 @@ describe('Public data catalogue page', () => {
     expect(result.violations).toEqual([]);
   });
 
-  it('uses the deployed catalogue URL as its canonical page', () => {
+  it('uses the configured catalogue URL as its canonical page', () => {
     render(Page);
 
     expect(document.head.querySelector('link[rel="canonical"]')).toHaveAttribute(
       'href',
-      'https://debesyla.github.io/dazniausi-zodziai/duomenu-katalogas'
+      'http://127.0.0.1:4173/duomenu-katalogas'
     );
     expect(document.head.querySelector('meta[property="og:url"]')).toHaveAttribute(
       'content',
-      'https://debesyla.github.io/dazniausi-zodziai/duomenu-katalogas'
+      'http://127.0.0.1:4173/duomenu-katalogas'
     );
   });
 });

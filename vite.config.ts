@@ -4,6 +4,7 @@ import { defineConfig } from 'vitest/config';
 
 export default defineConfig({
 	plugins: [sveltekit()],
+	envPrefix: ['VITE_', 'PUBLIC_'],
 	build: {
 		minify: 'esbuild',
 		target: 'es2020',

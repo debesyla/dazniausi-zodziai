@@ -8,7 +8,7 @@ Visitors can browse the same products, their source scope, licence, access, and
 interpretation limits at `/duomenu-katalogas` before following a JSON link.
 
 The generated files live under `static/data-products/` and are checked in with
-the application. This keeps the GitHub Pages deployment self-contained: the
+the application. This keeps the static deployment self-contained: the
 site publishes the exact reviewed JSON artifacts without requiring the raw
 source at deploy time. The public manifests preserve safe content-bound
 artifact IDs, byte counts, checksums, source URL, licence, and citation; they

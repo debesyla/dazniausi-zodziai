@@ -1,9 +1,9 @@
 # Public-release record
 
-Complete this record only after the final candidate is merged to `main` and a
-maintainer has manually confirmed and completed the gated GitHub Pages
-workflow. It is evidence for the launch decision, not a pre-merge checklist:
-leave a field blank rather than assuming a result.
+Complete this record only after the final candidate is merged to `main`,
+published to the selected server, and inspected by a maintainer. It is evidence
+for the launch decision, not a pre-merge checklist: leave a field blank rather
+than assuming a result.
 
 The release gate is tracked in [issue #37](https://github.com/debesyla/dazniausi-zodziai/issues/37).
 Use one copy of the template below for each public release candidate.
@@ -19,7 +19,7 @@ git status --short
 shasum -a 256 static/datasets/catalog.json static/data-products/catalog.json
 npm run products:verify
 npm run public:verify
-PLAYWRIGHT_BASE_URL=https://debesyla.github.io/dazniausi-zodziai/ npm run test:browser:deployed
+PLAYWRIGHT_BASE_URL=https://zodziai.example.lt/ npm run test:browser:deployed
 npm audit --omit=dev
 npm audit
 ```
@@ -44,12 +44,13 @@ either a release blocker or a non-issue.
 ## Deployed candidate
 
 - Main commit:
-- GitHub Pages workflow URL:
-- Deployed URL: https://debesyla.github.io/dazniausi-zodziai/
+- Build/deployment evidence URL or log:
+- Deployment target:
+- Deployed URL:
 - Deployment inspection time and timezone:
-- Rollback: revert the deployment commit on `main`, then manually run the
-  gated deployment for the reverted commit. Record the revert commit and
-  replacement workflow URL.
+- Rollback: restore the previous verified `build/` artifact or rebuild the
+  previous release commit, then record the restored commit and deployment
+  evidence.
 
 ## Public data inventory
 
