@@ -24,7 +24,7 @@ copying the raw source repository into the application source tree.
 
 | Contract | Decision | What it can support | Publication gate |
 | --- | --- | --- | --- |
-| `utka-ccll-wordforms` | Published chunked JSON | Wordform token counts for the aggregate and five named subcorpora | Static manifest, source-order index, and bounded chunks; a future interactive explorer must still meet the budgets below |
+| `utka-ccll-wordforms` | Published chunked JSON and bounded genre profile | Wordform token counts for the aggregate and five named subcorpora; exact-form comparison across the five named subcorpora | Static manifest, source-order index, bounded chunks, and a compact routed lookup that excludes the aggregate |
 | `dadurkevicius-dml6-vs-jcl-comparison` | Published chunked comparison JSON and coverage profile | JCL token counts, DML6 coverage categories, lemma/POS occurrences, missing types, and form/token shares by six transparent frequency bands | Three separate views plus a compact, checksum-described profile with on-demand bounded examples |
 | `utka-ccll2-war-ukraine-comparison` | Published chunked comparison JSON | Six normalized token/document metrics across three source collections | Null-preserving view with source denominators in every field definition |
 | `kapociute-dzikiene-2017-parliament-frequency-aggregates` | Published chunked frequency JSON | Corpus-wide legislative-speech wordform and lemma totals | Two separate aggregate-only views; no raw text, document, time, or person-level data is in the public product |
@@ -58,7 +58,7 @@ and token totals before generating the profile; the product verifier checks
 every optional example file's checksum, byte budget, interval, category, and
 order.
 
-## CCLL delivery and future explorer budget
+## CCLL delivery and explorer budget
 
 The aggregate CCLL frequency list has 1,733,157 rows and 25,251,347 UTF-8
 bytes. Its source already provides two useful orderings: frequency-descending
@@ -66,8 +66,8 @@ and alphabetical. The public product uses static chunked JSON; a visitor first
 receives a compact catalog, then one manifest and view index, then only the
 required chunks.
 
-Before a future CCLL explorer is added to `static/datasets/catalog.json`, its
-implementation must meet these budgets:
+Any broader CCLL explorer added to `static/datasets/catalog.json` must meet
+these budgets:
 
 - Initial catalog metadata: at most 10 KiB.
 - One requested CCLL JSON chunk: at most 64 KiB before transport compression.
@@ -76,6 +76,16 @@ implementation must meet these budgets:
   for the worker response and result handoff on the agreed test devices.
 - Initial mobile dataset payload: at most 256 KiB; the aggregate is fetched
   only after the visitor selects it.
+
+The current `/zanru-profilis` exact-form lookup is deliberately narrower than
+that broader explorer. It joins only the five named subcorpus lists during the
+verified build, records every source raw count and token denominator separately,
+and exposes `null` for a wordform not observed in a source. Its profile
+manifest, routing nodes, and lookup buckets are each bounded to 64 KiB; a
+lookup requests only the route needed for the typed form and one packed bucket.
+The selected bucket is parsed and scanned by a small browser worker. It has no
+aggregate-plus-subcorpus calculation, ratio ranking, or universal genre
+leaderboard.
 
 The public JSON is deliberately not loaded into the current generic frequency
 picker. A future worker owns chunk parsing, search, ordering, ranking,

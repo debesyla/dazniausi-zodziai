@@ -673,4 +673,146 @@ describe('public data-product preparation', () => {
     expect(lookupRecords[0]).toHaveLength(2);
     expect(bucket.bytes).toBeLessThanOrEqual(profile.delivery.lookupBucketMaxBytes);
   });
+
+  it('joins only the five named CCLL subcorpora into bounded, null-preserving genre lookup files', async () => {
+    const root = await makeDirectory();
+    const sourceRoot = path.join(root, 'sources');
+    const staticRoot = path.join(root, 'static');
+    const outputRoot = path.join(staticRoot, 'data-products');
+    const planPath = path.join(root, 'plan.json');
+    const contractPath = path.join(root, 'contract.json');
+    const sourceByRole = {
+      'subcorpus-fiction': '!\t2\nantras\t3\nalpha\t1\nvisos\t7\n',
+      'subcorpus-non-fiction': 'kelios\t3\nvisos\t8\n',
+      'subcorpus-administrative': 'kelios\t4\nvisos\t9\n',
+      'subcorpus-periodicals': 'kelios\t5\nvisos\t10\n',
+      'subcorpus-speech': 'kelios\t6\nvisos\t11\n'
+    };
+    const sourceIds = {
+      'subcorpus-fiction': 'fiction',
+      'subcorpus-non-fiction': 'non-fiction',
+      'subcorpus-administrative': 'administrative',
+      'subcorpus-periodicals': 'periodicals',
+      'subcorpus-speech': 'speech'
+    };
+    const tokenTotals = {
+      'subcorpus-fiction': 13,
+      'subcorpus-non-fiction': 11,
+      'subcorpus-administrative': 13,
+      'subcorpus-periodicals': 15,
+      'subcorpus-speech': 17
+    };
+    const roles = Object.keys(sourceByRole);
+    const fields = [
+      { id: 'word', label: 'Word form', type: 'string', sourceColumn: 0 },
+      { id: 'count', label: 'Token count', type: 'raw-token-count', unit: 'tokens', sourceColumn: 1 }
+    ];
+    const contract = {
+      schemaVersion: 1,
+      contracts: [{
+        id: 'ccll-genre-fixture',
+        title: 'CCLL genre fixture',
+        source: {
+          sourceUrl: 'https://example.test/ccll',
+          licence: 'CC BY 4.0',
+          citation: 'Fixture CCLL citation',
+          files: roles.map((role) => {
+            const source = sourceByRole[role];
+            return {
+              artifactId: `fixture-${sourceIds[role]}`,
+              role,
+              bytes: Buffer.byteLength(source),
+              rows: source.trim().split('\n').length,
+              sha256: checksum(source),
+              columns: 2,
+              numericColumns: [1],
+              numericTotals: { 1: tokenTotals[role] },
+              samples: [source.trim().split('\n')[0]]
+            };
+          })
+        },
+        delivery: { constraints: ['Keep aggregate data out of the named-genre profile.'] }
+      }]
+    };
+    const plan = {
+      schemaVersion: 1,
+      title: 'Fixture data products',
+      genericProducts: [],
+      contractProducts: [{
+        contractId: 'ccll-genre-fixture',
+        productType: 'chunked-wordform-list',
+        publication: { status: 'published', scope: 'Every fixture row.', access: 'Bounded JSON.' },
+        views: roles.map((role) => ({
+          id: `${sourceIds[role]}-by-frequency`,
+          sourceRole: role,
+          title: `${sourceIds[role]} fixture`,
+          description: 'Fixture word forms.',
+          ordering: { field: 'count', direction: 'descending' },
+          chunkBytes: 1024,
+          fields
+        })),
+        analysisProfiles: [{
+          id: 'genre-profile',
+          type: 'ccll-genre-wordform-lookup',
+          title: 'Fixture genre profile',
+          description: 'A bounded fixture profile.',
+          summaryMaxBytes: 8192,
+          sources: [
+            { id: 'fiction', label: 'Fiction', sourceRole: 'subcorpus-fiction' },
+            { id: 'non-fiction', label: 'Non-fiction', sourceRole: 'subcorpus-non-fiction' },
+            { id: 'administrative', label: 'Administration', sourceRole: 'subcorpus-administrative' },
+            { id: 'periodicals', label: 'Periodicals', sourceRole: 'subcorpus-periodicals' },
+            { id: 'speech', label: 'Spoken language', sourceRole: 'subcorpus-speech' }
+          ],
+          rate: { targetTokens: 1000000, unit: 'tokens per million source tokens', formula: 'rawCount * 1000000 / sourceTokens' },
+          lookup: { normalization: 'trim-nfc-preserve-case', maxRoutingNodeBytes: 4096, maxBucketBytes: 4096 },
+          policies: {
+            aggregate: 'excluded',
+            punctuation: 'preserve-source-wordforms',
+            repeatedTerm: 'reject-duplicate-exact-wordforms-per-source',
+            missing: 'not-observed-null',
+            threshold: { minimumRawCount: 1, appliesTo: 'exact-lookup-only-no-ranking' },
+            ordering: { field: 'word', direction: 'ascending', tieBreak: 'unicode-code-point' }
+          }
+        }]
+      }]
+    };
+
+    await mkdir(sourceRoot, { recursive: true });
+    await Promise.all([
+      ...roles.map((role) => writeFile(path.join(sourceRoot, `${sourceIds[role]}.tsv`), sourceByRole[role])),
+      writeJson(planPath, plan),
+      writeJson(contractPath, contract)
+    ]);
+
+    await buildDataProducts({ sourceRoot, staticRoot, outputRoot, planPath, contractPath });
+    await expect(verifyDataProducts({ outputRoot, staticRoot })).resolves.toMatchObject({
+      products: 1,
+      chunkedViews: 5,
+      records: 12
+    });
+
+    const profileDirectory = path.join(outputRoot, 'ccll-genre-fixture', 'analysis', 'genre-profile');
+    const profile = JSON.parse(await readFile(path.join(profileDirectory, 'manifest.json'), 'utf8'));
+    expect(profile.lookup).not.toHaveProperty('buckets');
+    expect(profile.summary).toEqual({
+      joinedWordforms: 5,
+      totalSourceRows: 12,
+      sourceRows: { fiction: 4, 'non-fiction': 2, administrative: 2, periodicals: 2, speech: 2 },
+      sourceTokenTotals: { fiction: 13, 'non-fiction': 11, administrative: 13, periodicals: 15, speech: 17 },
+      observedGenreCounts: { 1: 3, 2: 0, 3: 0, 4: 1, 5: 1 },
+      routingNodeCount: 1,
+      lookupBucketCount: 1
+    });
+    const rootNode = JSON.parse(await readFile(path.join(profileDirectory, profile.lookup.root), 'utf8'));
+    const punctuation = rootNode.transitions.find(([character]) => character === '!')[1].bucket;
+    const punctuationRecords = JSON.parse(await readFile(path.join(profileDirectory, punctuation.file), 'utf8')).records;
+    expect(punctuationRecords.filter((record) => record[0] === '!')).toEqual([['!', 2, null, null, null, null, 1]]);
+    const aBucket = rootNode.transitions.find(([character]) => character === 'a')[1].bucket;
+    const aRecords = JSON.parse(await readFile(path.join(profileDirectory, aBucket.file), 'utf8')).records;
+    expect(aRecords.filter((record) => record[0].startsWith('a')).map((record) => record[0])).toEqual(['alpha', 'antras']);
+    const kBucket = rootNode.transitions.find(([character]) => character === 'k')[1].bucket;
+    const kRecords = JSON.parse(await readFile(path.join(profileDirectory, kBucket.file), 'utf8')).records;
+    expect(kRecords.filter((record) => record[0] === 'kelios')).toEqual([['kelios', null, 3, 4, 5, 6, 4]]);
+  });
 });

@@ -86,7 +86,10 @@
       "Use the published manifest and view index before requesting individual chunks.",
       "Keep parsing, filtering, sorting, ranking, and export off the main thread when adding an interactive explorer.",
       "Never add the aggregate count to the five subcorpus counts.",
-      "Expose token-count units and source corpus scope in every result."
+      "Expose token-count units and source corpus scope in every result.",
+      "A CCLL genre profile may join only the five named subcorpus lists; the aggregate and its alphabetical index are not genres and must remain excluded.",
+      "Keep each named subcorpus raw count and token denominator separate, and represent a missing wordform as not observed rather than zero.",
+      "Do not create a universal genre-signal leaderboard or ratio ranking without a separate documented stability review."
     ]
   },
   "views": [
@@ -201,6 +204,15 @@
         },
         "nullCounts": {}
       }
+    }
+  ],
+  "analysisProfiles": [
+    {
+      "id": "ccll-wordform-genre-profile",
+      "type": "ccll-genre-wordform-lookup",
+      "title": "CCLL wordform genre profile",
+      "description": "An exact wordform lookup across the five named CCLL subcorpora. It retains each source count and denominator, derives rates per million only for the selected form, and never produces a genre-signal leaderboard.",
+      "manifest": "analysis/ccll-wordform-genre-profile/manifest.json"
     }
   ]
 }

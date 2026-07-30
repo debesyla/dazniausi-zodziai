@@ -7,5 +7,5 @@ describe('public provenance boundary', () => {
       jsonFiles: expect.any(Number),
       textFiles: expect.any(Number)
     });
-  });
+  }, 30_000);
 });

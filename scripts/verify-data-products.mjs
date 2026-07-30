@@ -32,8 +32,19 @@ const CHUNKED_PRODUCT_TYPES = new Set([
   'chunked-lexical-collection',
   'chunked-syntactic-context'
 ]);
-const ANALYSIS_PROFILE_TYPES = new Set(['frequency-band-coverage', 'normalized-contrast-lookup']);
+const ANALYSIS_PROFILE_TYPES = new Set([
+  'frequency-band-coverage',
+  'normalized-contrast-lookup',
+  'ccll-genre-wordform-lookup'
+]);
 const SYNTACTIC_CONTEXT_PRODUCT_TYPE = 'chunked-syntactic-context';
+const CCLL_GENRE_PROFILE_SOURCES = [
+  { id: 'fiction', sourceRole: 'subcorpus-fiction' },
+  { id: 'non-fiction', sourceRole: 'subcorpus-non-fiction' },
+  { id: 'administrative', sourceRole: 'subcorpus-administrative' },
+  { id: 'periodicals', sourceRole: 'subcorpus-periodicals' },
+  { id: 'speech', sourceRole: 'subcorpus-speech' }
+];
 
 function fail(message) {
   throw new Error(`Data-product verification failed: ${message}`);
@@ -144,6 +155,17 @@ function assertSafeInteger(value, description) {
 
 function sameObject(left, right) {
   return JSON.stringify(left) === JSON.stringify(right);
+}
+
+function compareUnicodeCodePoints(left, right) {
+  const leftCharacters = Array.from(left);
+  const rightCharacters = Array.from(right);
+  const length = Math.min(leftCharacters.length, rightCharacters.length);
+  for (let index = 0; index < length; index += 1) {
+    if (leftCharacters[index] === rightCharacters[index]) continue;
+    return leftCharacters[index].codePointAt(0) - rightCharacters[index].codePointAt(0);
+  }
+  return leftCharacters.length - rightCharacters.length;
 }
 
 function prefixFor(value, codePoints) {
@@ -680,6 +702,278 @@ async function verifyNormalizedContrastLookupProfile({ productManifest, productD
   }
 }
 
+function normalizeCcllGenreWordform(value) {
+  const word = normalizeString(value);
+  return word ? word.normalize('NFC') : '';
+}
+
+function ccllGenreBucketDescriptor(value, maxBytes, description) {
+  if (!isPlainObject(value) || !Number.isSafeInteger(value.id) || value.id < 0
+    || !normalizeString(value.file) || !value.file.startsWith('buckets/')
+    || !Number.isSafeInteger(value.records) || value.records < 1
+    || !Number.isSafeInteger(value.bytes) || value.bytes < 1 || value.bytes > maxBytes
+    || !isSha256(value.sha256)) {
+    fail(`${description} is invalid`);
+  }
+  resolveProductPath('', value.file, description);
+  return value;
+}
+
+function ccllGenreLookupFields(sources) {
+  return [
+    { id: 'word', label: 'Word form', type: 'string' },
+    ...sources.map((source) => ({
+      id: `${source.id}RawCount`,
+      label: `${source.label} raw token count`,
+      type: 'raw-token-count',
+      unit: 'tokens',
+      nullable: true
+    })),
+    { id: 'observedGenres', label: 'Observed named subcorpora', type: 'observed-genre-count' }
+  ];
+}
+
+async function verifyCcllGenreWordformLookupProfile({ productManifest, productDirectory, descriptor }) {
+  if (!isPlainObject(descriptor) || descriptor.type !== 'ccll-genre-wordform-lookup' || !isSafeId(descriptor.id)
+    || !normalizeString(descriptor.title) || !normalizeString(descriptor.description)
+    || !normalizeString(descriptor.manifest)) {
+    fail(`${productManifest.id} has an invalid CCLL genre profile descriptor`);
+  }
+  const profilePath = resolveProductPath(productDirectory, descriptor.manifest, `${productManifest.id}/${descriptor.id} profile`);
+  const profileDirectory = path.dirname(profilePath);
+  const profileBuffer = await readFile(profilePath);
+  const profile = parseJson(profileBuffer, `${productManifest.id}/${descriptor.id} profile`);
+  if (!isPlainObject(profile) || profile.schemaVersion !== 1 || profile.productId !== productManifest.id
+    || profile.profileId !== descriptor.id || profile.profileType !== 'ccll-genre-wordform-lookup'
+    || profile.title !== descriptor.title || profile.description !== descriptor.description
+    || !isPlainObject(profile.provenance) || !Array.isArray(profile.sources) || !isPlainObject(profile.rate)
+    || !isPlainObject(profile.policies) || !isPlainObject(profile.delivery) || !isPlainObject(profile.lookup)
+    || !isPlainObject(profile.summary)) {
+    fail(`${productManifest.id}/${descriptor.id} profile is invalid`);
+  }
+  if (!Number.isSafeInteger(profile.delivery.summaryMaxBytes) || profile.delivery.summaryMaxBytes < 1024
+    || profile.delivery.summaryMaxBytes > 65536 || profileBuffer.byteLength > profile.delivery.summaryMaxBytes
+    || !Number.isSafeInteger(profile.delivery.routingNodeMaxBytes) || profile.delivery.routingNodeMaxBytes < 1024
+    || profile.delivery.routingNodeMaxBytes > 65536 || !Number.isSafeInteger(profile.delivery.lookupBucketMaxBytes)
+    || profile.delivery.lookupBucketMaxBytes < 1024 || profile.delivery.lookupBucketMaxBytes > 65536) {
+    fail(`${productManifest.id}/${descriptor.id} profile delivery metadata is invalid`);
+  }
+  if (profile.provenance.sourceUrl !== productManifest.provenance?.sourceUrl
+    || profile.provenance.licence !== productManifest.provenance?.licence
+    || profile.provenance.citation !== productManifest.provenance?.citation) {
+    fail(`${productManifest.id}/${descriptor.id} profile provenance is invalid`);
+  }
+  assertNoInternalSourceLocator(profile.provenance, `${productManifest.id}/${descriptor.id} profile provenance`);
+  if (!sameObject(profile.rate, {
+    targetTokens: 1000000,
+    unit: 'tokens per million source tokens',
+    formula: 'rawCount * 1000000 / sourceTokens'
+  }) || !sameObject(profile.policies, {
+    aggregate: 'excluded',
+    punctuation: 'preserve-source-wordforms',
+    repeatedTerm: 'reject-duplicate-exact-wordforms-per-source',
+    missing: 'not-observed-null',
+    threshold: { minimumRawCount: 1, appliesTo: 'exact-lookup-only-no-ranking' },
+    ordering: { field: 'word', direction: 'ascending', tieBreak: 'unicode-code-point' }
+  }) || profile.lookup.normalization !== 'trim-nfc-preserve-case'
+    || profile.lookup.recordEncoding !== 'array' || !normalizeString(profile.lookup.root)
+    || !profile.lookup.root.startsWith('routing/nodes/')) {
+    fail(`${productManifest.id}/${descriptor.id} profile policy or lookup metadata is invalid`);
+  }
+  resolveProductPath(profileDirectory, profile.lookup.root, `${productManifest.id}/${descriptor.id} lookup root`);
+  if (profile.sources.length !== CCLL_GENRE_PROFILE_SOURCES.length) {
+    fail(`${productManifest.id}/${descriptor.id} profile must list all five named subcorpora`);
+  }
+
+  const expectedSourceRows = {};
+  const expectedSourceTokenTotals = {};
+  for (const [sourceIndex, expected] of CCLL_GENRE_PROFILE_SOURCES.entries()) {
+    const source = profile.sources[sourceIndex];
+    if (!isPlainObject(source) || source.id !== expected.id || source.sourceRole !== expected.sourceRole
+      || !normalizeString(source.label) || !Number.isSafeInteger(source.sourceRows) || source.sourceRows < 1
+      || !Number.isSafeInteger(source.sourceTokens) || source.sourceTokens < 1 || !isPlainObject(source.sourceFile)
+      || !isPlainObject(source.view) || !isSafeId(source.view.id) || !normalizeString(source.view.index)) {
+      fail(`${productManifest.id}/${descriptor.id} profile source ${sourceIndex} is invalid`);
+    }
+    const productSourceFile = productManifest.provenance?.files?.find((file) => file.role === source.sourceRole);
+    const sourceView = productManifest.views?.find((view) => view.id === source.view.id && view.sourceRole === source.sourceRole);
+    if (!productSourceFile || !sourceView || source.view.index !== sourceView.index
+      || !sameObject(source.sourceFile, productSourceFile)) {
+      fail(`${productManifest.id}/${descriptor.id} profile source ${source.id} does not match a published source view`);
+    }
+    validatePublicSourceFile(source.sourceFile, `${productManifest.id}/${descriptor.id} profile source ${source.id}`);
+    const sourceIndexPath = resolveProductPath(productDirectory, source.view.index, `${productManifest.id}/${descriptor.id} source ${source.id} index`);
+    const index = parseJson(await readFile(sourceIndexPath), `${productManifest.id}/${descriptor.id} source ${source.id} index`);
+    const countField = index?.fields?.find((field) => field.id === 'count' && field.type === 'raw-token-count');
+    if (!isPlainObject(index) || index.productId !== productManifest.id || index.viewId !== source.view.id
+      || !isPlainObject(index.summary) || !sameObject(index.sourceFile, source.sourceFile)
+      || !countField || !Number.isSafeInteger(index.summary.sourceRows) || index.summary.sourceRows !== source.sourceRows
+      || index.summary.recordCount !== source.sourceRows || !Number.isSafeInteger(index.summary.numericTotals?.count)
+      || index.summary.numericTotals.count !== source.sourceTokens) {
+      fail(`${productManifest.id}/${descriptor.id} profile source ${source.id} index is invalid`);
+    }
+    expectedSourceRows[source.id] = source.sourceRows;
+    expectedSourceTokenTotals[source.id] = source.sourceTokens;
+  }
+  if (!sameObject(profile.lookup.fields, ccllGenreLookupFields(profile.sources))) {
+    fail(`${productManifest.id}/${descriptor.id} profile lookup fields are invalid`);
+  }
+
+  const nodesByFile = new Map();
+  const seenNodeIds = new Set();
+  const bucketDescriptors = new Map();
+  const seenBucketFiles = new Map();
+  const pendingNodes = [{ file: profile.lookup.root, prefix: '', nodeId: null }];
+  for (let pendingIndex = 0; pendingIndex < pendingNodes.length; pendingIndex += 1) {
+    const expected = pendingNodes[pendingIndex];
+    if (nodesByFile.has(expected.file)) fail(`${productManifest.id}/${descriptor.id} lookup routing reuses a node`);
+    const nodePath = resolveProductPath(profileDirectory, expected.file, `${productManifest.id}/${descriptor.id} lookup routing node`);
+    const nodeBuffer = await readFile(nodePath);
+    if (nodeBuffer.byteLength > profile.delivery.routingNodeMaxBytes) {
+      fail(`${productManifest.id}/${descriptor.id} lookup routing node exceeds its byte budget`);
+    }
+    const node = parseJson(nodeBuffer, `${productManifest.id}/${descriptor.id} lookup routing node`);
+    if (!isPlainObject(node) || node.schemaVersion !== 1 || node.productId !== productManifest.id
+      || node.profileId !== descriptor.id || !Number.isSafeInteger(node.nodeId) || node.nodeId < 0
+      || (expected.nodeId !== null && node.nodeId !== expected.nodeId) || seenNodeIds.has(node.nodeId)
+      || node.prefix !== expected.prefix || !Array.isArray(node.transitions)
+      || (node.terminal !== null && !isPlainObject(node.terminal))) {
+      fail(`${productManifest.id}/${descriptor.id} lookup routing node is invalid`);
+    }
+    seenNodeIds.add(node.nodeId);
+    const transitions = new Map();
+    let previousCharacter = null;
+    const registerBucket = (value, description) => {
+      const bucket = ccllGenreBucketDescriptor(value, profile.delivery.lookupBucketMaxBytes, description);
+      const existingById = bucketDescriptors.get(bucket.id);
+      const existingIdForFile = seenBucketFiles.get(bucket.file);
+      if (existingById) {
+        if (!sameObject(existingById, bucket)) {
+          fail(`${productManifest.id}/${descriptor.id} lookup bucket descriptor is inconsistent`);
+        }
+        return existingById;
+      }
+      if (existingIdForFile !== undefined && existingIdForFile !== bucket.id) {
+        fail(`${productManifest.id}/${descriptor.id} lookup bucket file has multiple ids`);
+      }
+      bucketDescriptors.set(bucket.id, bucket);
+      seenBucketFiles.set(bucket.file, bucket.id);
+      return bucket;
+    };
+    const terminal = node.terminal === null ? null : registerBucket(node.terminal, `${productManifest.id}/${descriptor.id} lookup terminal`);
+    for (const transition of node.transitions) {
+      if (!Array.isArray(transition) || transition.length !== 2 || typeof transition[0] !== 'string'
+        || Array.from(transition[0]).length !== 1 || transitions.has(transition[0])
+        || (previousCharacter !== null && compareUnicodeCodePoints(previousCharacter, transition[0]) >= 0)
+        || !isPlainObject(transition[1])) {
+        fail(`${productManifest.id}/${descriptor.id} lookup transition is invalid`);
+      }
+      previousCharacter = transition[0];
+      const target = transition[1];
+      if (Object.hasOwn(target, 'bucket') === Object.hasOwn(target, 'node')) {
+        fail(`${productManifest.id}/${descriptor.id} lookup transition target is invalid`);
+      }
+      if (Object.hasOwn(target, 'bucket')) {
+        const bucket = registerBucket(target.bucket, `${productManifest.id}/${descriptor.id} lookup bucket`);
+        transitions.set(transition[0], { kind: 'bucket', bucket });
+      } else {
+        if (!isPlainObject(target.node) || !Number.isSafeInteger(target.node.id) || target.node.id < 0
+          || !normalizeString(target.node.file) || !target.node.file.startsWith('routing/nodes/')) {
+          fail(`${productManifest.id}/${descriptor.id} lookup child node is invalid`);
+        }
+        resolveProductPath(profileDirectory, target.node.file, `${productManifest.id}/${descriptor.id} lookup child node`);
+        transitions.set(transition[0], { kind: 'node', node: target.node });
+        pendingNodes.push({
+          file: target.node.file,
+          prefix: `${node.prefix}${transition[0]}`,
+          nodeId: target.node.id
+        });
+      }
+    }
+    if (terminal === null && transitions.size === 0) fail(`${productManifest.id}/${descriptor.id} lookup routing node is empty`);
+    nodesByFile.set(expected.file, { terminal, transitions });
+  }
+  if (bucketDescriptors.size === 0) fail(`${productManifest.id}/${descriptor.id} lookup has no buckets`);
+
+  function routeBucketIdForWord(word) {
+    let nodeFile = profile.lookup.root;
+    const characters = Array.from(word);
+    let characterIndex = 0;
+    for (let steps = 0; steps <= characters.length + nodesByFile.size; steps += 1) {
+      const node = nodesByFile.get(nodeFile);
+      if (!node) fail(`${productManifest.id}/${descriptor.id} lookup route has a missing node`);
+      if (characterIndex === characters.length) return node.terminal?.id ?? null;
+      const transition = node.transitions.get(characters[characterIndex]);
+      if (!transition) return null;
+      if (transition.kind === 'bucket') return transition.bucket.id;
+      nodeFile = transition.node.file;
+      characterIndex += 1;
+    }
+    fail(`${productManifest.id}/${descriptor.id} lookup route contains a cycle`);
+  }
+
+  const actualSourceRows = Object.fromEntries(CCLL_GENRE_PROFILE_SOURCES.map((source) => [source.id, 0]));
+  const actualSourceTokenTotals = Object.fromEntries(CCLL_GENRE_PROFILE_SOURCES.map((source) => [source.id, 0]));
+  const observedGenreCounts = Object.fromEntries(CCLL_GENRE_PROFILE_SOURCES.map((_, index) => [String(index + 1), 0]));
+  const seenWords = new Set();
+  let joinedWordforms = 0;
+  for (const bucket of bucketDescriptors.values()) {
+    const bucketPath = resolveProductPath(profileDirectory, bucket.file, `${productManifest.id}/${descriptor.id} lookup bucket`);
+    const buffer = await readFile(bucketPath);
+    if (buffer.byteLength !== bucket.bytes || buffer.byteLength > profile.delivery.lookupBucketMaxBytes
+      || createHash('sha256').update(buffer).digest('hex') !== bucket.sha256) {
+      fail(`${productManifest.id}/${descriptor.id} lookup bucket bytes are invalid`);
+    }
+    const content = parseJson(buffer, `${productManifest.id}/${descriptor.id} lookup bucket`);
+    if (!isPlainObject(content) || content.schemaVersion !== 1 || content.productId !== productManifest.id
+      || content.profileId !== descriptor.id || content.bucketId !== bucket.id || content.recordEncoding !== 'array'
+      || !Array.isArray(content.records) || content.records.length !== bucket.records) {
+      fail(`${productManifest.id}/${descriptor.id} lookup bucket content is invalid`);
+    }
+    let previousWord = null;
+    for (const record of content.records) {
+      if (!Array.isArray(record) || record.length !== profile.sources.length + 2 || !normalizeString(record[0])
+        || normalizeCcllGenreWordform(record[0]) !== record[0] || seenWords.has(record[0])
+        || (previousWord !== null && compareUnicodeCodePoints(previousWord, record[0]) >= 0)
+        || routeBucketIdForWord(record[0]) !== bucket.id) {
+        fail(`${productManifest.id}/${descriptor.id} lookup record is invalid`);
+      }
+      previousWord = record[0];
+      seenWords.add(record[0]);
+      let observed = 0;
+      for (const [sourceIndex, source] of profile.sources.entries()) {
+        const rawCount = record[sourceIndex + 1];
+        if (rawCount === null) continue;
+        if (!Number.isSafeInteger(rawCount) || rawCount < 1) {
+          fail(`${productManifest.id}/${descriptor.id} lookup raw count is invalid`);
+        }
+        observed += 1;
+        actualSourceRows[source.id] += 1;
+        actualSourceTokenTotals[source.id] += rawCount;
+      }
+      if (!Number.isSafeInteger(record[record.length - 1]) || record[record.length - 1] !== observed
+        || observed < 1 || observed > profile.sources.length) {
+        fail(`${productManifest.id}/${descriptor.id} lookup observed-genre count is invalid`);
+      }
+      observedGenreCounts[String(observed)] += 1;
+      joinedWordforms += 1;
+    }
+  }
+  const totalSourceRows = Object.values(actualSourceRows).reduce((total, value) => total + value, 0);
+  if (!sameObject(actualSourceRows, expectedSourceRows) || !sameObject(actualSourceTokenTotals, expectedSourceTokenTotals)
+    || !sameObject(profile.summary, {
+      joinedWordforms,
+      totalSourceRows,
+      sourceRows: actualSourceRows,
+      sourceTokenTotals: actualSourceTokenTotals,
+      observedGenreCounts,
+      routingNodeCount: nodesByFile.size,
+      lookupBucketCount: bucketDescriptors.size
+    })) {
+    fail(`${productManifest.id}/${descriptor.id} profile summary does not reconcile`);
+  }
+}
+
 async function verifyAnalysisProfiles({ productManifest, productDirectory }) {
   if (productManifest.analysisProfiles === undefined) return;
   if (!Array.isArray(productManifest.analysisProfiles)) fail(`${productManifest.id} analysis profiles are invalid`);
@@ -694,6 +988,8 @@ async function verifyAnalysisProfiles({ productManifest, productDirectory }) {
       await verifyFrequencyBandCoverageProfile({ productManifest, productDirectory, descriptor });
     } else if (descriptor.type === 'normalized-contrast-lookup') {
       await verifyNormalizedContrastLookupProfile({ productManifest, productDirectory, descriptor });
+    } else if (descriptor.type === 'ccll-genre-wordform-lookup') {
+      await verifyCcllGenreWordformLookupProfile({ productManifest, productDirectory, descriptor });
     }
   }
 }

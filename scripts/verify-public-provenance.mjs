@@ -120,9 +120,9 @@ export async function verifyPublicProvenance({ root = repositoryRoot } = {}) {
     path.join(resolvedRoot, 'static', 'datasets')
   ];
   const jsonFiles = (await Promise.all(jsonDirectories.map((directory) => walkFiles(directory, (filename) => filename.endsWith('.json'))))).flat();
-  const productMetadata = await walkFiles(
+  const productJsonFiles = await walkFiles(
     path.join(resolvedRoot, 'static', 'data-products'),
-    (filename) => ['catalog.json', 'manifest.json', 'index.json'].includes(path.basename(filename))
+    (filename) => filename.endsWith('.json')
   );
   const textTargets = [
     path.join(resolvedRoot, 'README.md'),
@@ -130,9 +130,9 @@ export async function verifyPublicProvenance({ root = repositoryRoot } = {}) {
     ...await walkFiles(path.join(resolvedRoot, '.github'))
   ];
 
-  await Promise.all([...jsonFiles, ...productMetadata].map(inspectJsonFile));
+  await Promise.all([...jsonFiles, ...productJsonFiles].map(inspectJsonFile));
   await Promise.all(textTargets.map(inspectTextFile));
-  return { jsonFiles: jsonFiles.length + productMetadata.length, textFiles: textTargets.length };
+  return { jsonFiles: jsonFiles.length + productJsonFiles.length, textFiles: textTargets.length };
 }
 
 if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {

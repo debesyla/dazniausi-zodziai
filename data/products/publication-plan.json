@@ -207,6 +207,67 @@
             }
           ]
         }
+      ],
+      "analysisProfiles": [
+        {
+          "id": "ccll-wordform-genre-profile",
+          "type": "ccll-genre-wordform-lookup",
+          "title": "CCLL wordform genre profile",
+          "description": "An exact wordform lookup across the five named CCLL subcorpora. It retains each source count and denominator, derives rates per million only for the selected form, and never produces a genre-signal leaderboard.",
+          "summaryMaxBytes": 65536,
+          "sources": [
+            {
+              "id": "fiction",
+              "label": "Grožinė literatūra",
+              "sourceRole": "subcorpus-fiction"
+            },
+            {
+              "id": "non-fiction",
+              "label": "Negrožinė literatūra",
+              "sourceRole": "subcorpus-non-fiction"
+            },
+            {
+              "id": "administrative",
+              "label": "Administraciniai tekstai",
+              "sourceRole": "subcorpus-administrative"
+            },
+            {
+              "id": "periodicals",
+              "label": "Periodika",
+              "sourceRole": "subcorpus-periodicals"
+            },
+            {
+              "id": "speech",
+              "label": "Sakytinė kalba",
+              "sourceRole": "subcorpus-speech"
+            }
+          ],
+          "rate": {
+            "targetTokens": 1000000,
+            "unit": "tokens per million source tokens",
+            "formula": "rawCount * 1000000 / sourceTokens"
+          },
+          "lookup": {
+            "normalization": "trim-nfc-preserve-case",
+            "maxRoutingNodeBytes": 65536,
+            "maxBucketBytes": 65536
+          },
+          "policies": {
+            "aggregate": "excluded",
+            "punctuation": "preserve-source-wordforms",
+            "repeatedTerm": "reject-duplicate-exact-wordforms-per-source",
+            "missing": "not-observed-null",
+            "threshold": {
+              "minimumRawCount": 1,
+              "appliesTo": "exact-lookup-only-no-ranking"
+            },
+            "ordering": {
+              "field": "word",
+              "direction": "ascending",
+              "tieBreak": "unicode-code-point"
+            }
+          }
+        }
       ]
     },
     {
