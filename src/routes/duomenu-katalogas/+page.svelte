@@ -154,6 +154,10 @@
     }
 
     const explorerActions: Record<string, PrimaryAction> = {
+      'utka-ccll-wordforms': {
+        href: `${base}/zanru-profilis`,
+        label: 'Tyrinėti žanrų profilį'
+      },
       'dadurkevicius-dml6-vs-jcl-comparison': {
         href: `${base}/zodyno-apreptis`,
         label: 'Tyrinėti žodyno aprėptį'

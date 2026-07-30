@@ -43,8 +43,19 @@ const CHUNKED_PRODUCT_TYPES = new Set([
   'chunked-lexical-collection',
   'chunked-syntactic-context'
 ]);
-const ANALYSIS_PROFILE_TYPES = new Set(['frequency-band-coverage', 'normalized-contrast-lookup']);
+const ANALYSIS_PROFILE_TYPES = new Set([
+  'frequency-band-coverage',
+  'normalized-contrast-lookup',
+  'ccll-genre-wordform-lookup'
+]);
 const SYNTACTIC_CONTEXT_PRODUCT_TYPE = 'chunked-syntactic-context';
+const CCLL_GENRE_PROFILE_SOURCES = [
+  { id: 'fiction', sourceRole: 'subcorpus-fiction' },
+  { id: 'non-fiction', sourceRole: 'subcorpus-non-fiction' },
+  { id: 'administrative', sourceRole: 'subcorpus-administrative' },
+  { id: 'periodicals', sourceRole: 'subcorpus-periodicals' },
+  { id: 'speech', sourceRole: 'subcorpus-speech' }
+];
 
 function fail(message) {
   throw new Error(`Data-product preparation failed: ${message}`);
@@ -292,16 +303,48 @@ function validateNormalizedContrastLookupProfile(profile, description) {
   }
 }
 
+function validateCcllGenreWordformLookupProfile(profile, description) {
+  if (profile.summaryMaxBytes > 65536 || !Array.isArray(profile.sources) || profile.sources.length !== CCLL_GENRE_PROFILE_SOURCES.length
+    || !isPlainObject(profile.rate) || profile.rate.targetTokens !== 1000000
+    || profile.rate.unit !== 'tokens per million source tokens'
+    || profile.rate.formula !== 'rawCount * 1000000 / sourceTokens'
+    || !isPlainObject(profile.lookup) || profile.lookup.normalization !== 'trim-nfc-preserve-case'
+    || !Number.isSafeInteger(profile.lookup.maxRoutingNodeBytes) || profile.lookup.maxRoutingNodeBytes < 1024
+    || profile.lookup.maxRoutingNodeBytes > 65536 || !Number.isSafeInteger(profile.lookup.maxBucketBytes)
+    || profile.lookup.maxBucketBytes < 1024 || profile.lookup.maxBucketBytes > 65536
+    || !isPlainObject(profile.policies) || profile.policies.aggregate !== 'excluded'
+    || profile.policies.punctuation !== 'preserve-source-wordforms'
+    || profile.policies.repeatedTerm !== 'reject-duplicate-exact-wordforms-per-source'
+    || profile.policies.missing !== 'not-observed-null' || !isPlainObject(profile.policies.threshold)
+    || profile.policies.threshold.minimumRawCount !== 1
+    || profile.policies.threshold.appliesTo !== 'exact-lookup-only-no-ranking'
+    || !isPlainObject(profile.policies.ordering) || profile.policies.ordering.field !== 'word'
+    || profile.policies.ordering.direction !== 'ascending'
+    || profile.policies.ordering.tieBreak !== 'unicode-code-point') {
+    fail(`${description} is invalid`);
+  }
+  for (const [index, expected] of CCLL_GENRE_PROFILE_SOURCES.entries()) {
+    const source = profile.sources[index];
+    if (!isPlainObject(source) || source.id !== expected.id || source.sourceRole !== expected.sourceRole
+      || !normalizeString(source.label)) {
+      fail(`${description}.sources[${index}] must identify the named CCLL subcorpus`);
+    }
+  }
+}
+
 function validateAnalysisProfile(profile, description) {
   if (!isPlainObject(profile) || !isSafeId(profile.id) || !ANALYSIS_PROFILE_TYPES.has(profile.type)
-    || !isSafeId(profile.sourceRole) || !normalizeString(profile.title) || !normalizeString(profile.description)
-    || !Number.isSafeInteger(profile.summaryMaxBytes) || profile.summaryMaxBytes < 1024) {
+    || !normalizeString(profile.title) || !normalizeString(profile.description)
+    || !Number.isSafeInteger(profile.summaryMaxBytes) || profile.summaryMaxBytes < 1024
+    || (profile.type !== 'ccll-genre-wordform-lookup' && !isSafeId(profile.sourceRole))) {
     fail(`${description} is invalid`);
   }
   if (profile.type === 'frequency-band-coverage') {
     validateFrequencyBandCoverageProfile(profile, description);
   } else if (profile.type === 'normalized-contrast-lookup') {
     validateNormalizedContrastLookupProfile(profile, description);
+  } else if (profile.type === 'ccll-genre-wordform-lookup') {
+    validateCcllGenreWordformLookupProfile(profile, description);
   }
 }
 
@@ -390,7 +433,13 @@ export function validatePublicationPlan(plan) {
       for (const [profileIndex, profile] of product.analysisProfiles.entries()) {
         validateAnalysisProfile(profile, `${description}.analysisProfiles[${profileIndex}]`);
         if (profileIds.has(profile.id)) fail(`${description}.analysisProfiles uses duplicate ids`);
-        if (!product.views.some((view) => view.sourceRole === profile.sourceRole)) {
+        if (profile.type === 'ccll-genre-wordform-lookup') {
+          for (const source of profile.sources) {
+            if (!product.views.some((view) => view.sourceRole === source.sourceRole)) {
+              fail(`${description}.analysisProfiles[${profileIndex}] must use only source roles exposed by row views`);
+            }
+          }
+        } else if (!product.views.some((view) => view.sourceRole === profile.sourceRole)) {
           fail(`${description}.analysisProfiles[${profileIndex}] must use a source role exposed by a row view`);
         }
         profileIds.add(profile.id);
@@ -1706,6 +1755,333 @@ async function buildNormalizedContrastLookupProfile({ contract, productId, produ
   };
 }
 
+function normalizeCcllGenreWordform(value) {
+  const word = normalizeString(value);
+  return word ? word.normalize('NFC') : '';
+}
+
+function ccllGenreRecordPayloadBytes(record) {
+  return Buffer.byteLength(JSON.stringify(record), 'utf8') + 1;
+}
+
+function compareUnicodeCodePoints(left, right) {
+  const leftCharacters = Array.from(left);
+  const rightCharacters = Array.from(right);
+  const length = Math.min(leftCharacters.length, rightCharacters.length);
+  for (let index = 0; index < length; index += 1) {
+    if (leftCharacters[index] === rightCharacters[index]) continue;
+    return leftCharacters[index].codePointAt(0) - rightCharacters[index].codePointAt(0);
+  }
+  return leftCharacters.length - rightCharacters.length;
+}
+
+function findCcllGenreProfileSources(profile, views, contract) {
+  const filesByRole = new Map(contract.source.files.map((file) => [file.role, file]));
+  return profile.sources.map((source) => {
+    const matchingViews = views.filter((view) => view.sourceRole === source.sourceRole);
+    if (matchingViews.length !== 1) {
+      fail(`${profile.id} requires exactly one row view for source role ${source.sourceRole}`);
+    }
+    const view = matchingViews[0];
+    const wordFields = view.fields.filter((field) => field.type === 'string');
+    const countFields = view.fields.filter((field) => field.type === 'raw-token-count');
+    if (wordFields.length !== 1 || countFields.length !== 1) {
+      fail(`${profile.id} requires one word and one raw token count field for ${source.sourceRole}`);
+    }
+    const sourceFile = filesByRole.get(source.sourceRole);
+    const sourceTokens = Number(sourceFile?.numericTotals?.[String(countFields[0].sourceColumn)]);
+    if (!sourceFile || !Number.isSafeInteger(sourceFile.rows) || sourceFile.rows < 1
+      || !Number.isSafeInteger(sourceTokens) || sourceTokens < 1) {
+      fail(`${profile.id} source ${source.sourceRole} is missing reviewed rows or token totals`);
+    }
+    return {
+      ...source,
+      view,
+      wordField: wordFields[0],
+      countField: countFields[0],
+      sourceFile,
+      sourceTokens
+    };
+  });
+}
+
+async function collectCcllGenreLookupRecords({ profile, sources, sourceResolver }) {
+  const recordsByWord = new Map();
+  const sourceRows = {};
+  const sourceTokenTotals = {};
+  let totalSourceRows = 0;
+
+  for (const [sourceIndex, source] of sources.entries()) {
+    const sourcePath = await sourceResolver.resolve(source.sourceFile);
+    const sourceDisplayPath = sourceDisplayName(source.sourceFile);
+    const delimiter = source.sourceFile.delimiter ?? '\t';
+    const lines = createInterface({
+      input: createReadStream(sourcePath, { encoding: 'utf8' }),
+      crlfDelay: Infinity
+    });
+    let physicalLineNumber = 0;
+    let rows = 0;
+    let tokenTotal = 0;
+    for await (const line of lines) {
+      physicalLineNumber += 1;
+      if (source.sourceFile.hasHeader === true && physicalLineNumber === 1) continue;
+      rows += 1;
+      const values = parseDelimitedLine(line, delimiter);
+      if (values.length !== source.sourceFile.columns) {
+        fail(`${sourceDisplayPath} line ${rows} has ${values.length} columns; expected ${source.sourceFile.columns}`);
+      }
+      const word = normalizeCcllGenreWordform(values[source.wordField.sourceColumn]);
+      if (!word) fail(`${sourceDisplayPath} line ${rows} has an empty ${source.wordField.id} value`);
+      const rawCount = parseFieldValue(source.countField, values[source.countField.sourceColumn], sourceDisplayPath, rows);
+      if (!Number.isSafeInteger(rawCount) || rawCount < 1) {
+        fail(`${sourceDisplayPath} line ${rows} has a non-positive ${source.countField.id} value`);
+      }
+      let record = recordsByWord.get(word);
+      if (!record) {
+        record = [word, ...Array(sources.length).fill(null), 0];
+        recordsByWord.set(word, record);
+      }
+      const countIndex = sourceIndex + 1;
+      if (record[countIndex] !== null) {
+        fail(`${sourceDisplayPath} repeats the exact normalized wordform ${JSON.stringify(word)}`);
+      }
+      record[countIndex] = rawCount;
+      record[record.length - 1] += 1;
+      tokenTotal += rawCount;
+    }
+    if (rows !== source.sourceFile.rows || tokenTotal !== source.sourceTokens) {
+      fail(`${sourceDisplayPath} does not reconcile with its reviewed row or token total`);
+    }
+    sourceRows[source.id] = rows;
+    sourceTokenTotals[source.id] = tokenTotal;
+    totalSourceRows += rows;
+  }
+
+  const observedGenreCounts = Object.fromEntries(sources.map((_, index) => [String(index + 1), 0]));
+  const records = [...recordsByWord.values()];
+  for (const record of records) observedGenreCounts[String(record[record.length - 1])] += 1;
+  return { records, sourceRows, sourceTokenTotals, totalSourceRows, observedGenreCounts };
+}
+
+function createCcllGenreRoutingNode(id, prefix) {
+  return { id, prefix, terminal: null, transitions: new Map() };
+}
+
+function ccllGenreGroupPayloadBytes(records) {
+  return records.reduce((total, record) => total + ccllGenreRecordPayloadBytes(record), 0);
+}
+
+function buildCcllGenreLookupRouting({ profile, records }) {
+  const payloadBudget = profile.lookup.maxBucketBytes - 2048;
+  if (payloadBudget < 1024) fail(`${profile.id} lookup bucket budget leaves no usable payload`);
+  const nodes = [];
+  const leafGroups = [];
+  const buckets = [];
+
+  function createLeafGroup({ node, type, character, groupRecords }) {
+    const group = {
+      node,
+      type,
+      character,
+      records: groupRecords,
+      payloadBytes: ccllGenreGroupPayloadBytes(groupRecords),
+      bucket: null
+    };
+    if (group.payloadBytes > payloadBudget) {
+      fail(`${profile.id} cannot bound exact lookup records for ${JSON.stringify(node.prefix)}`);
+    }
+    leafGroups.push(group);
+    return group;
+  }
+
+  function createNode(prefix, nodeRecords) {
+    const node = createCcllGenreRoutingNode(nodes.length, prefix);
+    nodes.push(node);
+    const terminalRecords = [];
+    const children = new Map();
+    const depth = Array.from(prefix).length;
+    for (const record of nodeRecords) {
+      const characters = Array.from(record[0]);
+      if (characters.length === depth) {
+        terminalRecords.push(record);
+      } else {
+        const character = characters[depth];
+        const group = children.get(character) ?? [];
+        group.push(record);
+        children.set(character, group);
+      }
+    }
+    if (terminalRecords.length > 0) {
+      node.terminal = createLeafGroup({ node, type: 'terminal', character: null, groupRecords: terminalRecords });
+    }
+    for (const [character, group] of [...children.entries()].sort(([left], [right]) => compareUnicodeCodePoints(left, right))) {
+      if (ccllGenreGroupPayloadBytes(group) <= payloadBudget) {
+        node.transitions.set(character, {
+          kind: 'group',
+          group: createLeafGroup({ node, type: 'child', character, groupRecords: group })
+        });
+      } else {
+        node.transitions.set(character, { kind: 'node', node: createNode(`${prefix}${character}`, group) });
+      }
+    }
+    return node;
+  }
+
+  const root = createNode('', records);
+  for (const group of [...leafGroups].sort((left, right) => right.payloadBytes - left.payloadBytes
+    || compareUnicodeCodePoints(left.node.prefix, right.node.prefix)
+    || compareUnicodeCodePoints(left.character ?? '', right.character ?? ''))) {
+    let bucket = buckets.find((candidate) => candidate.payloadBytes + group.payloadBytes <= payloadBudget);
+    if (!bucket) {
+      bucket = { id: buckets.length, groups: [], payloadBytes: 0, records: [], descriptor: null };
+      buckets.push(bucket);
+    }
+    bucket.groups.push(group);
+    bucket.payloadBytes += group.payloadBytes;
+    for (const record of group.records) bucket.records.push(record);
+    group.bucket = bucket;
+  }
+  if (buckets.length === 0) fail(`${profile.id} lookup produced no buckets`);
+  return { root, nodes, buckets };
+}
+
+async function writeCcllGenreLookupRouting({ productId, productDirectory, profile, routing }) {
+  const profileDirectory = path.join(productDirectory, 'analysis', profile.id);
+  const bucketDirectory = path.join(profileDirectory, 'buckets');
+  const nodeDirectory = path.join(profileDirectory, 'routing', 'nodes');
+  await mkdir(bucketDirectory, { recursive: true });
+  await mkdir(nodeDirectory, { recursive: true });
+
+  for (const bucket of routing.buckets) {
+    bucket.records.sort((left, right) => compareUnicodeCodePoints(left[0], right[0]));
+    const filename = `${String(bucket.id + 1).padStart(6, '0')}.json`;
+    const buffer = await writeCompactJsonWithByteBudget(
+      path.join(bucketDirectory, filename),
+      {
+        schemaVersion: 1,
+        productId,
+        profileId: profile.id,
+        bucketId: bucket.id,
+        recordEncoding: 'array',
+        records: bucket.records
+      },
+      profile.lookup.maxBucketBytes,
+      `${productId}/${profile.id}/buckets/${filename}`
+    );
+    bucket.descriptor = {
+      id: bucket.id,
+      file: `buckets/${filename}`,
+      records: bucket.records.length,
+      bytes: buffer.byteLength,
+      sha256: createHash('sha256').update(buffer).digest('hex')
+    };
+  }
+
+  for (const node of routing.nodes) {
+    node.file = `routing/nodes/${String(node.id + 1).padStart(6, '0')}.json`;
+  }
+  for (const node of routing.nodes) {
+    const filename = path.basename(node.file);
+    await writeCompactJsonWithByteBudget(
+      path.join(nodeDirectory, filename),
+      {
+        schemaVersion: 1,
+        productId,
+        profileId: profile.id,
+        nodeId: node.id,
+        prefix: node.prefix,
+        terminal: node.terminal?.bucket?.descriptor ?? null,
+        transitions: [...node.transitions.entries()]
+          .sort(([left], [right]) => compareUnicodeCodePoints(left, right))
+          .map(([character, transition]) => [
+            character,
+            transition.kind === 'group'
+              ? { bucket: transition.group.bucket.descriptor }
+              : { node: { id: transition.node.id, file: transition.node.file } }
+          ])
+      },
+      profile.lookup.maxRoutingNodeBytes,
+      `${productId}/${profile.id}/${node.file}`
+    );
+  }
+  return { root: routing.root.file, routingNodeCount: routing.nodes.length, lookupBucketCount: routing.buckets.length };
+}
+
+async function buildCcllGenreWordformLookupProfile({ contract, productId, productDirectory, profile, views, sourceResolver }) {
+  const sources = findCcllGenreProfileSources(profile, views, contract);
+  const joined = await collectCcllGenreLookupRecords({ profile, sources, sourceResolver });
+  const routing = buildCcllGenreLookupRouting({ profile, records: joined.records });
+  const writtenRouting = await writeCcllGenreLookupRouting({ productId, productDirectory, profile, routing });
+  const profileDirectory = path.join(productDirectory, 'analysis', profile.id);
+  const manifest = {
+    schemaVersion: 1,
+    productId,
+    profileId: profile.id,
+    profileType: profile.type,
+    title: profile.title,
+    description: profile.description,
+    provenance: {
+      sourceUrl: contract.source.sourceUrl,
+      licence: contract.source.licence,
+      citation: contract.source.citation
+    },
+    sources: sources.map((source) => ({
+      id: source.id,
+      label: source.label,
+      sourceRole: source.sourceRole,
+      sourceRows: source.sourceFile.rows,
+      sourceTokens: source.sourceTokens,
+      sourceFile: publicSourceFile(source.sourceFile),
+      view: { id: source.view.id, index: `views/${source.view.id}/index.json` }
+    })),
+    rate: profile.rate,
+    policies: profile.policies,
+    delivery: {
+      summaryMaxBytes: profile.summaryMaxBytes,
+      routingNodeMaxBytes: profile.lookup.maxRoutingNodeBytes,
+      lookupBucketMaxBytes: profile.lookup.maxBucketBytes
+    },
+    lookup: {
+      normalization: profile.lookup.normalization,
+      recordEncoding: 'array',
+      fields: [
+        { id: 'word', label: 'Word form', type: 'string' },
+        ...sources.map((source) => ({
+          id: `${source.id}RawCount`,
+          label: `${source.label} raw token count`,
+          type: 'raw-token-count',
+          unit: 'tokens',
+          nullable: true
+        })),
+        { id: 'observedGenres', label: 'Observed named subcorpora', type: 'observed-genre-count' }
+      ],
+      root: writtenRouting.root
+    },
+    summary: {
+      joinedWordforms: joined.records.length,
+      totalSourceRows: joined.totalSourceRows,
+      sourceRows: joined.sourceRows,
+      sourceTokenTotals: joined.sourceTokenTotals,
+      observedGenreCounts: joined.observedGenreCounts,
+      routingNodeCount: writtenRouting.routingNodeCount,
+      lookupBucketCount: writtenRouting.lookupBucketCount
+    }
+  };
+  await writeCompactJsonWithByteBudget(
+    path.join(profileDirectory, 'manifest.json'),
+    manifest,
+    profile.summaryMaxBytes,
+    `${productId}/${profile.id}/manifest.json`
+  );
+  return {
+    id: profile.id,
+    type: profile.type,
+    title: profile.title,
+    description: profile.description,
+    manifest: `analysis/${profile.id}/manifest.json`
+  };
+}
+
 function compareStrings(left, right) {
   return left < right ? -1 : left > right ? 1 : 0;
 }
@@ -2444,6 +2820,15 @@ async function buildContractProduct({ contract, contractProduct, sourceResolver,
       }));
     } else if (profile.type === 'normalized-contrast-lookup') {
       analysisProfiles.push(await buildNormalizedContrastLookupProfile({
+        contract,
+        productId: contract.id,
+        productDirectory,
+        profile,
+        views: contractProduct.views,
+        sourceResolver
+      }));
+    } else if (profile.type === 'ccll-genre-wordform-lookup') {
+      analysisProfiles.push(await buildCcllGenreWordformLookupProfile({
         contract,
         productId: contract.id,
         productDirectory,

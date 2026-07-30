@@ -18,6 +18,9 @@ metadata; larger products are explained in the public catalogue at
   with separate form and token shares plus bounded example lists.
 - Compare an exact word form across CCLL2, wartime media, and wartime social
   networks without loading the full 2.26-million-row comparison dataset.
+- Look up one exact wordform across the five named CCLL subcorpora at
+  `/zanru-profilis`, with raw counts, source denominators, and per-million
+  rates but no aggregate-plus-genre total or generic genre leaderboard.
 - Search, filter by part of speech, sort by word/frequency/type, and browse a
   50-row page at a time.
 - Export the complete active filtered and sorted result set as UTF-8 CSV.

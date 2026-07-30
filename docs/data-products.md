@@ -93,13 +93,26 @@ counts, a 100-per-100-million minimum-rate rule, and the formula
 summed: compatible sparse source rows are combined only when a visitor asks for
 that form, while contradictory values are rejected.
 
+`utka-ccll-wordforms/analysis/ccll-wordform-genre-profile/` is a separate,
+source-scoped exact wordform lookup across the five named CCLL subcorpora. Its
+small profile manifest points only to a root routing node; routing nodes and
+packed lookup buckets are each capped at 64 KiB. A selected record stores the
+source wordform, five nullable raw counts, and the number of named subcorpora
+where it was observed. The browser derives a per-million rate from each
+published source-token denominator; a small worker parses and scans the
+selected bucket off the main thread. It never adds the aggregate list, turns a
+missing value into zero, filters punctuation, or exposes a universal
+genre-signal leaderboard.
+
 ## Published collection coverage
 
 - `utka-2018-lemmatized-totals`, `dadurkevicius-2020-jcl-lemmas`, and
   `petkevicius-2025-ccll-lemmas` remain complete direct JSON datasets.
 - `utka-ccll-wordforms` has seven bounded JSON views: aggregate frequency and
   alphabetical orders plus five named subcorpora. The aggregate is never added
-  to the subcorpora.
+  to the subcorpora. Its genre-profile lookup joins only the five named lists,
+  retains raw counts and denominators separately, and loads a route plus one
+  bounded bucket for an exact form at `/zanru-profilis`.
 - `dadurkevicius-dml6-vs-jcl-comparison` has separate views for type coverage,
   lemma/POS occurrences, and types missing in DML6. Coverage codes are labelled
   categories, not counts. Its compact frequency-band coverage profile powers

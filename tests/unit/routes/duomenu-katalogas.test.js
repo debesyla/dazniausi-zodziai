@@ -100,6 +100,9 @@ describe('Public data catalogue page', () => {
     const comparisonCard = getByRole('article', { name: 'DML6 palyginimas' });
     expect(within(comparisonCard).getByRole('link', { name: 'Tyrinėti žodyno aprėptį' })).toHaveAttribute('href', '/zodyno-apreptis');
 
+    const ccllCard = getByRole('article', { name: 'CCLL žodžių formos' });
+    expect(within(ccllCard).getByRole('link', { name: 'Tyrinėti žanrų profilį' })).toHaveAttribute('href', '/zanru-profilis');
+
     const syntaxCard = getByRole('article', { name: 'ALKSNIS bandomieji kontekstai' });
     expect(within(syntaxCard).getByRole('link', { name: 'Tyrinėti sintaksės kontekstus' })).toHaveAttribute('href', '/sintakse');
 
