@@ -26,13 +26,71 @@ describe('analyseFrequency', () => {
       { type: 'jng', frequency: 60, entries: 1, share: 60 / 105 },
       { type: 'dkt', frequency: 40, entries: 2, share: 40 / 105 }
     ]);
+    expect(analysis.facts).toEqual({
+      topEntryShare: 60 / 105,
+      halfCoverage: { threshold: 0.5, entries: 1, entryShare: 1 / 4, tokenShare: 60 / 105 },
+      ninetyCoverage: { threshold: 0.9, entries: 3, entryShare: 3 / 4, tokenShare: 100 / 105 },
+      singletonEntries: 0,
+      singletonEntryShare: 0,
+      singletonTokenShare: 0
+    });
   });
 
   it('does not mutate the source rows and handles an empty result safely', () => {
     const original = structuredClone(words);
-    expect(analyseFrequency([])).toMatchObject({ entryCount: 0, totalFrequency: 0, topWord: null });
+    expect(analyseFrequency([])).toMatchObject({
+      entryCount: 0,
+      totalFrequency: 0,
+      topWord: null,
+      facts: {
+        topEntryShare: 0,
+        halfCoverage: null,
+        ninetyCoverage: null,
+        singletonEntries: 0,
+        singletonEntryShare: 0,
+        singletonTokenShare: 0
+      }
+    });
     analyseFrequency(words);
     expect(words).toEqual(original);
+  });
+
+  it('handles a single frequency-1 entry', () => {
+    const analysis = analyseFrequency([{ word: 'vienas', frequency: 1 }]);
+
+    expect(analysis.facts).toEqual({
+      topEntryShare: 1,
+      halfCoverage: { threshold: 0.5, entries: 1, entryShare: 1, tokenShare: 1 },
+      ninetyCoverage: { threshold: 0.9, entries: 1, entryShare: 1, tokenShare: 1 },
+      singletonEntries: 1,
+      singletonEntryShare: 1,
+      singletonTokenShare: 1
+    });
+  });
+
+  it('describes concentration and the frequency-1 long tail independently', () => {
+    const analysis = analyseFrequency([
+      { word: 'dažnas', frequency: 100 },
+      { word: 'retesnis', frequency: 10 },
+      { word: 'retas-a', frequency: 1 },
+      { word: 'retas-b', frequency: 1 }
+    ]);
+
+    expect(analysis.facts.halfCoverage).toEqual({
+      threshold: 0.5,
+      entries: 1,
+      entryShare: 1 / 4,
+      tokenShare: 100 / 112
+    });
+    expect(analysis.facts.ninetyCoverage).toEqual({
+      threshold: 0.9,
+      entries: 2,
+      entryShare: 1 / 2,
+      tokenShare: 110 / 112
+    });
+    expect(analysis.facts.singletonEntries).toBe(2);
+    expect(analysis.facts.singletonEntryShare).toBe(1 / 2);
+    expect(analysis.facts.singletonTokenShare).toBe(2 / 112);
   });
 });
 

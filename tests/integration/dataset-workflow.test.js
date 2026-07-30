@@ -92,12 +92,16 @@ describe('dataset workflow integration', () => {
 
     await waitFor(() => expect(getByRole('heading', { name: firstDataset.title })).toBeInTheDocument());
     expect(container.querySelector('.table-container tbody tr')).toHaveTextContent('beta');
+    expect(container.querySelector('.fact-grid')).toHaveTextContent(/66,667\s*%/);
 
     await user.click(getByRole('button', { name: 'Rikiuoti pagal Žodis: nerikiuota' }));
     await waitFor(() => expect(container.querySelector('.table-container tbody tr')).toHaveTextContent('alfa'));
 
     await user.click(getByRole('checkbox', { name: /Noun/ }));
-    await waitFor(() => expect(getByRole('button', { name: 'Išvalyti filtrus' })).toBeInTheDocument());
+    await waitFor(() => {
+      expect(getByRole('button', { name: 'Išvalyti filtrus' })).toBeInTheDocument();
+      expect(container.querySelector('.fact-grid')).toHaveTextContent('„beta“ sukaupia 100 %');
+    });
 
     await user.selectOptions(getByRole('combobox', { name: 'Pasirinkite duomenis:' }), 'second');
     await waitFor(() => expect(getByRole('heading', { name: secondDataset.title })).toBeInTheDocument());
