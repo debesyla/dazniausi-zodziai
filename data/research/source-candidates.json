@@ -37,6 +37,10 @@
         {
           "kind": "credential-safe-reproduction",
           "summary": "Define a reproducible acquisition path without committing passwords, transient download URLs, or raw corpus files to the public repository."
+        },
+        {
+          "kind": "publication-review",
+          "summary": "After acquisition, validate the delivered language composition and schema, then approve rights-, privacy-, and disclosure-safe aggregate outputs before publication."
         }
       ],
       "rawImportAuthorized": false,

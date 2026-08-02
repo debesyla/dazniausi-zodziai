@@ -60,6 +60,7 @@ describe('project hygiene', () => {
 		const plan = JSON.parse(await readRepositoryFile('data/products/publication-plan.json'));
 
 		expect(ledger.schemaVersion).toBe(1);
+		expect(new Set(ledger.candidates.map((candidate) => candidate.id)).size).toBe(ledger.candidates.length);
 		expect(ledger.candidates).toEqual([
 			expect.objectContaining({
 				id: 'vssa-2026-general-lithuanian-corpus',
@@ -77,7 +78,32 @@ describe('project hygiene', () => {
 			})
 		]);
 		for (const candidate of ledger.candidates) {
+			expect(Object.keys(candidate).sort()).toEqual([
+				'blockers',
+				'id',
+				'licence',
+				'publicProductAuthorized',
+				'rawImportAuthorized',
+				'sourceUrl',
+				'status',
+				'title',
+				'trackingIssue'
+			]);
+			expect(candidate.id).toMatch(/^[a-z0-9][a-z0-9-]+$/);
+			expect(candidate.sourceUrl).toMatch(/^https:\/\/clarin-repo\.lt\/items\/[a-f0-9-]+$/);
+			expect(candidate.trackingIssue).toMatch(/^https:\/\/github\.com\/debesyla\/dazniausi-zodziai\/issues\/\d+$/);
+			expect(candidate.licence).toEqual(expect.any(String));
+			expect(candidate.licence.length).toBeGreaterThan(0);
+			expect(candidate.status).toBe('blocked-external');
+			expect(candidate.rawImportAuthorized).toBe(false);
+			expect(candidate.publicProductAuthorized).toBe(false);
 			expect(candidate.blockers.length).toBeGreaterThan(0);
+			for (const blocker of candidate.blockers) {
+				expect(Object.keys(blocker).sort()).toEqual(['kind', 'summary']);
+				expect(blocker.kind).toMatch(/^[a-z][a-z-]+$/);
+				expect(blocker.summary).toEqual(expect.any(String));
+				expect(blocker.summary.length).toBeGreaterThan(20);
+			}
 			expect(sourceCatalog).toContain(candidate.title);
 			expect(sourceCatalog).toContain(candidate.trackingIssue);
 		}
