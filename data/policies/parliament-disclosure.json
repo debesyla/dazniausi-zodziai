@@ -1,0 +1,78 @@
+{
+  "schemaVersion": 1,
+  "productId": "kapociute-dzikiene-2017-parliament-frequency-aggregates",
+  "status": "aggregate-only",
+  "reviewIssue": "https://github.com/debesyla/dazniausi-zodziai/issues/68",
+  "approvedGranularity": "corpus",
+  "approvedViews": {
+    "wordforms-by-frequency": {
+      "recordFields": [
+        "word",
+        "count"
+      ]
+    },
+    "lemmas-by-frequency": {
+      "recordFields": [
+        "lemma",
+        "count"
+      ]
+    }
+  },
+  "forbiddenObjectKeys": [
+    "rawText",
+    "text",
+    "excerpt",
+    "excerpts",
+    "quote",
+    "quotation",
+    "sentence",
+    "sentences",
+    "document",
+    "documents",
+    "documentId",
+    "recordId",
+    "sampleId",
+    "archivePath",
+    "filePath",
+    "filename",
+    "sourceId",
+    "sourceIdentifier",
+    "sourceGroup",
+    "sourceGroupId",
+    "speaker",
+    "speakerId",
+    "speakerName",
+    "author",
+    "authorId",
+    "authorName",
+    "person",
+    "personId",
+    "date",
+    "speechDate",
+    "day",
+    "month",
+    "year",
+    "calendarYear",
+    "session",
+    "sessionId",
+    "period",
+    "time",
+    "timestamp",
+    "rank",
+    "ranking"
+  ],
+  "blockedExpansions": {
+    "temporal": {
+      "status": "blocked",
+      "reason": "The YYYY-MM-DD filename label has no authoritative documented semantic meaning.",
+      "minimumCellPolicy": {
+        "status": "pending-disclosure-review",
+        "threshold": null
+      }
+    },
+    "person": {
+      "status": "prohibited",
+      "reason": "Authorship attribution, speaker statistics, person rankings, and identity-bearing outputs are outside the authorized product scope."
+    }
+  }
+}
