@@ -4,6 +4,7 @@ import { fileURLToPath } from 'node:url';
 
 const repositoryRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const defaultPolicyPath = path.join(repositoryRoot, 'data', 'policies', 'parliament-disclosure.json');
+const PARLIAMENT_PRODUCT_ID = 'kapociute-dzikiene-2017-parliament-frequency-aggregates';
 
 const REQUIRED_APPROVED_VIEWS = {
   'wordforms-by-frequency': ['word', 'count'],
@@ -35,6 +36,61 @@ const REQUIRED_FORBIDDEN_KEYS = [
   'rank',
   'ranking'
 ];
+
+const APPROVED_METADATA_KEYS = new Set([
+  'schemaVersion',
+  'id',
+  'title',
+  'productType',
+  'publication',
+  'status',
+  'scope',
+  'access',
+  'reason',
+  'provenance',
+  'sourceUrl',
+  'licence',
+  'citation',
+  'files',
+  'role',
+  'artifactId',
+  'format',
+  'bytes',
+  'sha256',
+  'rows',
+  'columns',
+  'hasHeader',
+  'delivery',
+  'mode',
+  'constraints',
+  'views',
+  'description',
+  'index',
+  'sourceRole',
+  'recordEncoding',
+  'summary',
+  'sourceRows',
+  'recordCount',
+  'numericTotals',
+  'count',
+  'nullCounts',
+  'productId',
+  'viewId',
+  'fields',
+  'label',
+  'type',
+  'sourceColumn',
+  'unit',
+  'ordering',
+  'field',
+  'direction',
+  'sourceFile',
+  'maxChunkBytes',
+  'chunks',
+  'file',
+  'records',
+  'chunk'
+]);
 
 function fail(message) {
   throw new Error(`Parliament disclosure verification failed: ${message}`);
@@ -76,18 +132,34 @@ export function assertNoForbiddenKeys(value, forbiddenKeys, location = '$') {
   }
 }
 
+export function assertOnlyApprovedMetadataKeys(value, location = '$') {
+  if (Array.isArray(value)) {
+    value.forEach((item, index) => assertOnlyApprovedMetadataKeys(item, `${location}[${index}]`));
+    return;
+  }
+  if (!isPlainObject(value)) return;
+
+  for (const [key, child] of Object.entries(value)) {
+    if (!APPROVED_METADATA_KEYS.has(key)) {
+      fail(`${location} contains unapproved metadata key ${key}`);
+    }
+    assertOnlyApprovedMetadataKeys(child, `${location}.${key}`);
+  }
+}
+
 export function assertAggregateRecord(record, location = '$') {
   if (!Array.isArray(record) || record.length !== 2
-    || typeof record[0] !== 'string' || record[0].length === 0
+    || typeof record[0] !== 'string' || !/^\p{L}{1,64}$/u.test(record[0])
     || !Number.isSafeInteger(record[1]) || record[1] < 1) {
-    fail(`${location} must be exactly [non-empty word or lemma, positive integer count]`);
+    fail(`${location} must be exactly [1-64 Unicode letters, positive integer count]`);
   }
 }
 
 function validatePolicy(policy) {
   if (!isPlainObject(policy) || policy.schemaVersion !== 1
-    || typeof policy.productId !== 'string' || policy.status !== 'aggregate-only'
+    || policy.productId !== PARLIAMENT_PRODUCT_ID || policy.status !== 'aggregate-only'
     || policy.approvedGranularity !== 'corpus' || !isPlainObject(policy.approvedViews)
+    || policy.tokenPolicy?.kind !== 'unicode-letter-sequence' || policy.tokenPolicy.maxCodePoints !== 64
     || !Array.isArray(policy.forbiddenObjectKeys)) {
     fail('policy must declare one aggregate-only corpus product with approved views and forbidden keys');
   }
@@ -149,10 +221,13 @@ export async function verifyParliamentDisclosure({ root = repositoryRoot, policy
   const resolvedPolicyPath = policyPath ? path.resolve(policyPath) : path.join(resolvedRoot, path.relative(repositoryRoot, defaultPolicyPath));
   const policy = await readJson(resolvedPolicyPath, 'Parliament disclosure policy');
   const forbiddenKeys = validatePolicy(policy);
-  const productRoot = path.join(resolvedRoot, 'static', 'data-products', policy.productId);
+  const productBase = path.join(resolvedRoot, 'static', 'data-products');
+  const productRoot = path.resolve(productBase, policy.productId);
+  if (path.dirname(productRoot) !== productBase) fail('policy product ID resolves outside the public product directory');
   const manifestPath = path.join(productRoot, 'manifest.json');
   const manifest = await readJson(manifestPath, 'Parliament product manifest');
   assertNoForbiddenKeys(manifest, forbiddenKeys, 'manifest');
+  assertOnlyApprovedMetadataKeys(manifest, 'manifest');
 
   if (manifest.id !== policy.productId || manifest.productType !== 'chunked-frequency-list'
     || manifest.publication?.status !== 'published') {
@@ -179,6 +254,7 @@ export async function verifyParliamentDisclosure({ root = repositoryRoot, policy
     const index = await readJson(indexPath, `Parliament ${viewId} index`);
     expectedFiles.add(indexPath);
     assertNoForbiddenKeys(index, forbiddenKeys, `views.${viewId}.index`);
+    assertOnlyApprovedMetadataKeys(index, `views.${viewId}.index`);
 
     const fieldIds = Array.isArray(index.fields) ? index.fields.map((field) => field.id) : [];
     if (index.productId !== policy.productId || index.viewId !== viewId || index.recordEncoding !== 'array'
@@ -198,6 +274,7 @@ export async function verifyParliamentDisclosure({ root = repositoryRoot, policy
       const chunk = await readJson(chunkPath, `Parliament ${viewId} chunk ${chunkIndex}`);
       expectedFiles.add(chunkPath);
       assertNoForbiddenKeys(chunk, forbiddenKeys, `views.${viewId}.chunks[${chunkIndex}]`);
+      assertOnlyApprovedMetadataKeys(chunk, `views.${viewId}.chunks[${chunkIndex}]`);
 
       const chunkKeys = Object.keys(chunk);
       if (!sameMembers(chunkKeys, ['schemaVersion', 'productId', 'viewId', 'chunk', 'records'])

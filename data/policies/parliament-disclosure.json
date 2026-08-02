@@ -18,6 +18,10 @@
       ]
     }
   },
+  "tokenPolicy": {
+    "kind": "unicode-letter-sequence",
+    "maxCodePoints": 64
+  },
   "forbiddenObjectKeys": [
     "rawText",
     "text",

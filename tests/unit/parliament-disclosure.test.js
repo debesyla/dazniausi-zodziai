@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
   assertAggregateRecord,
   assertNoForbiddenKeys,
+  assertOnlyApprovedMetadataKeys,
   verifyParliamentDisclosure
 } from '../../scripts/verify-parliament-disclosure.mjs';
 
@@ -24,8 +25,16 @@ describe('Parliament disclosure quarantine', () => {
       .toThrow(`contains forbidden identity or granularity key ${key}`);
   });
 
+  it.each(['speakerMetadata', 'personStats', 'timeBuckets', 'documentRows'])
+    ('rejects unapproved compound metadata key %s', (key) => {
+      expect(() => assertOnlyApprovedMetadataKeys({ [key]: [] }))
+        .toThrow(`contains unapproved metadata key ${key}`);
+    });
+
   it('accepts only a two-field aggregate row', () => {
     expect(() => assertAggregateRecord(['žodis', 12])).not.toThrow();
+    expect(() => assertAggregateRecord(['visas kalbos tekstas', 12])).toThrow(/must be exactly/);
+    expect(() => assertAggregateRecord(['speaker-1', 12])).toThrow(/must be exactly/);
     expect(() => assertAggregateRecord(['žodis', 12, 'speaker-1'])).toThrow(/must be exactly/);
     expect(() => assertAggregateRecord(['žodis', 0])).toThrow(/must be exactly/);
   });

@@ -10,8 +10,11 @@ The machine-readable policy is
 `npm run disclosure:verify` walks the complete public product—not only its
 manifest—and rejects an extra view, an unapproved file, identity-bearing or
 temporal object keys, a record with more than the approved word/lemma and count
-fields, or a mismatch between index and chunk record totals. The same verifier
-runs inside `npm run public:verify` and therefore in pull-request CI.
+fields, a non-lexical string payload, or a mismatch between index and chunk
+record totals. Aggregate tokens must match the source pipeline's Unicode-letter
+rule and are capped at 64 code points; the reviewed outputs currently have a
+maximum of 27. The same verifier runs inside `npm run public:verify` and
+therefore in pull-request CI.
 
 Source-author names in the citation are required CC BY attribution. They do
 not identify corpus speakers and are not record fields. A word or surname that
