@@ -17,8 +17,15 @@ The automated journey uses a controlled catalog and dataset fixture so it can
 reliably prove catalog/data loading, search, POS filter, sorting, pagination,
 dashboard control change, table-equivalent disclosure, reset, keyboard sort,
 CSV download, console health, first-party request health, page-level overflow,
-and mobile touch-target dimensions. Failure screenshots, traces, videos, and
-reports are uploaded from CI when present.
+and mobile touch-target dimensions. CI runs this matrix from a non-root
+`/lietuviu-zodziai/` base path so absolute-navigation regressions cannot hide
+behind a root deployment.
+
+CI combines the GitHub annotation reporter with a complete HTML report. The
+HTML report is uploaded on green and failing browser runs; screenshots, traces,
+videos, and `test-results` are included when Playwright creates them. A missing
+report makes the artifact step fail instead of silently leaving the release
+without browser evidence.
 
 ## Local and hosted runs
 
@@ -38,6 +45,8 @@ PLAYWRIGHT_BASE_URL=https://zodziai.example.lt/ npm run test:browser:deployed
 
 The hosted run uses the same controlled dataset routes, while exercising the
 published application shell, base path, static assets, and browser behavior.
+All test navigation is relative to `PLAYWRIGHT_BASE_URL`, so a URL below a
+hosting subpath remains below that subpath.
 
 ## Manual release record
 

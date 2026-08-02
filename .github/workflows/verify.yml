@@ -35,17 +35,21 @@ jobs:
         run: npx playwright install --with-deps chromium firefox webkit
 
       - name: Test production browser matrix
+        id: browser-tests
+        env:
+          BASE_PATH: /lietuviu-zodziai
+          PUBLIC_SITE_URL: https://example.test/lietuviu-zodziai
         run: npm run test:browser
 
       - name: Upload browser-test artifacts
-        if: ${{ !cancelled() }}
+        if: ${{ !cancelled() && steps.browser-tests.outcome != 'skipped' }}
         uses: actions/upload-artifact@v4
         with:
           name: playwright-artifacts
           path: |
             playwright-report/
             test-results/
-          if-no-files-found: ignore
+          if-no-files-found: error
 
       - name: Verify checked-in public data products
         run: npm run products:verify
