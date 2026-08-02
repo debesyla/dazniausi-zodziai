@@ -1,6 +1,14 @@
 # Curated source catalog decisions
 
-This inventory covers every known collection in the maintained source folder. A source is published only when its meaning, rights, input shape, and web delivery are clear enough to explain to a visitor. The public artifact format is documented in [data-products.md](data-products.md); source contracts and byte-level verification are in [source-contracts.md](source-contracts.md).
+This inventory covers every collection admitted to the public-product contract
+or its explicit metadata-only exception. A source is published only when its
+meaning, rights, input shape, and web delivery are clear enough to explain to a
+visitor. Known sources that have not passed those gates are recorded separately
+under [research candidates](#research-candidates-outside-the-publication-plan);
+their presence in the maintained source workflow does not authorize import or
+publication. The public artifact format is documented in
+[data-products.md](data-products.md); source contracts and byte-level
+verification are in [source-contracts.md](source-contracts.md).
 
 | Source collection | Decision | Evidence and implementation | Rationale / remaining question |
 | --- | --- | --- | --- |
@@ -23,9 +31,28 @@ This inventory covers every known collection in the maintained source folder. A 
 
 The approved configurations each record a safe source artifact ID, raw-byte count and SHA-256, UTF-8 assumption, source URL, licence, citation, POS mapping where applicable, expected totals, duplicate policy, and manual samples. Run `npm run data:verify -- --source-root /path/to/reviewed-source-root` before committing generated data to confirm byte-for-byte reproducibility.
 
-## Remaining publication gate
+## Research candidates outside the publication plan
 
-The only maintained collection without public rows is Rimkutė's morphemic dictionary.
+The machine-readable
+[`data/research/source-candidates.json`](../data/research/source-candidates.json)
+ledger records sources that have been researched but are not approved contracts
+or public products. It contains only official public records, issue links,
+decisions, and blockers—never raw data, credentials, transient transfer URLs,
+or internal source locations.
+
+| Candidate | Decision | External blocker | Tracking |
+| --- | --- | --- | --- |
+| Bendrasis lietuvių kalbos tekstynas (BLKT) | **Do not import or publish yet** | NewGenLTU OpenRAIL-D does not clearly authorize the proposed public human-facing aggregate explorer. Obtain written licensor confirmation and approve a non-reconstructive privacy design first. | [Issue #59](https://github.com/debesyla/dazniausi-zodziai/issues/59) |
+| Parallel and monolingual corpora – 1 vol. (Lithuanian monolingual portion) | **Do not import or publish yet** | CC0 resolves reuse rights, but the official deposit does not provide the actual corpus as a versioned archive or immutable file/checksum manifest. Establish durable, credential-safe reproducible acquisition first. | [Issue #63](https://github.com/debesyla/dazniausi-zodziai/issues/63) |
+
+Neither candidate appears in `data/products/publication-plan.json` or the
+visitor catalogue. Moving one into the publication plan requires resolving all
+of its recorded blockers in a focused review.
+
+## Contracted metadata-only gate
+
+Within the approved contract catalogue, the only collection without public
+rows is Rimkutė's morphemic dictionary.
 Before changing its metadata-only decision, obtain a reviewed machine-readable
 source and explicit reusable terms, then close [issue #41](https://github.com/debesyla/dazniausi-zodziai/issues/41). A future interactive explorer for the
 large CCLL product must additionally meet its documented worker and response

@@ -117,6 +117,7 @@ export async function verifyPublicProvenance({ root = repositoryRoot } = {}) {
     path.join(resolvedRoot, 'data', 'contracts'),
     path.join(resolvedRoot, 'data', 'datasets'),
     path.join(resolvedRoot, 'data', 'products'),
+    path.join(resolvedRoot, 'data', 'research'),
     path.join(resolvedRoot, 'static', 'datasets')
   ];
   const jsonFiles = (await Promise.all(jsonDirectories.map((directory) => walkFiles(directory, (filename) => filename.endsWith('.json'))))).flat();

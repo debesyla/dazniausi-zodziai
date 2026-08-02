@@ -30,7 +30,7 @@ describe('project hygiene', () => {
 		expect(readme).not.toContain('test:e2e');
 	});
 
-	it('tracks a curation decision for every known source collection', async () => {
+	it('tracks every approved source collection in the public contract catalog', async () => {
 		const sourceCatalog = await readRepositoryFile('docs/source-catalog.md');
 
 		for (const collection of [
@@ -52,6 +52,40 @@ describe('project hygiene', () => {
 			expect(sourceCatalog).toContain(collection);
 		}
 		expect(sourceCatalog).toContain('byte-for-byte reproducibility');
+	});
+
+	it('tracks externally gated research candidates without authorizing products', async () => {
+		const sourceCatalog = await readRepositoryFile('docs/source-catalog.md');
+		const ledger = JSON.parse(await readRepositoryFile('data/research/source-candidates.json'));
+		const plan = JSON.parse(await readRepositoryFile('data/products/publication-plan.json'));
+
+		expect(ledger.schemaVersion).toBe(1);
+		expect(ledger.candidates).toEqual([
+			expect.objectContaining({
+				id: 'vssa-2026-general-lithuanian-corpus',
+				status: 'blocked-external',
+				trackingIssue: 'https://github.com/debesyla/dazniausi-zodziai/issues/59',
+				rawImportAuthorized: false,
+				publicProductAuthorized: false
+			}),
+			expect.objectContaining({
+				id: 'tilde-2026-parallel-and-monolingual-corpora',
+				status: 'blocked-external',
+				trackingIssue: 'https://github.com/debesyla/dazniausi-zodziai/issues/63',
+				rawImportAuthorized: false,
+				publicProductAuthorized: false
+			})
+		]);
+		for (const candidate of ledger.candidates) {
+			expect(candidate.blockers.length).toBeGreaterThan(0);
+			expect(sourceCatalog).toContain(candidate.title);
+			expect(sourceCatalog).toContain(candidate.trackingIssue);
+		}
+
+		const productContractIds = plan.contractProducts.map((product) => product.contractId);
+		expect(productContractIds).not.toContain('vssa-2026-general-lithuanian-corpus');
+		expect(productContractIds).not.toContain('tilde-2026-parallel-and-monolingual-corpora');
+		expect(sourceCatalog).not.toContain('The only maintained collection without public rows');
 	});
 
 	it('assigns every collection a public JSON product or an explicit metadata-only decision', async () => {

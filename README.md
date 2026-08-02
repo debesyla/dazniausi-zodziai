@@ -66,9 +66,10 @@ decision.
 
 Datasets are prepared rarely by a maintainer, not uploaded through the public
 app. The canonical schema, source configuration, validation rules, and command
-are in [docs/data-preparation.md](docs/data-preparation.md). The reviewed
-decision for every maintained source collection is tracked in
-[docs/source-catalog.md](docs/source-catalog.md).
+are in [docs/data-preparation.md](docs/data-preparation.md). Approved source
+decisions and externally gated research candidates are tracked separately in
+[docs/source-catalog.md](docs/source-catalog.md), so a known source is not
+mistaken for an authorized public product.
 Larger and non-generic collections have implementation-ready source contracts in
 [docs/source-contracts.md](docs/source-contracts.md). The complete public JSON
 delivery model is documented in [docs/data-products.md](docs/data-products.md).

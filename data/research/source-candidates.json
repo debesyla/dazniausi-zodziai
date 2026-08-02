@@ -1,0 +1,46 @@
+{
+  "schemaVersion": 1,
+  "purpose": "Research candidates that are known to maintainers but are not authorized public data products.",
+  "candidates": [
+    {
+      "id": "vssa-2026-general-lithuanian-corpus",
+      "title": "Bendrasis lietuvių kalbos tekstynas (BLKT)",
+      "status": "blocked-external",
+      "trackingIssue": "https://github.com/debesyla/dazniausi-zodziai/issues/59",
+      "sourceUrl": "https://clarin-repo.lt/items/2b51a918-55c3-4e62-8e45-e763fc7fc157",
+      "licence": "NewGenLTU OpenRAIL-D v1.0",
+      "blockers": [
+        {
+          "kind": "licence-clarification",
+          "summary": "Obtain written confirmation that an aggregate-only, public human-facing explorer is permitted and record the required downstream notices."
+        },
+        {
+          "kind": "privacy-review",
+          "summary": "Approve a non-reconstructive aggregation design that publishes no text, titles, authors, URLs, identifiers, source metadata, or document rows."
+        }
+      ],
+      "rawImportAuthorized": false,
+      "publicProductAuthorized": false
+    },
+    {
+      "id": "tilde-2026-parallel-and-monolingual-corpora",
+      "title": "Parallel and monolingual corpora – 1 vol. (Lithuanian monolingual portion)",
+      "status": "blocked-external",
+      "trackingIssue": "https://github.com/debesyla/dazniausi-zodziai/issues/63",
+      "sourceUrl": "https://clarin-repo.lt/items/a831f3de-35a9-4429-826d-14e1f808d10b",
+      "licence": "CC0 1.0",
+      "blockers": [
+        {
+          "kind": "durable-acquisition",
+          "summary": "Obtain a versioned archive with inventory and checksums, or an immutable provider manifest plus permission for a controlled archival copy."
+        },
+        {
+          "kind": "credential-safe-reproduction",
+          "summary": "Define a reproducible acquisition path without committing passwords, transient download URLs, or raw corpus files to the public repository."
+        }
+      ],
+      "rawImportAuthorized": false,
+      "publicProductAuthorized": false
+    }
+  ]
+}
