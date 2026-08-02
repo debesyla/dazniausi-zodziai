@@ -1,8 +1,10 @@
 import { defineConfig, devices } from '@playwright/test';
+import { normalizePlaywrightBaseURL } from './scripts/playwright-base-url.mjs';
 
 const basePath = process.env.BASE_PATH ?? '';
 const localBaseURL = `http://127.0.0.1:4173${basePath}/`;
-const baseURL = process.env.PLAYWRIGHT_BASE_URL ?? localBaseURL;
+const deployedBaseURL = process.env.PLAYWRIGHT_BASE_URL;
+const baseURL = deployedBaseURL ? normalizePlaywrightBaseURL(deployedBaseURL) : localBaseURL;
 const useDeployedServer = Boolean(process.env.PLAYWRIGHT_BASE_URL);
 
 export default defineConfig({

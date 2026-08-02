@@ -22,10 +22,11 @@ and mobile touch-target dimensions. CI runs this matrix from a non-root
 behind a root deployment.
 
 CI combines the GitHub annotation reporter with a complete HTML report. The
-HTML report is uploaded on green and failing browser runs; screenshots, traces,
-videos, and `test-results` are included when Playwright creates them. A missing
-report makes the artifact step fail instead of silently leaving the release
-without browser evidence.
+HTML report is a separately required artifact on green and failing browser
+runs. Screenshots, traces, videos, and `test-results` are uploaded as optional
+diagnostics when Playwright creates them. A missing HTML report makes the
+required artifact step fail instead of silently leaving the release without
+browser evidence.
 
 ## Local and hosted runs
 
@@ -40,13 +41,14 @@ For release sign-off against the chosen server, supply its fully qualified
 public base URL, including a trailing subpath and slash when applicable:
 
 ```bash
-PLAYWRIGHT_BASE_URL=https://zodziai.example.lt/ npm run test:browser:deployed
+PLAYWRIGHT_BASE_URL=https://zodziai.example.lt/lietuviu-zodziai/ npm run test:browser:deployed
 ```
 
 The hosted run uses the same controlled dataset routes, while exercising the
 published application shell, base path, static assets, and browser behavior.
 All test navigation is relative to `PLAYWRIGHT_BASE_URL`, so a URL below a
-hosting subpath remains below that subpath.
+hosting subpath remains below that subpath. The runner normalizes a missing
+trailing slash, while the documented command keeps it explicit for clarity.
 
 ## Manual release record
 
