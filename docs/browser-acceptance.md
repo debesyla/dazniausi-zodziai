@@ -20,7 +20,7 @@ CSV download, console health, first-party request health, page-level overflow,
 and mobile touch-target dimensions. Failure screenshots, traces, videos, and
 reports are uploaded from CI when present.
 
-## Local and deployed runs
+## Local and hosted runs
 
 Install the browser matrix once per machine:
 
@@ -29,20 +29,20 @@ npx playwright install chromium firefox webkit
 npm run test:browser
 ```
 
-For release sign-off against GitHub Pages, supply the fully qualified deployed
-base URL, including its trailing project path and slash:
+For release sign-off against the chosen server, supply its fully qualified
+public base URL, including a trailing subpath and slash when applicable:
 
 ```bash
-PLAYWRIGHT_BASE_URL=https://debesyla.github.io/dazniausi-zodziai/ npm run test:browser:deployed
+PLAYWRIGHT_BASE_URL=https://zodziai.example.lt/ npm run test:browser:deployed
 ```
 
-The deployed run uses the same controlled dataset routes, while exercising the
-deployed application shell, base path, static assets, and browser behavior.
+The hosted run uses the same controlled dataset routes, while exercising the
+published application shell, base path, static assets, and browser behavior.
 
 ## Manual release record
 
-Before the release decision, a maintainer records the deployed commit, date,
-browser-test workflow URL, and a short manual assistive-technology smoke check:
+Before the release decision, a maintainer records the published commit, date,
+browser-test evidence, and a short manual assistive-technology smoke check:
 
 - navigate landmarks, dataset selector, search, POS controls, table sorting,
   pagination, chart table equivalents, and download with a keyboard;
@@ -50,9 +50,9 @@ browser-test workflow URL, and a short manual assistive-technology smoke check:
 - with one current screen reader/browser pairing, confirm the page title,
   result count, filter state, chart labels, and table-equivalent summaries are
   understandable;
-- inspect the deployed page at a narrow viewport for page-level horizontal
+- inspect the hosted page at a narrow viewport for page-level horizontal
   overflow and controls smaller than the documented 44 px target;
 - record any browser-specific limitation and a safe user-facing fallback.
 
-Automated fixtures do not replace a final review of the real deployed catalog,
+Automated fixtures do not replace a final review of the real hosted catalog,
 source attribution, and licences. That review belongs in the release record.

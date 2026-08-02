@@ -57,3 +57,9 @@ jobs:
         env:
           NODE_ENV: production
         run: npm run build
+
+      - name: Verify portable subpath build
+        env:
+          BASE_PATH: /lietuviu-zodziai
+          PUBLIC_SITE_URL: https://example.test/lietuviu-zodziai
+        run: npm run build

@@ -1,3 +1,0 @@
-User-agent: *
-Allow: /
-Sitemap: https://debesyla.github.io/dazniausi-zodziai/sitemap.xml
