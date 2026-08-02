@@ -17,6 +17,22 @@ export interface PartOfSpeechTotal {
   share: number;
 }
 
+export interface CoverageMilestone {
+  threshold: number;
+  entries: number;
+  entryShare: number;
+  tokenShare: number;
+}
+
+export interface FrequencyFacts {
+  topEntryShare: number;
+  halfCoverage: CoverageMilestone | null;
+  ninetyCoverage: CoverageMilestone | null;
+  singletonEntries: number;
+  singletonEntryShare: number;
+  singletonTokenShare: number;
+}
+
 export interface FrequencyAnalysis {
   entryCount: number;
   totalFrequency: number;
@@ -24,6 +40,7 @@ export interface FrequencyAnalysis {
   rankedWords: RankedWord[];
   coverage: CoveragePoint[];
   partOfSpeech: PartOfSpeechTotal[];
+  facts: FrequencyFacts;
 }
 
 function byFrequencyThenWord(a: Word, b: Word) {
@@ -67,13 +84,34 @@ export function analyseFrequency(words: Word[]): FrequencyAnalysis {
     }))
     .sort((a, b) => b.frequency - a.frequency || a.type.localeCompare(b.type, 'lt'));
 
+  function coverageMilestone(threshold: number): CoverageMilestone | null {
+    const point = coverage.find((candidate) => candidate.coverage >= threshold);
+    if (!point) return null;
+    return {
+      threshold,
+      entries: point.rank,
+      entryShare: point.rank / rankedWords.length,
+      tokenShare: point.coverage
+    };
+  }
+
+  const singletonEntries = rankedWords.filter((word) => word.frequency === 1).length;
+
   return {
     entryCount: rankedWords.length,
     totalFrequency,
     topWord: rankedWords[0] ?? null,
     rankedWords,
     coverage,
-    partOfSpeech
+    partOfSpeech,
+    facts: {
+      topEntryShare: totalFrequency === 0 ? 0 : (rankedWords[0]?.frequency ?? 0) / totalFrequency,
+      halfCoverage: coverageMilestone(0.5),
+      ninetyCoverage: coverageMilestone(0.9),
+      singletonEntries,
+      singletonEntryShare: rankedWords.length === 0 ? 0 : singletonEntries / rankedWords.length,
+      singletonTokenShare: totalFrequency === 0 ? 0 : singletonEntries / totalFrequency
+    }
   };
 }
 

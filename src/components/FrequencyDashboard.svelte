@@ -36,6 +36,10 @@
     return new Intl.NumberFormat('lt-LT', { style: 'percent', maximumFractionDigits: 1 }).format(value);
   }
 
+  function formatFactPercent(value: number) {
+    return new Intl.NumberFormat('lt-LT', { style: 'percent', maximumFractionDigits: 3 }).format(value);
+  }
+
   function displayType(type: string) {
     return typeLabels[type] ? `${typeLabels[type]} (${type})` : type;
   }
@@ -108,6 +112,48 @@
         <dd>{analysis.partOfSpeech.length > 0 ? t('wordFrequencyAndPos') : t('wordAndFrequency')}</dd>
       </div>
     </dl>
+
+    <section class="facts-section" aria-labelledby="frequency-facts-title">
+      <h4 id="frequency-facts-title">{t('frequencyFacts')}</h4>
+      <p>{t('frequencyFactsDescription')}</p>
+      <dl class="fact-grid">
+        <div>
+          <dt>{t('leadingEntryShare')}</dt>
+          <dd>{t('leadingEntryFact', {
+            word: analysis.topWord?.word ?? '',
+            share: formatFactPercent(analysis.facts.topEntryShare)
+          })}</dd>
+        </div>
+        {#if analysis.facts.halfCoverage}
+          <div>
+            <dt>{t('halfCoverage')}</dt>
+            <dd>{t('coverageMilestoneFact', {
+              entries: formatNumber(analysis.facts.halfCoverage.entries),
+              coverage: formatPercent(analysis.facts.halfCoverage.threshold),
+              entryShare: formatFactPercent(analysis.facts.halfCoverage.entryShare)
+            })}</dd>
+          </div>
+        {/if}
+        {#if analysis.facts.ninetyCoverage}
+          <div>
+            <dt>{t('ninetyCoverage')}</dt>
+            <dd>{t('coverageMilestoneFact', {
+              entries: formatNumber(analysis.facts.ninetyCoverage.entries),
+              coverage: formatPercent(analysis.facts.ninetyCoverage.threshold),
+              entryShare: formatFactPercent(analysis.facts.ninetyCoverage.entryShare)
+            })}</dd>
+          </div>
+        {/if}
+        <div>
+          <dt>{t('singletonTail')}</dt>
+          <dd>{t('singletonFact', {
+            entries: formatNumber(analysis.facts.singletonEntries),
+            entryShare: formatFactPercent(analysis.facts.singletonEntryShare),
+            tokenShare: formatFactPercent(analysis.facts.singletonTokenShare)
+          })}</dd>
+        </div>
+      </dl>
+    </section>
 
     <section class="chart-section" aria-labelledby="top-words-title">
       <div class="chart-heading">
@@ -276,6 +322,37 @@
     padding: var(--sm);
   }
 
+  .facts-section {
+    border: 1px solid var(--border-color);
+    margin-bottom: var(--xl);
+    padding: var(--md);
+  }
+
+  .facts-section h4 {
+    margin-bottom: var(--xs);
+  }
+
+  .facts-section > p {
+    color: color-mix(in srgb, var(--text-color) 72%, transparent);
+  }
+
+  .fact-grid {
+    display: grid;
+    gap: var(--md);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    margin: var(--md) 0 0;
+  }
+
+  .fact-grid > div {
+    border-left: 3px solid var(--text-color);
+    padding-left: var(--sm);
+  }
+
+  .fact-grid dd {
+    font-size: 1em;
+    line-height: 1.5;
+  }
+
   dt {
     color: color-mix(in srgb, var(--text-color) 72%, transparent);
   }
@@ -405,7 +482,8 @@
       flex-direction: column;
     }
 
-    .headline-metrics {
+    .headline-metrics,
+    .fact-grid {
       grid-template-columns: 1fr;
     }
 

@@ -16,6 +16,8 @@ it('renders frequency concentration metrics and source-labelled POS composition'
   });
 
   expect(getByText('Dažnumo vaizdas')).toBeInTheDocument();
+  expect(getByText('Ką atskleidžia šis sąrašas')).toBeInTheDocument();
+  expect(getByText('Faktai apskaičiuoti tik iš pasirinkto šaltinio ir aktyvius filtrus atitinkančių įrašų.')).toBeInTheDocument();
   expect(getByText((_, element) => element?.tagName === 'DD' && element.textContent === 'žodis-1 (100)')).toBeInTheDocument();
   expect(getByText('Žodis · dažnumas · kalbos dalis')).toBeInTheDocument();
   expect(getByText('Kalbos dalių sudėtis')).toBeInTheDocument();
@@ -36,13 +38,17 @@ it('changes the top-word chart deterministically when its control changes', asyn
   expect(topChart).not.toHaveAccessibleName(/žodis-21/);
 });
 
-it('updates from the supplied active result set and omits POS composition when no POS values exist', async () => {
-  const { getByText, queryByText, rerender } = render(FrequencyDashboard, { words });
+it('updates facts from the supplied active result set and omits POS composition when no POS values exist', async () => {
+  const { container, getByText, queryByText, rerender } = render(FrequencyDashboard, { words });
 
   expect(getByText('Žodis · dažnumas · kalbos dalis')).toBeInTheDocument();
+  expect(container.querySelector('.fact-grid')).toHaveTextContent('žodis-1');
   await rerender({ words: [{ word: 'vienas', frequency: 7 }] });
 
   expect(getByText((_, element) => element?.tagName === 'DD' && element.textContent === 'vienas (7)')).toBeInTheDocument();
+  expect(container.querySelector('.fact-grid')).toHaveTextContent('„vienas“ sukaupia 100 %');
+  expect(container.querySelector('.fact-grid')).toHaveTextContent('Dažniausių įrašų skaičius, reikalingas 90 % žetonų aprėpčiai: 1');
+  expect(container.querySelector('.fact-grid')).toHaveTextContent('Tokių įrašų skaičius: 0');
   expect(getByText('Žodis · dažnumas')).toBeInTheDocument();
   expect(queryByText('Kalbos dalių sudėtis')).not.toBeInTheDocument();
 });
