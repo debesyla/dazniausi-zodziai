@@ -24,9 +24,11 @@ npm audit --omit=dev
 npm audit
 ```
 
-`npm audit` may contain a documented development-only upstream advisory. Record
-the exact conclusion and issue link rather than silently treating a warning as
-either a release blocker or a non-issue.
+The currently accepted development-only exception is the low-severity `cookie`
+advisory inherited from stable SvelteKit and tracked in
+[issue #29](https://github.com/debesyla/dazniausi-zodziai/issues/29). Record the
+exact audit result; fix or separately review any additional finding rather than
+silently treating it as either a release blocker or a non-issue.
 
 ## Copyable record template
 
