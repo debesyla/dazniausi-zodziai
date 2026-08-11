@@ -68,7 +68,7 @@ test('downloads the filtered, sorted CSV in a real browser', async ({ page }) =>
   await page.route('**/datasets/catalog.json', (route) => route.fulfill({ json: fixtureCatalog }));
   await page.route('**/datasets/browser-download-fixture.json', (route) => route.fulfill({ json: fixtureDataset }));
 
-  await page.goto('/');
+  await page.goto('.');
   await expect(page.getByRole('heading', { name: fixtureDataset.title })).toBeVisible();
 
   await page.getByLabel('Ieškoti žodžių').fill('ąžuolas');

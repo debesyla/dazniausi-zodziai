@@ -7,7 +7,7 @@ author, or person-level analysis.
 
 The machine-readable policy is
 [`data/policies/parliament-disclosure.json`](../data/policies/parliament-disclosure.json).
-`npm run disclosure:verify` walks the complete public product—not only its
+`npm run parliament:disclosure:verify` walks the complete public product—not only its
 manifest—and rejects an extra view, an unapproved file, identity-bearing or
 temporal object keys, a record with more than the approved word/lemma and count
 fields, a non-lexical string payload, or a mismatch between index and chunk

@@ -7,6 +7,9 @@ This is the implementation decision record for [issue #31](https://github.com/de
 - Keep the existing frequency dashboard as the baseline for a single selected frequency list: rank, concentration, cumulative token coverage, and source-provided part-of-speech composition are already useful and reproducible.
 - Build the next small analytical products from the two comparison collections, where a question, unit, and denominator are already explicit.
 - Treat the CCLL subcorpora as a source-scoped normalized wordform-comparison product, not as six independent generic lists and never as an aggregate-plus-five total.
+- Treat BLKT as an exact-word, privacy-thresholded profile: broad document types
+  and broad periods are categorical scopes, not a browseable ranking or a
+  continuous historical time series.
 - MATAS can support sentence concordances and window-based co-occurrence after a dedicated derived product. It cannot support grammatical-relation word sketches from the reviewed archive.
 - Do not add time-series charts, generic cross-corpus rankings, or analytical word clouds until the required data dimensions exist.
 
@@ -16,7 +19,7 @@ This is the implementation decision record for [issue #31](https://github.com/de
 | --- | --- | --- |
 | Frequency, relative frequency, distribution, and linked table-to-context exploration | [Voyant's document terms](https://docs.voyant-tools.org/docs/tutorial-documentterms.html) distinguishes raw counts, relative frequency, and distribution; its [trends](https://docs.voyant-tools.org/docs/tutorial-trends.html) documentation cautions that a line can imply continuity where categories are discrete. | Use frequency, rank, coverage, and categorical frequency bands for a selected list. Use bars or a table for discrete corpus categories; reserve a line for genuinely ordered series such as rank or time. |
 | Concordance | [Voyant contexts](https://docs.voyant-tools.org/docs/tutorial-contexts.html) requires a token's surrounding text and position, rather than a frequency table alone. | Add concordance only for a source that retains sentence text, order, and stable identifiers: MATAS after a separate context product is built. |
-| Normalized historical frequency | [Google Books Ngram Viewer](https://books.google.com/ngrams/info) plots occurrences by year as a share of the corpus and documents that corpus releases and tagging can change results. | Do not simulate a historical chart from source publication year, corpus name, or raw totals. No maintained product currently has reviewed time buckets. |
+| Normalized historical frequency | [Google Books Ngram Viewer](https://books.google.com/ngrams/info) plots occurrences by year as a share of the corpus and documents that corpus releases and tagging can change results. | BLKT can compare an exact word across four reviewed broad period categories with separate denominators. Do not turn those discontinuous categories into an annual trend, interpolate missing years, or derive a time chart from another source's publication year. |
 | Collocation comparison | [Sketch Engine word sketch difference](https://www.sketchengine.eu/guide/word-sketch-difference-compare-words/) compares collocates in grammatical relations. | Do not label window co-occurrence as a word sketch. The reviewed MATAS archive has sentence order but no populated dependency head or relation fields. |
 | Word cloud | [Voyant Cirrus](https://docs.voyant-tools.org/docs/tutorial-cirrus.html) makes clear that it is a frequency-oriented orientation tool, not a precise positional or colour encoding. | Do not use a word cloud as an analytical result. A ranked, searchable table and an accessible bar chart are clearer and exportable. |
 
@@ -32,6 +35,7 @@ The table records the strongest safe claim for each collection. “No” means t
 | CCLL wordforms | Wordform, raw token frequency; aggregate plus five named subcorpora with pinned token totals | Fiction, non-fiction, administrative, periodicals, spoken | No | No | Exact-form genre profile with raw counts, `null` absence, separate denominators, and per-million rates; no universal genre leaderboard |
 | DML6 vs JCL | JCL raw token counts; categorical DML6 coverage; separate lemma-occurrence and missing-type views | Coverage category and source POS where supplied | No | No | Dictionary-coverage profile by frequency band; high-frequency missing-type inspection |
 | CCLL2 vs wartime media / social networks | Separate normalized token and document measures for three sources, each per 100 million source words; nulls retained | CCLL2, wartime media, social networks | No | No | Side-by-side source contrast for complete, sufficiently frequent rows |
+| BLKT exact-word profile | Thresholded wordform token and document counts, with rates per million derived tokens | Whole corpus; five broad document types; four broad periods | Four categorical periods, not annual bins | No | Exact-form corpus/type/period comparison when every published cell passes the 100-token and 20-document safeguards; no ranking, subtype, or crossed-dimension claim |
 | Delfi.lt 1-grams | Raw wordform token frequency, including punctuation and non-alphabetic forms | None | No | No | Within-list rank and concentration; not lemma or POS analysis |
 | MATAS v3 derived frequencies | Derived lemma/POS and wordform/POS frequency views | Universal POS | No | Aggregate product: no. Reviewed source: sentence and document structure, but no syntactic relations | Within-list frequency/POS today; future concordance and window co-occurrence after a new derived product |
 | Morphemic dictionary | Metadata only | None | No | No | Citation and provenance only, until [issue #41](https://github.com/debesyla/dazniausi-zodziai/issues/41) resolves rights and a machine-readable source |
@@ -90,8 +94,13 @@ The following contracts make the future work reproducible and prevent a visual l
 
 ## Non-goals until new evidence exists
 
-- **No time trend:** a corpus release date or source publication year is not a token timestamp. Add a trend only after obtaining reviewed time slices with per-slice denominators.
+- **No time trend from proxy dates:** BLKT has four reviewed broad periods with
+  per-period denominators, so they may be compared as labelled categories for
+  one exact word. They do not support annual interpolation or a continuous
+  trend, and a release date or publication year still cannot substitute for a
+  token timestamp in any other product.
 - **No generic “most different corpus” leaderboard:** lemma versus wordform, raw versus normalized counts, and unequal corpus definitions cannot be pooled into one meaningful rank.
+- **No “representative Lithuanian” claim from BLKT:** media and document texts dominate its document and token composition, so its exact-word profiles describe this source collection rather than all Lithuanian language use.
 - **No statistical significance badge:** the current public products lack a documented document-level sampling design needed for that claim.
 - **No connection graph from frequency lists:** frequency alone has no co-occurrence edge. Connections require the MATAS context contract or another reviewed ordered-token source.
 

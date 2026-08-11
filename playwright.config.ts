@@ -1,8 +1,10 @@
 import { defineConfig, devices } from '@playwright/test';
+import { normalizePlaywrightBaseURL } from './scripts/playwright-base-url.mjs';
 
 const basePath = process.env.BASE_PATH ?? '';
 const localBaseURL = `http://127.0.0.1:4173${basePath}/`;
-const baseURL = process.env.PLAYWRIGHT_BASE_URL ?? localBaseURL;
+const deployedBaseURL = process.env.PLAYWRIGHT_BASE_URL;
+const baseURL = deployedBaseURL ? normalizePlaywrightBaseURL(deployedBaseURL) : localBaseURL;
 const useDeployedServer = Boolean(process.env.PLAYWRIGHT_BASE_URL);
 
 export default defineConfig({
@@ -10,7 +12,12 @@ export default defineConfig({
   forbidOnly: Boolean(process.env.CI),
   retries: process.env.CI ? 2 : 0,
   workers: process.env.CI ? 1 : undefined,
-  reporter: process.env.CI ? 'github' : 'list',
+  reporter: process.env.CI
+    ? [
+        ['github'],
+        ['html', { outputFolder: 'playwright-report', open: 'never' }]
+      ]
+    : 'list',
   use: {
     baseURL,
     screenshot: 'only-on-failure',

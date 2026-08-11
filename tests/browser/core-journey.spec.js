@@ -109,7 +109,7 @@ test('completes the production visitor journey without browser-health or respons
   const assertHealthy = observePageHealth(page);
   await installFixtures(page);
 
-  await page.goto('/');
+  await page.goto('.');
   await expect(page.getByRole('heading', { name: fixtureDataset.title })).toBeVisible();
   await expect(page.getByText('Rodomi 1–50 iš 60')).toBeVisible();
 
