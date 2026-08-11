@@ -133,6 +133,16 @@
       "recordCount": null
     },
     {
+      "id": "vssa-2026-blkt-wordform-profile",
+      "title": "BLKT privatumo slenksčiais apsaugotas žodžio profilis",
+      "productType": "chunked-comparison",
+      "publicationStatus": "published",
+      "manifest": "vssa-2026-blkt-wordform-profile/manifest.json",
+      "licence": "NewGenLTU OpenRAIL-D v1.0; CC BY-SA 4.0 for BLKT rows labelled Vikipedija",
+      "viewCount": 1,
+      "recordCount": null
+    },
+    {
       "id": "rimkute-morphemic-dictionary",
       "title": "Dažninis lietuvių kalbos morfemikos žodynas",
       "productType": "metadata-only",

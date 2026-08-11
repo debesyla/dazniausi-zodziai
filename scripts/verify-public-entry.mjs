@@ -16,6 +16,7 @@ const publicRoutes = [
   'zodyno-apreptis',
   'karo-zodziu-palyginimas',
   'zanru-profilis',
+  'blkt-profilis',
   'sintakse'
 ];
 

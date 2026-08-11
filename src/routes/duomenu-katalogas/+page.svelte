@@ -71,6 +71,9 @@
   }
 
   function productForm(product: PublicDataProduct) {
+    if (product.id === 'vssa-2026-blkt-wordform-profile') {
+      return 'Vieno tekstyno žodžio profilis pagal tipą ir laikotarpį';
+    }
     const forms: Record<DataProductType, string> = {
       'generic-frequency-dataset': product.content?.entryKind === 'wordform'
         ? 'Naršyklėje tiriamas žodžių formų dažnumo sąrašas'
@@ -101,6 +104,7 @@
       'birvinskaite-2026-lithuanian-basketball-slang': 'Lietuvių krepšinio žargono leksiniai įrašai.',
       'rimkute-2019-alksnis-syntactic-context': 'ALKSNIS medyno priklausomybių ryšiai, žanrai, lemos ir riboti sakinių kontekstai.',
       'kapociute-dzikiene-2017-parliament-frequency-aggregates': 'Lietuvos parlamento kalbų tekstyno bendri lemų ir žodžių formų dažniai.',
+      'vssa-2026-blkt-wordform-profile': 'Vienos tikslios žodžio formos rodikliai visame BLKT ir saugiai paskelbtuose penkių teksto tipų bei keturių laikotarpių pjūviuose.',
       'rimkute-morphemic-dictionary': 'Citata, failų inventorius ir skelbimo sprendimas be žodyno įrašų.'
     };
     return scopes[product.id] ?? product.publication.scope;
@@ -109,6 +113,7 @@
   function limitation(product: PublicDataProduct) {
     const sourceSpecificLimits: Record<string, string> = {
       'kapociute-dzikiene-2017-parliament-frequency-aggregates': 'Pateikiamos tik viso tekstyno suvestinės; tai nėra autorystės nustatymo, politikų reitingavimo, citatų ar kalendorinės analizės priemonė.',
+      'vssa-2026-blkt-wordform-profile': 'BLKT nėra reprezentatyvus visos lietuvių kalbos portretas, nes jame vyrauja žiniasklaida ir dokumentai. Tokenizatoriaus raidžių sekos nėra taisyklingumo ar lietuviškumo įvertinimas. Ieškoma tik viena tiksli forma; neskelbiami reitingai, potipiai, sankirtos ar saugos slenksčio nepasiekusios pjūvių šeimos.',
       'rimkute-morphemic-dictionary': 'Turimi PDF failai nėra mašininiu būdu tinkami pernaudoti, o jų pakartotinio naudojimo sąlygos neišspręstos.'
     };
     if (sourceSpecificLimits[product.id]) return sourceSpecificLimits[product.id];
@@ -169,6 +174,10 @@
       'rimkute-2019-alksnis-syntactic-context': {
         href: `${base}/sintakse`,
         label: 'Tyrinėti sintaksės kontekstus'
+      },
+      'vssa-2026-blkt-wordform-profile': {
+        href: `${base}/blkt-profilis`,
+        label: 'Tyrinėti BLKT žodžio profilį'
       }
     };
 

@@ -9,6 +9,7 @@ const defaultOutputRoot = path.join(defaultStaticRoot, 'data-products');
 
 const NUMERIC_FIELD_TYPES = new Set([
   'raw-token-count',
+  'raw-document-count',
   'normalized-token-count',
   'normalized-document-count',
   'coverage-code'
@@ -21,6 +22,7 @@ const FIELD_TYPES = new Set([
 ]);
 const SUMMARIZED_FIELD_TYPES = new Set([
   'raw-token-count',
+  'raw-document-count',
   'normalized-token-count',
   'normalized-document-count'
 ]);
@@ -45,6 +47,81 @@ const CCLL_GENRE_PROFILE_SOURCES = [
   { id: 'periodicals', sourceRole: 'subcorpus-periodicals' },
   { id: 'speech', sourceRole: 'subcorpus-speech' }
 ];
+const BLKT_PRODUCT_ID = 'vssa-2026-blkt-wordform-profile';
+const BLKT_TYPE_DIMENSIONS = [
+  ['fiction', 'gro'],
+  ['non-fiction', 'neg'],
+  ['media', 'zin'],
+  ['speech', 'sak'],
+  ['documents', 'dok']
+];
+const BLKT_PERIOD_DIMENSIONS = [
+  ['1922-1940', '1'],
+  ['1941-1990', '2'],
+  ['1990-2004', '3'],
+  ['2008-2026', '4']
+];
+const BLKT_EXCLUSIONS = [
+  'raw-text',
+  'document-rows',
+  'document-subtypes',
+  'joint-dimensions',
+  'titles',
+  'authors',
+  'urls',
+  'source-identifiers',
+  'publication-dates',
+  'personal-data'
+];
+const BLKT_SOURCE_SCOPE_CAVEAT = 'BLKT is not representative of all Lithuanian language use: media and document texts dominate its document and token composition.';
+const BLKT_SOURCE_LICENCES = {
+  inventory: [
+    {
+      sourceLabel: 'NewGenLTU OpenRAIL-D', name: 'NewGenLTU OpenRAIL-D v1.0',
+      url: 'https://sitti.vdu.lt/newgenltu-openrail-d-license/', documents: 8267437, sourceAlphaWords: 3906734476
+    },
+    {
+      sourceLabel: 'CC BY-SA 4.0', name: 'Creative Commons Attribution-ShareAlike 4.0 International',
+      url: 'https://creativecommons.org/licenses/by-sa/4.0/',
+      attribution: 'Wikipedia contributors (BLKT source_name: Vikipedija).',
+      documents: 170718, sourceAlphaWords: 34741743
+    }
+  ],
+  application: 'The combined aggregate retains the notices and conditions of both source licence groups.'
+};
+const BLKT_RIGHTS = {
+  licences: [
+    {
+      id: 'newgenltu-openrail-d-v1.0', name: 'NewGenLTU OpenRAIL-D v1.0',
+      url: 'https://sitti.vdu.lt/newgenltu-openrail-d-license/',
+      file: 'LICENSE-NewGenLTU-OpenRAIL-D-1.0.txt',
+      sha256: 'abf61fc83225e088c1ed91aae517f0d5c606c2c9b441f3fc245ce821c1c79ab9'
+    },
+    {
+      id: 'cc-by-sa-4.0', name: 'Creative Commons Attribution-ShareAlike 4.0 International',
+      url: 'https://creativecommons.org/licenses/by-sa/4.0/',
+      file: 'LICENSE-CC-BY-SA-4.0.txt',
+      sha256: '23ee78c8bae49cf08ea2f0c84945c66b987ebe4520881fb51b3dad4fb43d07c2'
+    }
+  ],
+  modificationNotice: 'MODIFIED FILE: Privacy-thresholded aggregate-only BLKT derivative produced by dazniausi-zodziai; no original text or document-level metadata is distributed.',
+  attributionNotices: [
+    'Valstybės skaitmeninių sprendimų agentūra. 2026. Bendrasis lietuvių kalbos tekstynas. Hugging Face. https://huggingface.co/datasets/VSSA-SDSA/LT_AI_BLKT.',
+    'Wikipedia contributors. The BLKT source rows labelled “Vikipedija” are derived from Lithuanian Wikipedia material licensed under CC BY-SA 4.0. https://lt.wikipedia.org/'
+  ],
+  downstreamRequirements: [
+    'Retain both applicable licence copies, this modification notice, the BLKT attribution, and the Wikipedia-contributor attribution with any redistribution.',
+    'Use this derivative only for model training, other language-technology development, or production of datasets for model training.',
+    'Do not use this derivative to extract, obtain, reconstruct, or publish personal data.',
+    'For material derived from the BLKT rows labelled “Vikipedija”, comply with CC BY-SA 4.0 attribution and ShareAlike requirements.'
+  ]
+};
+const BLKT_FILE_NOTICE = {
+  modificationNotice: BLKT_RIGHTS.modificationNotice,
+  attribution: 'BLKT: Valstybės skaitmeninių sprendimų agentūra (2026); Vikipedija subset: Wikipedia contributors.',
+  licenceLocation: 'product-root',
+  licences: BLKT_RIGHTS.licences.map(({ name, file }) => ({ name, file }))
+};
 
 function fail(message) {
   throw new Error(`Data-product verification failed: ${message}`);
@@ -270,6 +347,140 @@ function validateRecord(record, fields, description, totals, nullCounts, lexical
     }
     if (SUMMARIZED_FIELD_TYPES.has(field.type)) totals[field.id] += value;
   }
+}
+
+function validateBlktDimension(value, expected, description) {
+  if (!isPlainObject(value) || value.id !== expected[0] || value.sourceCode !== expected[1]
+    || !normalizeString(value.label) || !isSafeFieldId(value.tokenField)
+    || !isSafeFieldId(value.documentField) || value.tokenField === value.documentField) {
+    fail(`${description} is invalid`);
+  }
+  for (const field of ['documents', 'sourceAlphaWords', 'derivedTokens']) {
+    if (!Number.isSafeInteger(value[field]) || value[field] < 1) fail(`${description}.${field} is invalid`);
+  }
+}
+
+function validateBlktWordformProfile(manifest) {
+  const value = manifest.wordformProfile;
+  if (manifest.id !== BLKT_PRODUCT_ID || manifest.productType !== 'chunked-comparison'
+    || !isPlainObject(value) || value.schemaVersion !== 1 || value.viewId !== 'wordform-scope-metrics'
+    || value.sourceScopeCaveat !== BLKT_SOURCE_SCOPE_CAVEAT
+    || !sameObject(value.sourceLicences, BLKT_SOURCE_LICENCES)
+    || !isPlainObject(value.tokenizer) || value.tokenizer.id !== 'blkt-unicode-letter-lower-v1'
+    || value.tokenizer.normalization !== 'trim-nfc-lower' || value.tokenizer.maximumCodePoints !== 64
+    || value.tokenizer.caseMapping !== 'duckdb-simple-per-code-point'
+    || !isPlainObject(value.disclosure) || value.disclosure.minimumTokenCount !== 100
+    || value.disclosure.minimumDocumentSupport !== 20
+    || value.disclosure.familyRule !== 'all-positive-siblings-must-pass-or-family-is-null'
+    || !isPlainObject(value.rate) || value.rate.targetTokens !== 1000000
+    || value.rate.formula !== 'tokenCount * 1000000 / derivedTokens'
+    || value.rate.unit !== 'tokens per million derived tokens'
+    || !isPlainObject(value.corpus) || value.corpus.id !== 'corpus'
+    || value.corpus.sourceCode !== undefined || !normalizeString(value.corpus.label)
+    || !isSafeFieldId(value.corpus.tokenField)
+    || !isSafeFieldId(value.corpus.documentField) || value.corpus.tokenField === value.corpus.documentField
+    || !Array.isArray(value.documentTypes) || value.documentTypes.length !== BLKT_TYPE_DIMENSIONS.length
+    || !Array.isArray(value.periods) || value.periods.length !== BLKT_PERIOD_DIMENSIONS.length
+    || !isPlainObject(value.validatedSubtypes) || value.validatedSubtypes.count !== 11
+    || value.validatedSubtypes.published !== false || !isPlainObject(value.permission)
+    || value.permission.status !== 'confirmed-by-project-owner' || value.permission.confirmedOn !== '2026-08-02'
+    || !sameObject(value.rights, BLKT_RIGHTS)
+    || !sameObject(value.exclusions, BLKT_EXCLUSIONS)) {
+    fail(`${manifest.id} BLKT wordform profile metadata is invalid`);
+  }
+  for (const field of ['documents', 'sourceAlphaWords', 'derivedTokens']) {
+    if (!Number.isSafeInteger(value.corpus[field]) || value.corpus[field] < 1) {
+      fail(`${manifest.id} BLKT corpus denominator is invalid`);
+    }
+  }
+  value.documentTypes.forEach((dimension, index) => validateBlktDimension(dimension, BLKT_TYPE_DIMENSIONS[index], `${manifest.id} BLKT documentTypes[${index}]`));
+  value.periods.forEach((dimension, index) => validateBlktDimension(dimension, BLKT_PERIOD_DIMENSIONS[index], `${manifest.id} BLKT periods[${index}]`));
+  for (const dimensions of [value.documentTypes, value.periods]) {
+    for (const field of ['documents', 'sourceAlphaWords', 'derivedTokens']) {
+      if (dimensions.reduce((total, item) => total + item[field], 0) !== value.corpus[field]) {
+        fail(`${manifest.id} BLKT ${field} denominators do not reconcile`);
+      }
+    }
+  }
+  if (value.sourceLicences.inventory.reduce((total, item) => total + item.documents, 0) !== value.corpus.documents
+    || value.sourceLicences.inventory.reduce((total, item) => total + item.sourceAlphaWords, 0) !== value.corpus.sourceAlphaWords) {
+    fail(`${manifest.id} BLKT source licence inventory does not reconcile`);
+  }
+  if (!manifest.views?.some((view) => view.id === value.viewId)) {
+    fail(`${manifest.id} BLKT wordform profile view is missing`);
+  }
+}
+
+async function verifyBlktLicenceFiles(manifest, productDirectory) {
+  for (const licence of manifest.wordformProfile.rights.licences) {
+    if (!/^[A-Za-z0-9][A-Za-z0-9.-]+\.txt$/.test(licence.file)) {
+      fail(`${manifest.id} bundled licence filename is invalid`);
+    }
+    const filename = resolveProductPath(productDirectory, licence.file, `${manifest.id} bundled licence`);
+    const buffer = await readFile(filename);
+    const text = buffer.toString('utf8');
+    const hasCompleteTerms = licence.id === 'newgenltu-openrail-d-v1.0'
+      ? ['Section I: PREAMBLE', 'Section IV: OTHER PROVISIONS', 'Attachment A', '10. Other restrictions']
+        .every((marker) => text.includes(marker))
+      : ['Attribution-ShareAlike 4.0 International', 'Section 3 -- License Conditions.', 'b. ShareAlike.', 'Section 8 -- Interpretation.']
+        .every((marker) => text.includes(marker));
+    if (buffer.byteLength < 1024 || buffer.byteLength > 65536
+      || createHash('sha256').update(buffer).digest('hex') !== licence.sha256 || !hasCompleteTerms) {
+      fail(`${manifest.id} bundled ${licence.name} text is missing, changed, or oversized`);
+    }
+  }
+}
+
+function blktRecordLayout(profile, fields, description) {
+  const indexes = new Map(fields.map((field, index) => [field.id, { field, index }]));
+  const pair = (value) => {
+    const token = indexes.get(value.tokenField);
+    const documents = indexes.get(value.documentField);
+    if (token?.field.type !== 'raw-token-count' || documents?.field.type !== 'raw-document-count') {
+      fail(`${description} references invalid count fields`);
+    }
+    return [token.index, documents.index];
+  };
+  return {
+    corpus: pair(profile.corpus),
+    documentTypes: profile.documentTypes.map(pair),
+    periods: profile.periods.map(pair),
+    minimumTokenCount: profile.disclosure.minimumTokenCount,
+    minimumDocumentSupport: profile.disclosure.minimumDocumentSupport
+  };
+}
+
+function validateBlktRecordFamily(record, pairs, corpusTokens, corpusDocuments, layout, description) {
+  const values = pairs.flatMap(([tokenIndex, documentIndex]) => [record[tokenIndex], record[documentIndex]]);
+  if (values.every((value) => value === null)) return;
+  if (values.some((value) => value === null)) fail(`${description} is only partly suppressed`);
+  let tokens = 0;
+  let documents = 0;
+  for (const [tokenIndex, documentIndex] of pairs) {
+    const tokenCount = record[tokenIndex];
+    const documentCount = record[documentIndex];
+    if ((tokenCount === 0) !== (documentCount === 0)
+      || (tokenCount > 0 && (tokenCount < layout.minimumTokenCount || documentCount < layout.minimumDocumentSupport))
+      || documentCount > tokenCount) {
+      fail(`${description} violates the disclosure threshold`);
+    }
+    tokens += tokenCount;
+    documents += documentCount;
+  }
+  if (tokens !== corpusTokens || documents !== corpusDocuments) fail(`${description} does not reconcile with the corpus word total`);
+}
+
+function validateBlktRecord(record, layout, description) {
+  const [corpusTokenIndex, corpusDocumentIndex] = layout.corpus;
+  const corpusTokens = record[corpusTokenIndex];
+  const corpusDocuments = record[corpusDocumentIndex];
+  if (!Number.isSafeInteger(corpusTokens) || corpusTokens < layout.minimumTokenCount
+    || !Number.isSafeInteger(corpusDocuments) || corpusDocuments < layout.minimumDocumentSupport
+    || corpusDocuments > corpusTokens) {
+    fail(`${description} violates the corpus disclosure threshold`);
+  }
+  validateBlktRecordFamily(record, layout.documentTypes, corpusTokens, corpusDocuments, layout, `${description} document-type family`);
+  validateBlktRecordFamily(record, layout.periods, corpusTokens, corpusDocuments, layout, `${description} period family`);
 }
 
 function validatedDerivedSourceRows({ derivation, fields, totals, lexicalCounts, viewRecords, description }) {
@@ -1012,8 +1223,77 @@ async function verifyGenericProduct({ manifest, productDirectory, staticRoot }) 
   return { chunkedViews: 0, chunks: 0, records: dataset.words.length, viewCount: 1 };
 }
 
+function validateLookupRange(range, description) {
+  if (!Array.isArray(range) || range.length !== 2
+    || range.some((value) => typeof value !== 'string' || !normalizeString(value))
+    || compareUnicodeCodePoints(range[0], range[1]) > 0) {
+    fail(`${description} lookup range is invalid`);
+  }
+}
+
+async function readBlktRangeRouting({ manifest, view, index, indexPath }) {
+  const routing = index.routing;
+  if (!isPlainObject(routing) || routing.type !== 'range-pages'
+    || routing.maxPageBytes !== index.lookup.maxIndexBytes
+    || !Array.isArray(routing.pages) || routing.pages.length === 0) {
+    fail(`${manifest.id}/${view.id} BLKT lookup routing is invalid`);
+  }
+  const chunks = [];
+  const routingFiles = new Set();
+  let previousRangeEnd = null;
+  let routedRecords = 0;
+  for (const [pageIndex, descriptor] of routing.pages.entries()) {
+    const description = `${manifest.id}/${view.id} routing page ${pageIndex}`;
+    if (!isPlainObject(descriptor) || !normalizeString(descriptor.file)
+      || !Number.isSafeInteger(descriptor.chunks) || descriptor.chunks < 1
+      || !Number.isSafeInteger(descriptor.records) || descriptor.records < 1
+      || !Number.isSafeInteger(descriptor.bytes) || descriptor.bytes < 1
+      || descriptor.bytes > routing.maxPageBytes || !/^[a-f0-9]{64}$/.test(descriptor.sha256)) {
+      fail(`${description} descriptor is invalid`);
+    }
+    validateLookupRange(descriptor.range, description);
+    if (previousRangeEnd !== null && compareUnicodeCodePoints(previousRangeEnd, descriptor.range[0]) >= 0) {
+      fail(`${description} range is not strictly ordered`);
+    }
+    previousRangeEnd = descriptor.range[1];
+    const pagePath = resolveProductPath(path.dirname(indexPath), descriptor.file, `${description} file`);
+    if (routingFiles.has(pagePath)) fail(`${description} file is reused`);
+    routingFiles.add(pagePath);
+    const buffer = await readFile(pagePath);
+    if (buffer.byteLength !== descriptor.bytes || buffer.byteLength > routing.maxPageBytes
+      || createHash('sha256').update(buffer).digest('hex') !== descriptor.sha256) {
+      fail(`${description} bytes or checksum are invalid`);
+    }
+    const page = parseJson(buffer, description);
+    if (!isPlainObject(page) || page.schemaVersion !== 1 || page.productId !== manifest.id
+      || page.viewId !== view.id || page.page !== pageIndex || !sameObject(page.notice, BLKT_FILE_NOTICE)
+      || !Array.isArray(page.chunks)
+      || page.chunks.length !== descriptor.chunks || page.chunks.length === 0) {
+      fail(`${description} content is invalid`);
+    }
+    for (const [chunkIndex, chunk] of page.chunks.entries()) {
+      validateLookupRange(chunk?.range, `${description} chunk ${chunkIndex}`);
+    }
+    const records = page.chunks.reduce((total, chunk) => total + (
+      Number.isSafeInteger(chunk.records) && chunk.records > 0 ? chunk.records : 0
+    ), 0);
+    if (records !== descriptor.records
+      || page.chunks[0].range[0] !== descriptor.range[0]
+      || page.chunks.at(-1).range[1] !== descriptor.range[1]) {
+      fail(`${description} does not reconcile with its descriptor`);
+    }
+    routedRecords += records;
+    chunks.push(...page.chunks);
+  }
+  if (routedRecords !== index.summary.recordCount) {
+    fail(`${manifest.id}/${view.id} BLKT lookup routing record count does not reconcile`);
+  }
+  return chunks;
+}
+
 async function verifyChunkedProduct({ manifest, productDirectory }) {
   if (!Array.isArray(manifest.views) || manifest.views.length === 0) fail(`${manifest.id} has no chunked views`);
+  if (manifest.wordformProfile !== undefined) await verifyBlktLicenceFiles(manifest, productDirectory);
   let chunkedViews = 0;
   let chunks = 0;
   let records = 0;
@@ -1026,10 +1306,11 @@ async function verifyChunkedProduct({ manifest, productDirectory }) {
     viewIds.add(view.id);
 
     const indexPath = resolveProductPath(productDirectory, view.index, `${manifest.id}/${view.id} index`);
-    const index = parseJson(await readFile(indexPath), `${manifest.id}/${view.id} index`);
+    const indexBuffer = await readFile(indexPath);
+    const index = parseJson(indexBuffer, `${manifest.id}/${view.id} index`);
     if (!isPlainObject(index) || index.schemaVersion !== 1 || index.productId !== manifest.id || index.viewId !== view.id
       || index.recordEncoding !== 'array' || !Array.isArray(index.fields) || index.fields.length === 0
-      || !Array.isArray(index.chunks) || index.chunks.length === 0 || !isPlainObject(index.summary)
+      || !isPlainObject(index.summary)
       || !Number.isSafeInteger(index.maxChunkBytes) || index.maxChunkBytes < 1024) {
       fail(`${manifest.id}/${view.id} index is invalid`);
     }
@@ -1040,6 +1321,42 @@ async function verifyChunkedProduct({ manifest, productDirectory }) {
       validateField(field, `${manifest.id}/${view.id}.fields[${fieldIndex}]`);
       if (fieldIds.has(field.id)) fail(`${manifest.id}/${view.id} has duplicate field id ${field.id}`);
       fieldIds.add(field.id);
+    }
+    const blktLayout = manifest.wordformProfile?.viewId === view.id
+      ? blktRecordLayout(manifest.wordformProfile, fields, `${manifest.id}/${view.id} BLKT profile`)
+      : null;
+    if (blktLayout && index.maxChunkBytes > 65536) {
+      fail(`${manifest.id}/${view.id} BLKT data chunks exceed the 65536-byte lookup budget`);
+    }
+    let lookupFieldIndex = -1;
+    if (index.lookup !== undefined) {
+      if (!isPlainObject(index.lookup) || index.lookup.type !== 'exact-string-range'
+        || index.lookup.normalization !== 'trim-nfc-lower'
+        || !isSafeFieldId(index.lookup.field)
+        || !Number.isSafeInteger(index.lookup.maxIndexBytes) || index.lookup.maxIndexBytes < 8192
+        || index.lookup.maxIndexBytes > 65536 || indexBuffer.byteLength > index.lookup.maxIndexBytes
+        || !isPlainObject(index.ordering) || index.ordering.field !== index.lookup.field
+        || index.ordering.direction !== 'ascending') {
+        fail(`${manifest.id}/${view.id} exact lookup metadata is invalid`);
+      }
+      lookupFieldIndex = fields.findIndex((field) => field.id === index.lookup.field && field.type === 'string');
+      if (lookupFieldIndex < 0) fail(`${manifest.id}/${view.id} exact lookup field is invalid`);
+    }
+    if (blktLayout && (lookupFieldIndex < 0 || index.lookup.field !== 'word')) {
+      fail(`${manifest.id}/${view.id} BLKT profile must use the exact word range lookup`);
+    }
+    let chunkDescriptors;
+    if (blktLayout) {
+      if (!sameObject(index.notice, BLKT_FILE_NOTICE)) {
+        fail(`${manifest.id}/${view.id} BLKT index is missing its licence and modification notice`);
+      }
+      if (index.chunks !== undefined) fail(`${manifest.id}/${view.id} BLKT lookup must use bounded range routing pages`);
+      chunkDescriptors = await readBlktRangeRouting({ manifest, view, index, indexPath });
+    } else {
+      if (index.routing !== undefined || !Array.isArray(index.chunks) || index.chunks.length === 0) {
+        fail(`${manifest.id}/${view.id} chunk descriptors are invalid`);
+      }
+      chunkDescriptors = index.chunks;
     }
     let selectionFieldIndex = -1;
     if (index.selection !== undefined) {
@@ -1057,8 +1374,11 @@ async function verifyChunkedProduct({ manifest, productDirectory }) {
     const nullCounts = expectedNullCounts(fields);
     const lexicalCounts = { senseCount: 0, definitionCount: 0, exampleCount: 0 };
     let viewRecords = 0;
+    let previousLookupKey = null;
 
-    for (const [chunkIndex, descriptor] of index.chunks.entries()) {
+    const chunkFiles = new Set();
+    let previousDescriptorRangeEnd = null;
+    for (const [chunkIndex, descriptor] of chunkDescriptors.entries()) {
       if (!isPlainObject(descriptor) || !normalizeString(descriptor.file) || !Number.isSafeInteger(descriptor.records)
         || descriptor.records < 1 || !Number.isSafeInteger(descriptor.bytes) || descriptor.bytes < 1
         || !/^[a-f0-9]{64}$/.test(descriptor.sha256)) {
@@ -1072,7 +1392,19 @@ async function verifyChunkedProduct({ manifest, productDirectory }) {
       if (selectionFieldIndex < 0 && descriptor.selectionPrefixes !== undefined) {
         fail(`${manifest.id}/${view.id} has unexpected selection metadata`);
       }
+      if (lookupFieldIndex >= 0) {
+        validateLookupRange(descriptor.range, `${manifest.id}/${view.id} chunk ${chunkIndex}`);
+        if (previousDescriptorRangeEnd !== null
+          && compareUnicodeCodePoints(previousDescriptorRangeEnd, descriptor.range[0]) >= 0) {
+          fail(`${manifest.id}/${view.id} chunk ${chunkIndex} lookup range is not strictly ordered`);
+        }
+        previousDescriptorRangeEnd = descriptor.range[1];
+      } else if (descriptor.range !== undefined) {
+        fail(`${manifest.id}/${view.id} has unexpected lookup range metadata`);
+      }
       const chunkPath = resolveProductPath(path.dirname(indexPath), descriptor.file, `${manifest.id}/${view.id} chunk`);
+      if (chunkFiles.has(chunkPath)) fail(`${manifest.id}/${view.id} reuses a chunk file`);
+      chunkFiles.add(chunkPath);
       const buffer = await readFile(chunkPath);
       if (buffer.byteLength !== descriptor.bytes || buffer.byteLength > index.maxChunkBytes) {
         fail(`${manifest.id}/${view.id} chunk ${chunkIndex} byte count is invalid`);
@@ -1081,15 +1413,33 @@ async function verifyChunkedProduct({ manifest, productDirectory }) {
       if (checksum !== descriptor.sha256) fail(`${manifest.id}/${view.id} chunk ${chunkIndex} checksum is invalid`);
       const chunk = parseJson(buffer, `${manifest.id}/${view.id} chunk ${chunkIndex}`);
       if (!isPlainObject(chunk) || chunk.schemaVersion !== 1 || chunk.productId !== manifest.id || chunk.viewId !== view.id
-        || chunk.chunk !== chunkIndex || !Array.isArray(chunk.records) || chunk.records.length !== descriptor.records) {
+        || chunk.chunk !== chunkIndex || (blktLayout && !sameObject(chunk.notice, BLKT_FILE_NOTICE))
+        || !Array.isArray(chunk.records) || chunk.records.length !== descriptor.records) {
         fail(`${manifest.id}/${view.id} chunk ${chunkIndex} content is invalid`);
       }
       for (const [recordIndex, record] of chunk.records.entries()) {
         validateRecord(record, fields, `${manifest.id}/${view.id} chunk ${chunkIndex} record ${recordIndex}`, totals, nullCounts, lexicalCounts);
+        if (blktLayout) {
+          validateBlktRecord(record, blktLayout, `${manifest.id}/${view.id} chunk ${chunkIndex} record ${recordIndex}`);
+        }
         if (selectionFieldIndex >= 0
           && !descriptor.selectionPrefixes.includes(prefixFor(record[selectionFieldIndex], index.selection.codePoints))) {
           fail(`${manifest.id}/${view.id} selection chunk ${chunkIndex} has a record outside its prefix`);
         }
+        if (lookupFieldIndex >= 0) {
+          const key = record[lookupFieldIndex];
+          if (typeof key !== 'string' || key !== key.trim().normalize('NFC').toLowerCase()
+            || !/^\p{L}{1,64}$/u.test(key)
+            || (previousLookupKey !== null && compareUnicodeCodePoints(previousLookupKey, key) >= 0)) {
+            fail(`${manifest.id}/${view.id} exact lookup records are invalid or not strictly ascending`);
+          }
+          previousLookupKey = key;
+        }
+      }
+      if (lookupFieldIndex >= 0
+        && (chunk.records[0][lookupFieldIndex] !== descriptor.range[0]
+          || chunk.records.at(-1)[lookupFieldIndex] !== descriptor.range[1])) {
+        fail(`${manifest.id}/${view.id} chunk ${chunkIndex} does not match its lookup range`);
       }
       viewRecords += chunk.records.length;
     }
@@ -1115,7 +1465,7 @@ async function verifyChunkedProduct({ manifest, productDirectory }) {
       fail(`${manifest.id}/${view.id} summary does not match its chunks`);
     }
     chunkedViews += 1;
-    chunks += index.chunks.length;
+    chunks += chunkDescriptors.length;
     records += viewRecords;
   }
   return { chunkedViews, chunks, records, viewCount: manifest.views.length };
@@ -1175,6 +1525,12 @@ function validateManifest(manifest, catalogEntry) {
     validateDatasetProvenance(manifest.provenance, `${manifest.id} provenance`);
   } else {
     validateProductProvenance(manifest.provenance, `${manifest.id} provenance`);
+  }
+  if (manifest.wordformProfile !== undefined) {
+    validateBlktWordformProfile(manifest);
+    if (!sameObject(manifest.notice, BLKT_FILE_NOTICE)) {
+      fail(`${manifest.id} BLKT manifest is missing its licence and modification notice`);
+    }
   }
 }
 
