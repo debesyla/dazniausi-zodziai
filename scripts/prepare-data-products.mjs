@@ -20,18 +20,21 @@ const FIELD_TYPES = new Set([
   'source-pos-code',
   'lexical-entry-details',
   'raw-token-count',
+  'raw-document-count',
   'normalized-token-count',
   'normalized-document-count',
   'coverage-code'
 ]);
 const NUMERIC_FIELD_TYPES = new Set([
   'raw-token-count',
+  'raw-document-count',
   'normalized-token-count',
   'normalized-document-count',
   'coverage-code'
 ]);
 const SUMMARIZED_FIELD_TYPES = new Set([
   'raw-token-count',
+  'raw-document-count',
   'normalized-token-count',
   'normalized-document-count'
 ]);
@@ -56,6 +59,8 @@ const CCLL_GENRE_PROFILE_SOURCES = [
   { id: 'periodicals', sourceRole: 'subcorpus-periodicals' },
   { id: 'speech', sourceRole: 'subcorpus-speech' }
 ];
+const BLKT_PRODUCT_ID = 'vssa-2026-blkt-wordform-profile';
+const BLKT_PROVENANCE_LICENCE = 'NewGenLTU OpenRAIL-D v1.0; CC BY-SA 4.0 for BLKT rows labelled Vikipedija';
 
 function fail(message) {
   throw new Error(`Data-product preparation failed: ${message}`);
@@ -67,6 +72,10 @@ function isPlainObject(value) {
 
 function normalizeString(value) {
   return typeof value === 'string' ? value.trim() : '';
+}
+
+function sameObject(left, right) {
+  return JSON.stringify(left) === JSON.stringify(right);
 }
 
 function isSafeId(value) {
@@ -186,6 +195,157 @@ function validateView(view, description) {
   }
   if (!(view.ordering.field === 'source' && view.ordering.direction === 'as-stored') && !ids.has(view.ordering.field)) {
     fail(`${description}.ordering.field must name a field unless it declares source order`);
+  }
+  if (view.lookup !== undefined) {
+    const lookupField = view.fields.find((field) => field.id === view.lookup?.field);
+    if (!isPlainObject(view.lookup) || view.lookup.type !== 'exact-string-range'
+      || view.lookup.normalization !== 'trim-nfc-lower'
+      || !Number.isSafeInteger(view.lookup.maxIndexBytes) || view.lookup.maxIndexBytes < 8192
+      || view.lookup.maxIndexBytes > 65536 || view.ordering.field !== view.lookup.field
+      || view.ordering.direction !== 'ascending' || !lookupField || lookupField.type !== 'string') {
+      fail(`${description}.lookup must define a bounded exact-string range index over the ascending string field`);
+    }
+  }
+}
+
+const BLKT_TYPE_DIMENSIONS = [
+  ['fiction', 'gro'],
+  ['non-fiction', 'neg'],
+  ['media', 'zin'],
+  ['speech', 'sak'],
+  ['documents', 'dok']
+];
+const BLKT_PERIOD_DIMENSIONS = [
+  ['1922-1940', '1'],
+  ['1941-1990', '2'],
+  ['1990-2004', '3'],
+  ['2008-2026', '4']
+];
+const BLKT_EXCLUSIONS = [
+  'raw-text',
+  'document-rows',
+  'document-subtypes',
+  'joint-dimensions',
+  'titles',
+  'authors',
+  'urls',
+  'source-identifiers',
+  'publication-dates',
+  'personal-data'
+];
+const BLKT_SOURCE_SCOPE_CAVEAT = 'BLKT is not representative of all Lithuanian language use: media and document texts dominate its document and token composition.';
+const BLKT_SOURCE_LICENCES = {
+  inventory: [
+    {
+      sourceLabel: 'NewGenLTU OpenRAIL-D',
+      name: 'NewGenLTU OpenRAIL-D v1.0',
+      url: 'https://sitti.vdu.lt/newgenltu-openrail-d-license/',
+      documents: 8267437,
+      sourceAlphaWords: 3906734476
+    },
+    {
+      sourceLabel: 'CC BY-SA 4.0',
+      name: 'Creative Commons Attribution-ShareAlike 4.0 International',
+      url: 'https://creativecommons.org/licenses/by-sa/4.0/',
+      attribution: 'Wikipedia contributors (BLKT source_name: Vikipedija).',
+      documents: 170718,
+      sourceAlphaWords: 34741743
+    }
+  ],
+  application: 'The combined aggregate retains the notices and conditions of both source licence groups.'
+};
+const BLKT_RIGHTS = {
+  licences: [
+    {
+      id: 'newgenltu-openrail-d-v1.0',
+      name: 'NewGenLTU OpenRAIL-D v1.0',
+      url: 'https://sitti.vdu.lt/newgenltu-openrail-d-license/',
+      file: 'LICENSE-NewGenLTU-OpenRAIL-D-1.0.txt',
+      sha256: 'abf61fc83225e088c1ed91aae517f0d5c606c2c9b441f3fc245ce821c1c79ab9'
+    },
+    {
+      id: 'cc-by-sa-4.0',
+      name: 'Creative Commons Attribution-ShareAlike 4.0 International',
+      url: 'https://creativecommons.org/licenses/by-sa/4.0/',
+      file: 'LICENSE-CC-BY-SA-4.0.txt',
+      sha256: '23ee78c8bae49cf08ea2f0c84945c66b987ebe4520881fb51b3dad4fb43d07c2'
+    }
+  ],
+  modificationNotice: 'MODIFIED FILE: Privacy-thresholded aggregate-only BLKT derivative produced by dazniausi-zodziai; no original text or document-level metadata is distributed.',
+  attributionNotices: [
+    'Valstybės skaitmeninių sprendimų agentūra. 2026. Bendrasis lietuvių kalbos tekstynas. Hugging Face. https://huggingface.co/datasets/VSSA-SDSA/LT_AI_BLKT.',
+    'Wikipedia contributors. The BLKT source rows labelled “Vikipedija” are derived from Lithuanian Wikipedia material licensed under CC BY-SA 4.0. https://lt.wikipedia.org/'
+  ],
+  downstreamRequirements: [
+    'Retain both applicable licence copies, this modification notice, the BLKT attribution, and the Wikipedia-contributor attribution with any redistribution.',
+    'Use this derivative only for model training, other language-technology development, or production of datasets for model training.',
+    'Do not use this derivative to extract, obtain, reconstruct, or publish personal data.',
+    'For material derived from the BLKT rows labelled “Vikipedija”, comply with CC BY-SA 4.0 attribution and ShareAlike requirements.'
+  ]
+};
+const BLKT_FILE_NOTICE = {
+  modificationNotice: BLKT_RIGHTS.modificationNotice,
+  attribution: 'BLKT: Valstybės skaitmeninių sprendimų agentūra (2026); Vikipedija subset: Wikipedia contributors.',
+  licenceLocation: 'product-root',
+  licences: BLKT_RIGHTS.licences.map(({ name, file }) => ({ name, file }))
+};
+const BLKT_LICENCE_SOURCE_FILES = [
+  ['data/licenses/newgenltu-openrail-d-v1.0.txt', BLKT_RIGHTS.licences[0]],
+  ['data/licenses/cc-by-sa-4.0-legalcode.txt', BLKT_RIGHTS.licences[1]]
+];
+
+function validateBlktDimension(value, expected, description) {
+  if (!isPlainObject(value) || value.id !== expected[0] || value.sourceCode !== expected[1]
+    || !normalizeString(value.label) || !isSafeFieldId(value.tokenField)
+    || !isSafeFieldId(value.documentField) || value.tokenField === value.documentField) {
+    fail(`${description} is invalid`);
+  }
+  for (const field of ['documents', 'sourceAlphaWords', 'derivedTokens']) {
+    if (!Number.isSafeInteger(value[field]) || value[field] < 1) fail(`${description}.${field} is invalid`);
+  }
+}
+
+function validateBlktWordformProfile(value, description) {
+  if (!isPlainObject(value) || value.schemaVersion !== 1 || value.viewId !== 'wordform-scope-metrics'
+    || value.sourceScopeCaveat !== BLKT_SOURCE_SCOPE_CAVEAT
+    || !sameObject(value.sourceLicences, BLKT_SOURCE_LICENCES)
+    || !isPlainObject(value.tokenizer) || value.tokenizer.id !== 'blkt-unicode-letter-lower-v1'
+    || value.tokenizer.normalization !== 'trim-nfc-lower' || value.tokenizer.maximumCodePoints !== 64
+    || value.tokenizer.caseMapping !== 'duckdb-simple-per-code-point'
+    || !isPlainObject(value.disclosure) || value.disclosure.minimumTokenCount !== 100
+    || value.disclosure.minimumDocumentSupport !== 20
+    || value.disclosure.familyRule !== 'all-positive-siblings-must-pass-or-family-is-null'
+    || !isPlainObject(value.rate) || value.rate.targetTokens !== 1000000
+    || value.rate.formula !== 'tokenCount * 1000000 / derivedTokens'
+    || value.rate.unit !== 'tokens per million derived tokens'
+    || !isPlainObject(value.corpus) || value.corpus.id !== 'corpus'
+    || value.corpus.sourceCode !== undefined || !normalizeString(value.corpus.label)
+    || !isSafeFieldId(value.corpus.tokenField)
+    || !isSafeFieldId(value.corpus.documentField) || value.corpus.tokenField === value.corpus.documentField
+    || !Array.isArray(value.documentTypes) || value.documentTypes.length !== BLKT_TYPE_DIMENSIONS.length
+    || !Array.isArray(value.periods) || value.periods.length !== BLKT_PERIOD_DIMENSIONS.length
+    || !isPlainObject(value.validatedSubtypes) || value.validatedSubtypes.count !== 11
+    || value.validatedSubtypes.published !== false || !isPlainObject(value.permission)
+    || value.permission.status !== 'confirmed-by-project-owner' || value.permission.confirmedOn !== '2026-08-02'
+    || !sameObject(value.rights, BLKT_RIGHTS)
+    || !sameObject(value.exclusions, BLKT_EXCLUSIONS)) {
+    fail(`${description} is invalid`);
+  }
+  for (const field of ['documents', 'sourceAlphaWords', 'derivedTokens']) {
+    if (!Number.isSafeInteger(value.corpus[field]) || value.corpus[field] < 1) fail(`${description}.corpus.${field} is invalid`);
+  }
+  value.documentTypes.forEach((dimension, index) => validateBlktDimension(dimension, BLKT_TYPE_DIMENSIONS[index], `${description}.documentTypes[${index}]`));
+  value.periods.forEach((dimension, index) => validateBlktDimension(dimension, BLKT_PERIOD_DIMENSIONS[index], `${description}.periods[${index}]`));
+  for (const dimensions of [value.documentTypes, value.periods]) {
+    for (const field of ['documents', 'sourceAlphaWords', 'derivedTokens']) {
+      if (dimensions.reduce((total, item) => total + item[field], 0) !== value.corpus[field]) {
+        fail(`${description}.${field} does not reconcile with the corpus denominator`);
+      }
+    }
+  }
+  if (value.sourceLicences.inventory.reduce((total, item) => total + item.documents, 0) !== value.corpus.documents
+    || value.sourceLicences.inventory.reduce((total, item) => total + item.sourceAlphaWords, 0) !== value.corpus.sourceAlphaWords) {
+    fail(`${description}.sourceLicences does not reconcile with the corpus denominator`);
   }
 }
 
@@ -427,6 +587,20 @@ export function validatePublicationPlan(plan) {
       viewIds.add(view.id);
     }
 
+    if (product.wordformProfile !== undefined) {
+      if (product.contractId !== BLKT_PRODUCT_ID || product.productType !== 'chunked-comparison') {
+        fail(`${description}.wordformProfile is only valid for the reviewed BLKT comparison product`);
+      }
+      validateBlktWordformProfile(product.wordformProfile, `${description}.wordformProfile`);
+      if (!viewIds.has(product.wordformProfile.viewId)) {
+        fail(`${description}.wordformProfile must reference a published view`);
+      }
+      const lookupView = product.views.find((view) => view.id === product.wordformProfile.viewId);
+      if (lookupView.chunkBytes > 65536) {
+        fail(`${description}.wordformProfile view chunks must not exceed 65536 bytes`);
+      }
+    }
+
     if (product.analysisProfiles !== undefined) {
       if (!Array.isArray(product.analysisProfiles)) fail(`${description}.analysisProfiles must be an array when present`);
       const profileIds = new Set();
@@ -515,8 +689,65 @@ function parseFieldValue(field, value, sourcePath, lineNumber) {
   return parsed;
 }
 
-function chunkPrefix(productId, viewId, chunkNumber) {
-  return `{"schemaVersion":1,"productId":${JSON.stringify(productId)},"viewId":${JSON.stringify(viewId)},"chunk":${chunkNumber},"records":[`;
+function chunkPrefix(productId, viewId, chunkNumber, notice = null) {
+  return `{"schemaVersion":1,"productId":${JSON.stringify(productId)},"viewId":${JSON.stringify(viewId)},"chunk":${chunkNumber}${notice === null ? '' : `,"notice":${JSON.stringify(notice)}`},"records":[`;
+}
+
+function rangeRoutingPage(productId, viewId, pageNumber, chunks) {
+  return {
+    schemaVersion: 1,
+    productId,
+    viewId,
+    page: pageNumber,
+    notice: BLKT_FILE_NOTICE,
+    chunks
+  };
+}
+
+async function writeRangeRoutingPages({ productId, viewDirectory, viewId, chunks, maxPageBytes }) {
+  const routingDirectory = path.join(viewDirectory, 'routing');
+  const pages = [];
+  let pageNumber = 0;
+  let pageChunks = [];
+
+  async function flushPage() {
+    if (pageChunks.length === 0) return;
+    const page = rangeRoutingPage(productId, viewId, pageNumber, pageChunks);
+    const filename = `${String(pageNumber + 1).padStart(6, '0')}.json`;
+    const buffer = await writeCompactJsonWithByteBudget(
+      path.join(routingDirectory, filename),
+      page,
+      maxPageBytes,
+      `${productId}/${viewId}/routing/${filename}`
+    );
+    pages.push({
+      file: `routing/${filename}`,
+      chunks: pageChunks.length,
+      records: pageChunks.reduce((total, chunk) => total + chunk.records, 0),
+      bytes: buffer.byteLength,
+      sha256: createHash('sha256').update(buffer).digest('hex'),
+      range: [pageChunks[0].range[0], pageChunks.at(-1).range[1]]
+    });
+    pageNumber += 1;
+    pageChunks = [];
+  }
+
+  for (const chunk of chunks) {
+    const candidate = rangeRoutingPage(productId, viewId, pageNumber, [...pageChunks, chunk]);
+    const candidateBytes = Buffer.byteLength(`${JSON.stringify(candidate)}\n`, 'utf8');
+    if (candidateBytes > maxPageBytes && pageChunks.length > 0) await flushPage();
+    const singleCandidate = rangeRoutingPage(productId, viewId, pageNumber, [...pageChunks, chunk]);
+    if (Buffer.byteLength(`${JSON.stringify(singleCandidate)}\n`, 'utf8') > maxPageBytes) {
+      fail(`${productId}/${viewId} chunk descriptor cannot fit in the ${maxPageBytes}-byte routing-page budget`);
+    }
+    pageChunks.push(chunk);
+  }
+  await flushPage();
+  return {
+    type: 'range-pages',
+    maxPageBytes,
+    pages
+  };
 }
 
 function sourceDisplayName(sourceFile) {
@@ -560,12 +791,19 @@ async function buildChunkedView({ productId, productDirectory, view, sourceFile,
   let recordJsons = [];
   let recordsBytes = 0;
   let sourceRows = 0;
+  const lookupFieldIndex = view.lookup === undefined
+    ? -1
+    : view.fields.findIndex((field) => field.id === view.lookup.field);
+  let previousLookupKey = null;
+  let chunkFirstLookupKey = null;
+  let chunkLastLookupKey = null;
   const numericTotals = fieldTotals(view.fields);
   const nullCounts = fieldNullCounts(view.fields);
+  const fileNotice = productId === BLKT_PRODUCT_ID ? BLKT_FILE_NOTICE : null;
 
   async function flushChunk() {
     if (recordJsons.length === 0) return;
-    const serialized = `${chunkPrefix(productId, view.id, chunkNumber)}${recordJsons.join(',')}${suffix}`;
+    const serialized = `${chunkPrefix(productId, view.id, chunkNumber, fileNotice)}${recordJsons.join(',')}${suffix}`;
     const buffer = Buffer.from(serialized, 'utf8');
     if (buffer.byteLength > view.chunkBytes) {
       fail(`${productId}/${view.id} chunk ${chunkNumber} exceeds its ${view.chunkBytes}-byte budget`);
@@ -576,11 +814,14 @@ async function buildChunkedView({ productId, productDirectory, view, sourceFile,
       file: `chunks/${filename}`,
       records: recordJsons.length,
       bytes: buffer.byteLength,
-      sha256: createHash('sha256').update(buffer).digest('hex')
+      sha256: createHash('sha256').update(buffer).digest('hex'),
+      ...(lookupFieldIndex < 0 ? {} : { range: [chunkFirstLookupKey, chunkLastLookupKey] })
     });
     chunkNumber += 1;
     recordJsons = [];
     recordsBytes = 0;
+    chunkFirstLookupKey = null;
+    chunkLastLookupKey = null;
   }
 
   const lines = createInterface({
@@ -597,6 +838,16 @@ async function buildChunkedView({ productId, productDirectory, view, sourceFile,
       fail(`${sourceDisplayPath} line ${sourceRows} has ${values.length} columns; expected ${sourceFile.columns}`);
     }
     const record = view.fields.map((field) => parseFieldValue(field, values[field.sourceColumn], sourceDisplayPath, sourceRows));
+    let lookupKey = null;
+    if (lookupFieldIndex >= 0) {
+      lookupKey = record[lookupFieldIndex];
+      if (typeof lookupKey !== 'string' || lookupKey !== lookupKey.trim().normalize('NFC').toLowerCase()
+        || !/^\p{L}{1,64}$/u.test(lookupKey)
+        || (previousLookupKey !== null && compareUnicodeCodePoints(previousLookupKey, lookupKey) >= 0)) {
+        fail(`${sourceDisplayPath} line ${sourceRows} has an invalid or non-ascending exact lookup key`);
+      }
+      previousLookupKey = lookupKey;
+    }
     for (const [index, field] of view.fields.entries()) {
       const value = record[index];
       if (value === null) {
@@ -607,17 +858,21 @@ async function buildChunkedView({ productId, productDirectory, view, sourceFile,
     }
 
     const recordJson = JSON.stringify(record);
-    const prefix = chunkPrefix(productId, view.id, chunkNumber);
+    const prefix = chunkPrefix(productId, view.id, chunkNumber, fileNotice);
     const candidateBytes = Buffer.byteLength(prefix) + recordsBytes + (recordJsons.length === 0 ? 0 : 1)
       + Buffer.byteLength(recordJson) + Buffer.byteLength(suffix);
     if (candidateBytes > view.chunkBytes && recordJsons.length > 0) {
       await flushChunk();
     }
-    const currentPrefix = chunkPrefix(productId, view.id, chunkNumber);
+    const currentPrefix = chunkPrefix(productId, view.id, chunkNumber, fileNotice);
     const currentBytes = Buffer.byteLength(currentPrefix) + recordsBytes + (recordJsons.length === 0 ? 0 : 1)
       + Buffer.byteLength(recordJson) + Buffer.byteLength(suffix);
     if (currentBytes > view.chunkBytes) {
       fail(`${sourceDisplayPath} line ${sourceRows} cannot fit in the ${view.chunkBytes}-byte chunk budget`);
+    }
+    if (lookupFieldIndex >= 0) {
+      chunkFirstLookupKey ??= lookupKey;
+      chunkLastLookupKey = lookupKey;
     }
     recordJsons.push(recordJson);
     recordsBytes += (recordJsons.length === 1 ? 0 : 1) + Buffer.byteLength(recordJson);
@@ -633,7 +888,7 @@ async function buildChunkedView({ productId, productDirectory, view, sourceFile,
   assertContractSummary(sourceFile, view.fields, summary, sourceDisplayPath);
   if (chunks.length === 0) fail(`${sourceDisplayPath} produced no records`);
 
-  const index = {
+  const baseIndex = {
     schemaVersion: 1,
     productId,
     viewId: view.id,
@@ -642,10 +897,36 @@ async function buildChunkedView({ productId, productDirectory, view, sourceFile,
     ordering: view.ordering,
     sourceFile: publicSourceFile(sourceFile),
     maxChunkBytes: view.chunkBytes,
-    summary,
-    chunks
+    ...(fileNotice === null ? {} : { notice: fileNotice }),
+    ...(view.lookup === undefined ? {} : { lookup: view.lookup }),
+    summary
   };
-  await writeJson(path.join(viewDirectory, 'index.json'), index);
+  if (productId === BLKT_PRODUCT_ID && view.lookup !== undefined) {
+    const routing = await writeRangeRoutingPages({
+      productId,
+      viewDirectory,
+      viewId: view.id,
+      chunks,
+      maxPageBytes: view.lookup.maxIndexBytes
+    });
+    await writeCompactJsonWithByteBudget(
+      path.join(viewDirectory, 'index.json'),
+      { ...baseIndex, routing },
+      view.lookup.maxIndexBytes,
+      `${productId}/${view.id}/index.json`
+    );
+  } else {
+    const index = { ...baseIndex, chunks };
+    if (view.lookup === undefined) await writeJson(path.join(viewDirectory, 'index.json'), index);
+    else {
+      await writeCompactJsonWithByteBudget(
+        path.join(viewDirectory, 'index.json'),
+        index,
+        view.lookup.maxIndexBytes,
+        `${productId}/${view.id}/index.json`
+      );
+    }
+  }
   return {
     id: view.id,
     title: view.title,
@@ -2760,6 +3041,23 @@ function buildMetadataOnlyManifest({ contract, contractProduct }) {
   };
 }
 
+async function writeBlktLicenceFiles(productDirectory) {
+  for (const [sourceRelativePath, licence] of BLKT_LICENCE_SOURCE_FILES) {
+    const buffer = await readFile(path.join(repositoryRoot, sourceRelativePath));
+    const checksum = createHash('sha256').update(buffer).digest('hex');
+    const text = buffer.toString('utf8');
+    const hasCompleteTerms = licence.id === 'newgenltu-openrail-d-v1.0'
+      ? ['Section I: PREAMBLE', 'Section IV: OTHER PROVISIONS', 'Attachment A', '10. Other restrictions']
+        .every((marker) => text.includes(marker))
+      : ['Attribution-ShareAlike 4.0 International', 'Section 3 -- License Conditions.', 'b. ShareAlike.', 'Section 8 -- Interpretation.']
+        .every((marker) => text.includes(marker));
+    if (checksum !== licence.sha256 || buffer.byteLength > 65536 || !hasCompleteTerms) {
+      fail(`${licence.name} bundled licence text is missing, changed, or exceeds 65536 bytes`);
+    }
+    await writeFile(path.join(productDirectory, licence.file), buffer);
+  }
+}
+
 async function buildContractProduct({ contract, contractProduct, sourceResolver, outputRoot }) {
   const productDirectory = path.join(outputRoot, contract.id);
   if (contractProduct.productType === 'metadata-only') {
@@ -2841,6 +3139,42 @@ async function buildContractProduct({ contract, contractProduct, sourceResolver,
     }
   }
 
+  if (contractProduct.wordformProfile !== undefined) {
+    const profile = contractProduct.wordformProfile;
+    const view = contractProduct.views.find((candidate) => candidate.id === profile.viewId);
+    const fields = new Map(view?.fields.map((field) => [field.id, field]));
+    const pairs = [profile.corpus, ...profile.documentTypes, ...profile.periods];
+    const expectedFields = [
+      ['word', 'string', false],
+      [profile.corpus.tokenField, 'raw-token-count', false],
+      [profile.corpus.documentField, 'raw-document-count', false],
+      ...profile.documentTypes.flatMap((item) => [
+        [item.tokenField, 'raw-token-count', true],
+        [item.documentField, 'raw-document-count', true]
+      ]),
+      ...profile.periods.flatMap((item) => [
+        [item.tokenField, 'raw-token-count', true],
+        [item.documentField, 'raw-document-count', true]
+      ])
+    ];
+    if (contract.source.licence !== BLKT_PROVENANCE_LICENCE
+      || !sameObject(contract.source.sourceLicences, profile.sourceLicences)
+      || !sameObject(contract.source.rights, profile.rights)
+      || contract.schema?.sourceScopeCaveat !== profile.sourceScopeCaveat) {
+      fail(`${contract.id} contract licence and source-scope metadata do not match its public wordform profile`);
+    }
+    if (!view || view.lookup?.field !== 'word' || view.fields.length !== expectedFields.length
+      || view.fields.some((field, index) => field.id !== expectedFields[index][0]
+        || field.type !== expectedFields[index][1]
+        || (field.nullable === true) !== expectedFields[index][2]
+        || field.sourceColumn !== index)
+      || pairs.some((item) => fields.get(item.tokenField)?.type !== 'raw-token-count'
+        || fields.get(item.documentField)?.type !== 'raw-document-count')) {
+      fail(`${contract.id} wordform profile fields do not match its published range-indexed view`);
+    }
+    await writeBlktLicenceFiles(productDirectory);
+  }
+
   const manifest = {
     schemaVersion: 1,
     id: contract.id,
@@ -2858,6 +3192,8 @@ async function buildContractProduct({ contract, contractProduct, sourceResolver,
       constraints: contract.delivery?.constraints ?? []
     },
     views,
+    ...(contractProduct.wordformProfile === undefined ? {} : { notice: BLKT_FILE_NOTICE }),
+    ...(contractProduct.wordformProfile === undefined ? {} : { wordformProfile: contractProduct.wordformProfile }),
     ...(analysisProfiles.length === 0 ? {} : { analysisProfiles })
   };
   await writeJson(path.join(productDirectory, 'manifest.json'), manifest);

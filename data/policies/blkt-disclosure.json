@@ -1,0 +1,250 @@
+{
+  "schemaVersion": 1,
+  "productId": "vssa-2026-blkt-wordform-profile",
+  "status": "thresholded-marginals-only",
+  "reviewIssue": "https://github.com/debesyla/dazniausi-zodziai/issues/59",
+  "approvedView": {
+    "id": "wordform-scope-metrics",
+    "productType": "chunked-comparison",
+    "recordEncoding": "array",
+    "recordFields": [
+      "word",
+      "corpusTokenCount",
+      "corpusDocumentCount",
+      "typeGroTokenCount",
+      "typeGroDocumentCount",
+      "typeNegTokenCount",
+      "typeNegDocumentCount",
+      "typeZinTokenCount",
+      "typeZinDocumentCount",
+      "typeSakTokenCount",
+      "typeSakDocumentCount",
+      "typeDokTokenCount",
+      "typeDokDocumentCount",
+      "period1TokenCount",
+      "period1DocumentCount",
+      "period2TokenCount",
+      "period2DocumentCount",
+      "period3TokenCount",
+      "period3DocumentCount",
+      "period4TokenCount",
+      "period4DocumentCount"
+    ]
+  },
+  "approvedGranularity": {
+    "corpus": {
+      "tokenField": "corpusTokenCount",
+      "documentField": "corpusDocumentCount"
+    },
+    "documentTypes": [
+      {
+        "id": "fiction",
+        "sourceCode": "gro",
+        "tokenField": "typeGroTokenCount",
+        "documentField": "typeGroDocumentCount"
+      },
+      {
+        "id": "non-fiction",
+        "sourceCode": "neg",
+        "tokenField": "typeNegTokenCount",
+        "documentField": "typeNegDocumentCount"
+      },
+      {
+        "id": "media",
+        "sourceCode": "zin",
+        "tokenField": "typeZinTokenCount",
+        "documentField": "typeZinDocumentCount"
+      },
+      {
+        "id": "speech",
+        "sourceCode": "sak",
+        "tokenField": "typeSakTokenCount",
+        "documentField": "typeSakDocumentCount"
+      },
+      {
+        "id": "documents",
+        "sourceCode": "dok",
+        "tokenField": "typeDokTokenCount",
+        "documentField": "typeDokDocumentCount"
+      }
+    ],
+    "periods": [
+      {
+        "id": "1922-1940",
+        "sourceCode": "1",
+        "tokenField": "period1TokenCount",
+        "documentField": "period1DocumentCount"
+      },
+      {
+        "id": "1941-1990",
+        "sourceCode": "2",
+        "tokenField": "period2TokenCount",
+        "documentField": "period2DocumentCount"
+      },
+      {
+        "id": "1990-2004",
+        "sourceCode": "3",
+        "tokenField": "period3TokenCount",
+        "documentField": "period3DocumentCount"
+      },
+      {
+        "id": "2008-2026",
+        "sourceCode": "4",
+        "tokenField": "period4TokenCount",
+        "documentField": "period4DocumentCount"
+      }
+    ],
+    "documentSubtypes": false,
+    "jointDimensions": false
+  },
+  "tokenPolicy": {
+    "kind": "unicode-letter-sequence",
+    "normalization": "trim-nfc-lower",
+    "maxCodePoints": 64,
+    "caseMapping": "duckdb-simple-per-code-point"
+  },
+  "disclosure": {
+    "minimumTokenCount": 100,
+    "minimumDocumentSupport": 20,
+    "familyRule": "all-positive-siblings-must-pass-or-family-is-null"
+  },
+  "lookup": {
+    "type": "exact-string-range",
+    "field": "word",
+    "normalization": "trim-nfc-lower",
+    "routing": "range-pages",
+    "maximumIndexBytes": 65536,
+    "maximumRoutingPageBytes": 65536,
+    "maximumChunkBytes": 65536
+  },
+  "sourceScopeCaveat": "BLKT is not representative of all Lithuanian language use: media and document texts dominate its document and token composition.",
+  "sourceLicences": {
+    "inventory": [
+      {
+        "sourceLabel": "NewGenLTU OpenRAIL-D",
+        "name": "NewGenLTU OpenRAIL-D v1.0",
+        "url": "https://sitti.vdu.lt/newgenltu-openrail-d-license/",
+        "documents": 8267437,
+        "sourceAlphaWords": 3906734476
+      },
+      {
+        "sourceLabel": "CC BY-SA 4.0",
+        "name": "Creative Commons Attribution-ShareAlike 4.0 International",
+        "url": "https://creativecommons.org/licenses/by-sa/4.0/",
+        "attribution": "Wikipedia contributors (BLKT source_name: Vikipedija).",
+        "documents": 170718,
+        "sourceAlphaWords": 34741743
+      }
+    ],
+    "application": "The combined aggregate retains the notices and conditions of both source licence groups."
+  },
+  "rights": {
+    "licences": [
+      {
+        "id": "newgenltu-openrail-d-v1.0",
+        "name": "NewGenLTU OpenRAIL-D v1.0",
+        "url": "https://sitti.vdu.lt/newgenltu-openrail-d-license/",
+        "file": "LICENSE-NewGenLTU-OpenRAIL-D-1.0.txt",
+        "sha256": "abf61fc83225e088c1ed91aae517f0d5c606c2c9b441f3fc245ce821c1c79ab9"
+      },
+      {
+        "id": "cc-by-sa-4.0",
+        "name": "Creative Commons Attribution-ShareAlike 4.0 International",
+        "url": "https://creativecommons.org/licenses/by-sa/4.0/",
+        "file": "LICENSE-CC-BY-SA-4.0.txt",
+        "sha256": "23ee78c8bae49cf08ea2f0c84945c66b987ebe4520881fb51b3dad4fb43d07c2"
+      }
+    ],
+    "modificationNotice": "MODIFIED FILE: Privacy-thresholded aggregate-only BLKT derivative produced by dazniausi-zodziai; no original text or document-level metadata is distributed.",
+    "attributionNotices": [
+      "Valstybės skaitmeninių sprendimų agentūra. 2026. Bendrasis lietuvių kalbos tekstynas. Hugging Face. https://huggingface.co/datasets/VSSA-SDSA/LT_AI_BLKT.",
+      "Wikipedia contributors. The BLKT source rows labelled “Vikipedija” are derived from Lithuanian Wikipedia material licensed under CC BY-SA 4.0. https://lt.wikipedia.org/"
+    ],
+    "downstreamRequirements": [
+      "Retain both applicable licence copies, this modification notice, the BLKT attribution, and the Wikipedia-contributor attribution with any redistribution.",
+      "Use this derivative only for model training, other language-technology development, or production of datasets for model training.",
+      "Do not use this derivative to extract, obtain, reconstruct, or publish personal data.",
+      "For material derived from the BLKT rows labelled “Vikipedija”, comply with CC BY-SA 4.0 attribution and ShareAlike requirements."
+    ]
+  },
+  "fileNotice": {
+    "modificationNotice": "MODIFIED FILE: Privacy-thresholded aggregate-only BLKT derivative produced by dazniausi-zodziai; no original text or document-level metadata is distributed.",
+    "attribution": "BLKT: Valstybės skaitmeninių sprendimų agentūra (2026); Vikipedija subset: Wikipedia contributors.",
+    "licenceLocation": "product-root",
+    "licences": [
+      {
+        "name": "NewGenLTU OpenRAIL-D v1.0",
+        "file": "LICENSE-NewGenLTU-OpenRAIL-D-1.0.txt"
+      },
+      {
+        "name": "Creative Commons Attribution-ShareAlike 4.0 International",
+        "file": "LICENSE-CC-BY-SA-4.0.txt"
+      }
+    ]
+  },
+  "requiredExclusions": [
+    "raw-text",
+    "document-rows",
+    "document-subtypes",
+    "joint-dimensions",
+    "titles",
+    "authors",
+    "urls",
+    "source-identifiers",
+    "publication-dates",
+    "personal-data"
+  ],
+  "forbiddenObjectKeys": [
+    "rawText",
+    "text",
+    "body",
+    "content",
+    "excerpt",
+    "excerpts",
+    "quote",
+    "quotation",
+    "sentence",
+    "sentences",
+    "context",
+    "document",
+    "documentId",
+    "documentTitle",
+    "documentUrl",
+    "recordId",
+    "row",
+    "rowId",
+    "sourceRow",
+    "sourceRowId",
+    "sampleId",
+    "archivePath",
+    "filePath",
+    "filename",
+    "sourceId",
+    "sourceIdentifier",
+    "sourceGroup",
+    "sourceGroupId",
+    "speaker",
+    "speakerId",
+    "speakerName",
+    "author",
+    "authorId",
+    "authorName",
+    "person",
+    "personId",
+    "date",
+    "publicationDate",
+    "day",
+    "month",
+    "year",
+    "calendarYear",
+    "session",
+    "sessionId",
+    "period",
+    "documentSubtype",
+    "subtype",
+    "time",
+    "timestamp",
+    "rank",
+    "ranking"
+  ]
+}
