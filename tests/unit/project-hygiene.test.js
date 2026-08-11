@@ -30,7 +30,7 @@ describe('project hygiene', () => {
 		expect(readme).not.toContain('test:e2e');
 	});
 
-	it('tracks a curation decision for every known source collection', async () => {
+	it('tracks every approved source collection in the public contract catalog', async () => {
 		const sourceCatalog = await readRepositoryFile('docs/source-catalog.md');
 
 		for (const collection of [
@@ -53,6 +53,60 @@ describe('project hygiene', () => {
 			expect(sourceCatalog).toContain(collection);
 		}
 		expect(sourceCatalog).toContain('byte-for-byte reproducibility');
+	});
+
+	it('tracks externally gated research candidates without authorizing products', async () => {
+		const sourceCatalog = await readRepositoryFile('docs/source-catalog.md');
+		const ledger = JSON.parse(await readRepositoryFile('data/research/source-candidates.json'));
+		const plan = JSON.parse(await readRepositoryFile('data/products/publication-plan.json'));
+
+		expect(ledger.schemaVersion).toBe(1);
+		expect(new Set(ledger.candidates.map((candidate) => candidate.id)).size).toBe(ledger.candidates.length);
+		expect(ledger.candidates).toEqual([
+			expect.objectContaining({
+				id: 'tilde-2026-parallel-and-monolingual-corpora',
+				status: 'blocked-external',
+				trackingIssue: 'https://github.com/debesyla/dazniausi-zodziai/issues/63',
+				rawImportAuthorized: false,
+				publicProductAuthorized: false
+			})
+		]);
+		for (const candidate of ledger.candidates) {
+			expect(Object.keys(candidate).sort()).toEqual([
+				'blockers',
+				'id',
+				'licence',
+				'publicProductAuthorized',
+				'rawImportAuthorized',
+				'sourceUrl',
+				'status',
+				'title',
+				'trackingIssue'
+			]);
+			expect(candidate.id).toMatch(/^[a-z0-9][a-z0-9-]+$/);
+			expect(candidate.sourceUrl).toMatch(/^https:\/\/clarin-repo\.lt\/items\/[a-f0-9-]+$/);
+			expect(candidate.trackingIssue).toMatch(/^https:\/\/github\.com\/debesyla\/dazniausi-zodziai\/issues\/\d+$/);
+			expect(candidate.licence).toEqual(expect.any(String));
+			expect(candidate.licence.length).toBeGreaterThan(0);
+			expect(candidate.status).toBe('blocked-external');
+			expect(candidate.rawImportAuthorized).toBe(false);
+			expect(candidate.publicProductAuthorized).toBe(false);
+			expect(candidate.blockers.length).toBeGreaterThan(0);
+			for (const blocker of candidate.blockers) {
+				expect(Object.keys(blocker).sort()).toEqual(['kind', 'summary']);
+				expect(blocker.kind).toMatch(/^[a-z][a-z-]+$/);
+				expect(blocker.summary).toEqual(expect.any(String));
+				expect(blocker.summary.length).toBeGreaterThan(20);
+			}
+			expect(sourceCatalog).toContain(candidate.title);
+			expect(sourceCatalog).toContain(candidate.trackingIssue);
+		}
+
+		const productContractIds = plan.contractProducts.map((product) => product.contractId);
+		expect(productContractIds).toContain('vssa-2026-blkt-wordform-profile');
+		expect(productContractIds).not.toContain('tilde-2026-parallel-and-monolingual-corpora');
+		expect(ledger.candidates.map((candidate) => candidate.id)).not.toContain('vssa-2026-general-lithuanian-corpus');
+		expect(sourceCatalog).not.toContain('The only maintained collection without public rows');
 	});
 
 	it('assigns every collection a public JSON product or an explicit metadata-only decision', async () => {

@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "purpose": "Research candidates that are known to maintainers but are not authorized public data products.",
+  "candidates": [
+    {
+      "id": "tilde-2026-parallel-and-monolingual-corpora",
+      "title": "Parallel and monolingual corpora – 1 vol. (Lithuanian monolingual portion)",
+      "status": "blocked-external",
+      "trackingIssue": "https://github.com/debesyla/dazniausi-zodziai/issues/63",
+      "sourceUrl": "https://clarin-repo.lt/items/a831f3de-35a9-4429-826d-14e1f808d10b",
+      "licence": "CC0 1.0",
+      "blockers": [
+        {
+          "kind": "durable-acquisition",
+          "summary": "Obtain a versioned archive with inventory and checksums, or an immutable provider manifest plus permission for a controlled archival copy."
+        },
+        {
+          "kind": "credential-safe-reproduction",
+          "summary": "Define a reproducible acquisition path without committing passwords, transient download URLs, or raw corpus files to the public repository."
+        },
+        {
+          "kind": "publication-review",
+          "summary": "After acquisition, validate the delivered language composition and schema, then approve rights-, privacy-, and disclosure-safe aggregate outputs before publication."
+        }
+      ],
+      "rawImportAuthorized": false,
+      "publicProductAuthorized": false
+    }
+  ]
+}
