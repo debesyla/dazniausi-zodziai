@@ -43,12 +43,13 @@ or internal source locations.
 
 | Candidate | Decision | Remaining gates | Tracking |
 | --- | --- | --- | --- |
-| Bendrasis lietuvių kalbos tekstynas (BLKT) | **Do not import or publish yet** | NewGenLTU OpenRAIL-D does not clearly authorize the proposed public human-facing aggregate explorer. Obtain written licensor confirmation and approve a non-reconstructive privacy design first. | [Issue #59](https://github.com/debesyla/dazniausi-zodziai/issues/59) |
 | Parallel and monolingual corpora – 1 vol. (Lithuanian monolingual portion) | **Do not import or publish yet** | The official record applies CC0, simplifying copyright reuse, but it does not provide the actual corpus as a versioned archive or immutable file/checksum manifest. Establish durable, credential-safe acquisition, then complete schema, rights, privacy, and disclosure review. | [Issue #63](https://github.com/debesyla/dazniausi-zodziai/issues/63) |
 
-Neither candidate appears in `data/products/publication-plan.json` or the
-visitor catalogue. Moving one into the publication plan requires resolving all
-of its recorded blockers in a focused review.
+This candidate does not appear in `data/products/publication-plan.json` or the
+visitor catalogue. Moving it into the publication plan requires resolving all
+of its recorded blockers in a focused review. BLKT is no longer a research
+candidate: its reviewed, permission-backed aggregate product is recorded in the
+approved table above.
 
 ## Contracted metadata-only gate
 

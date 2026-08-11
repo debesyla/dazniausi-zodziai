@@ -64,13 +64,6 @@ describe('project hygiene', () => {
 		expect(new Set(ledger.candidates.map((candidate) => candidate.id)).size).toBe(ledger.candidates.length);
 		expect(ledger.candidates).toEqual([
 			expect.objectContaining({
-				id: 'vssa-2026-general-lithuanian-corpus',
-				status: 'blocked-external',
-				trackingIssue: 'https://github.com/debesyla/dazniausi-zodziai/issues/59',
-				rawImportAuthorized: false,
-				publicProductAuthorized: false
-			}),
-			expect.objectContaining({
 				id: 'tilde-2026-parallel-and-monolingual-corpora',
 				status: 'blocked-external',
 				trackingIssue: 'https://github.com/debesyla/dazniausi-zodziai/issues/63',
@@ -110,8 +103,9 @@ describe('project hygiene', () => {
 		}
 
 		const productContractIds = plan.contractProducts.map((product) => product.contractId);
-		expect(productContractIds).not.toContain('vssa-2026-general-lithuanian-corpus');
+		expect(productContractIds).toContain('vssa-2026-blkt-wordform-profile');
 		expect(productContractIds).not.toContain('tilde-2026-parallel-and-monolingual-corpora');
+		expect(ledger.candidates.map((candidate) => candidate.id)).not.toContain('vssa-2026-general-lithuanian-corpus');
 		expect(sourceCatalog).not.toContain('The only maintained collection without public rows');
 	});
 
