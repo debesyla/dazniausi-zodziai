@@ -878,6 +878,202 @@
       }
     },
     {
+      "id": "vssa-2026-blkt-wordform-profile",
+      "title": "BLKT privatumo slenksčiais apsaugotas žodžio profilis",
+      "decision": "publish-thresholded-aggregate",
+      "reason": "The project owner confirmed permission to publish BLKT-derived aggregates and datasets. The reviewed product exposes only thresholded exact-word corpus, broad document-type, and broad period marginals, with no raw text or document-level identity data.",
+      "source": {
+        "sourceUrl": "https://clarin-repo.lt/items/2b51a918-55c3-4e62-8e45-e763fc7fc157",
+        "licence": "NewGenLTU OpenRAIL-D v1.0; CC BY-SA 4.0 for BLKT rows labelled Vikipedija",
+        "citation": "Valstybės skaitmeninių sprendimų agentūra. 2026. Bendrasis lietuvių kalbos tekstynas. Hugging Face. https://huggingface.co/datasets/VSSA-SDSA/LT_AI_BLKT.",
+        "files": [
+          {
+            "artifactId": "vssa-2026-blkt-source-manifest",
+            "format": "binary",
+            "bytes": 9040,
+            "sha256": "573d57238f8ca82b43c5b5095d4fab286c03d1294d43c0279b2722e3f172650a"
+          },
+          {
+            "artifactId": "vssa-2026-blkt-aggregation-summary",
+            "format": "binary",
+            "bytes": 6900,
+            "sha256": "ec8919d14b60d5468d505a51ed6543b9e916c9bc73b72e5d5247cc61a8c05a0f"
+          },
+          {
+            "artifactId": "vssa-2026-blkt-wordform-profile",
+            "role": "wordform-profile",
+            "format": "text",
+            "bytes": 18030597,
+            "rows": 446971,
+            "sha256": "79c3e9896cc219f5bd694aed0e0d6776f54f1d4573800b7c94b82aaa0059e302",
+            "columns": 21,
+            "delimiter": "\t",
+            "hasHeader": true,
+            "numericColumns": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20],
+            "nullableColumns": [3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20],
+            "numericTotals": {
+              "1": 3945182364,
+              "2": 2070256631,
+              "3": 6713266,
+              "4": 723754,
+              "5": 147369042,
+              "6": 66750875,
+              "7": 1183807404,
+              "8": 692312469,
+              "9": 55446309,
+              "10": 7677766,
+              "11": 814237206,
+              "12": 218234802,
+              "13": 7556396,
+              "14": 792786,
+              "15": 6865951,
+              "16": 1025947,
+              "17": 149059944,
+              "18": 66122337,
+              "19": 2349966851,
+              "20": 1061521142
+            },
+            "missingCounts": {
+              "3": 423895,
+              "4": 423895,
+              "5": 423895,
+              "6": 423895,
+              "7": 423895,
+              "8": 423895,
+              "9": 423895,
+              "10": 423895,
+              "11": 423895,
+              "12": 423895,
+              "13": 397685,
+              "14": 397685,
+              "15": 397685,
+              "16": 397685,
+              "17": 397685,
+              "18": 397685,
+              "19": 397685,
+              "20": 397685
+            }
+          }
+        ],
+        "permission": {
+          "status": "confirmed-by-project-owner",
+          "confirmedOn": "2026-08-02",
+          "scope": "Publication of BLKT-derived aggregate results and derived datasets for this Lithuanian word project.",
+          "privateCorrespondencePublished": false
+        },
+        "sourceLicences": {
+          "inventory": [
+            {
+              "sourceLabel": "NewGenLTU OpenRAIL-D",
+              "name": "NewGenLTU OpenRAIL-D v1.0",
+              "url": "https://sitti.vdu.lt/newgenltu-openrail-d-license/",
+              "documents": 8267437,
+              "sourceAlphaWords": 3906734476
+            },
+            {
+              "sourceLabel": "CC BY-SA 4.0",
+              "name": "Creative Commons Attribution-ShareAlike 4.0 International",
+              "url": "https://creativecommons.org/licenses/by-sa/4.0/",
+              "attribution": "Wikipedia contributors (BLKT source_name: Vikipedija).",
+              "documents": 170718,
+              "sourceAlphaWords": 34741743
+            }
+          ],
+          "application": "The combined aggregate retains the notices and conditions of both source licence groups."
+        },
+        "rights": {
+          "licences": [
+            {
+              "id": "newgenltu-openrail-d-v1.0",
+              "name": "NewGenLTU OpenRAIL-D v1.0",
+              "url": "https://sitti.vdu.lt/newgenltu-openrail-d-license/",
+              "file": "LICENSE-NewGenLTU-OpenRAIL-D-1.0.txt",
+              "sha256": "abf61fc83225e088c1ed91aae517f0d5c606c2c9b441f3fc245ce821c1c79ab9"
+            },
+            {
+              "id": "cc-by-sa-4.0",
+              "name": "Creative Commons Attribution-ShareAlike 4.0 International",
+              "url": "https://creativecommons.org/licenses/by-sa/4.0/",
+              "file": "LICENSE-CC-BY-SA-4.0.txt",
+              "sha256": "23ee78c8bae49cf08ea2f0c84945c66b987ebe4520881fb51b3dad4fb43d07c2"
+            }
+          ],
+          "modificationNotice": "MODIFIED FILE: Privacy-thresholded aggregate-only BLKT derivative produced by dazniausi-zodziai; no original text or document-level metadata is distributed.",
+          "attributionNotices": [
+            "Valstybės skaitmeninių sprendimų agentūra. 2026. Bendrasis lietuvių kalbos tekstynas. Hugging Face. https://huggingface.co/datasets/VSSA-SDSA/LT_AI_BLKT.",
+            "Wikipedia contributors. The BLKT source rows labelled “Vikipedija” are derived from Lithuanian Wikipedia material licensed under CC BY-SA 4.0. https://lt.wikipedia.org/"
+          ],
+          "downstreamRequirements": [
+            "Retain both applicable licence copies, this modification notice, the BLKT attribution, and the Wikipedia-contributor attribution with any redistribution.",
+            "Use this derivative only for model training, other language-technology development, or production of datasets for model training.",
+            "Do not use this derivative to extract, obtain, reconstruct, or publish personal data.",
+            "For material derived from the BLKT rows labelled “Vikipedija”, comply with CC BY-SA 4.0 attribution and ShareAlike requirements."
+          ]
+        },
+        "snapshotEvidence": {
+          "manifestId": "vssa-2026-04-21-general-lithuanian-corpus",
+          "artifactId": "vssa-2026-blkt-source-manifest",
+          "bytes": 9040,
+          "sha256": "573d57238f8ca82b43c5b5095d4fab286c03d1294d43c0279b2722e3f172650a",
+          "fileCount": 25,
+          "sourceBytes": 12570497752,
+          "documents": 8438155,
+          "sourceAlphaWords": 3941476219,
+          "contents": "The pinned companion source manifest records the immutable public upstream revision and all 25 exact public file locations, byte counts, and SHA-256 checksums."
+        }
+      },
+      "schema": {
+        "sourceScopeCaveat": "BLKT is not representative of all Lithuanian language use: media and document texts dominate its document and token composition.",
+        "rawColumns": ["id", "text", "url", "title", "author", "source_id", "source_name", "publication_date", "record_created", "license", "document_type", "document_subtype", "period", "alpha_word_count", "language", "text_char_count", "source_file"],
+        "publishedColumns": ["word", "corpusTokenCount", "corpusDocumentCount", "typeGroTokenCount", "typeGroDocumentCount", "typeNegTokenCount", "typeNegDocumentCount", "typeZinTokenCount", "typeZinDocumentCount", "typeSakTokenCount", "typeSakDocumentCount", "typeDokTokenCount", "typeDokDocumentCount", "period1TokenCount", "period1DocumentCount", "period2TokenCount", "period2DocumentCount", "period3TokenCount", "period3DocumentCount", "period4TokenCount", "period4DocumentCount"],
+        "tokenizer": {
+          "id": "blkt-unicode-letter-lower-v1",
+          "engine": "DuckDB 1.5.5",
+          "normalization": "NFC before segmentation, DuckDB simple Unicode lowercase per code point, then NFC for each token",
+          "boundary": "A token is a maximal contiguous sequence matched by RE2 Unicode \\p{L}+.",
+          "maximumCodePoints": 64,
+          "overlengthTokenOccurrencesExcluded": 96
+        },
+        "disclosure": {
+          "minimumTokenCount": 100,
+          "minimumDocumentSupport": 20,
+          "familyRule": "all-positive-siblings-must-pass-or-family-is-null"
+        },
+        "denominators": {
+          "corpus": {"documents": 8438155, "sourceAlphaWords": 3941476219, "derivedTokens": 3986358197},
+          "documentTypes": [
+            {"id":"fiction","sourceCode":"gro","documents":425,"sourceAlphaWords":10722386,"derivedTokens":10741419},
+            {"id":"non-fiction","sourceCode":"neg","documents":832271,"sourceAlphaWords":280296836,"derivedTokens":284770783},
+            {"id":"media","sourceCode":"zin","documents":6388765,"sourceAlphaWords":2060625648,"derivedTokens":2082912032},
+            {"id":"speech","sourceCode":"sak","documents":4563,"sourceAlphaWords":80483739,"derivedTokens":81943532},
+            {"id":"documents","sourceCode":"dok","documents":1212131,"sourceAlphaWords":1509347610,"derivedTokens":1525990431}
+          ],
+          "periods": [
+            {"id":"1922-1940","sourceCode":"1","documents":290,"sourceAlphaWords":11226438,"derivedTokens":11260489},
+            {"id":"1941-1990","sourceCode":"2","documents":4288,"sourceAlphaWords":10440807,"derivedTokens":10511716},
+            {"id":"1990-2004","sourceCode":"3","documents":684359,"sourceAlphaWords":229967268,"derivedTokens":233679092},
+            {"id":"2008-2026","sourceCode":"4","documents":7749218,"sourceAlphaWords":3689841706,"derivedTokens":3730906900}
+          ],
+          "validatedDocumentSubtypesNotPublished": 11
+        },
+        "privacyDecision": {
+          "publish": ["thresholded corpus marginals", "thresholded document-type marginals", "thresholded period marginals"],
+          "exclude": ["raw text", "document rows", "document subtypes", "joint dimensions", "titles", "authors", "URLs", "source identifiers", "publication dates", "personal data"]
+        }
+      },
+      "delivery": {
+        "status": "published-static-json",
+        "mode": "static-chunked-json",
+        "constraints": [
+          "Publish only thresholded corpus, broad document-type, and broad period marginal aggregates for one exact normalized wordform.",
+          "Do not publish raw text, document rows, document subtypes, crossed dimensions, titles, authors, URLs, source identifiers, publication dates, or personal data.",
+          "Retain the BLKT attribution, NewGenLTU OpenRAIL-D v1.0 licence, modification notice, downstream field-of-use restriction, and personal-data prohibition.",
+          "Retain the CC BY-SA 4.0 licence and Wikipedia-contributor attribution for the Vikipedija-labelled source subset, and make both complete licence texts available with the product.",
+          "State that BLKT is not representative of all Lithuanian language use because media and document texts dominate its composition."
+        ]
+      }
+    },
+    {
       "id": "rimkute-morphemic-dictionary",
       "title": "Dažninis lietuvių kalbos morfemikos žodynas",
       "decision": "metadata-only",

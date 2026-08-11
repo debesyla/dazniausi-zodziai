@@ -7,6 +7,7 @@ export const publicRoutes = [
   'zodyno-apreptis',
   'karo-zodziu-palyginimas',
   'zanru-profilis',
+  'blkt-profilis',
   'sintakse'
 ] as const;
 
@@ -33,6 +34,7 @@ export function createSite(publicSiteUrl?: string) {
     coverageProfileUrl: `${url}/zodyno-apreptis`,
     wartimeContrastUrl: `${url}/karo-zodziu-palyginimas`,
     genreProfileUrl: `${url}/zanru-profilis`,
+    blktProfileUrl: `${url}/blkt-profilis`,
     syntaxExplorerUrl: `${url}/sintakse`,
     socialImageUrl: `${url}/social-preview.png`,
     description: 'Naršykite viešus lietuvių kalbos lemų ir žodžių formų dažnumo sąrašus: ieškokite, filtruokite, analizuokite rodiklius ir atsisiųskite duomenis su jų šaltiniais.'

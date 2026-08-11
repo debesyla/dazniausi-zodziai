@@ -116,6 +116,7 @@ export async function verifyPublicProvenance({ root = repositoryRoot } = {}) {
   const jsonDirectories = [
     path.join(resolvedRoot, 'data', 'contracts'),
     path.join(resolvedRoot, 'data', 'datasets'),
+    path.join(resolvedRoot, 'data', 'policies'),
     path.join(resolvedRoot, 'data', 'products'),
     path.join(resolvedRoot, 'data', 'research'),
     path.join(resolvedRoot, 'static', 'datasets')

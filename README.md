@@ -21,6 +21,11 @@ metadata; larger products are explained in the public catalogue at
 - Look up one exact wordform across the five named CCLL subcorpora at
   `/zanru-profilis`, with raw counts, source denominators, and per-million
   rates but no aggregate-plus-genre total or generic genre leaderboard.
+- Look up one lower-cased exact BLKT wordform at `/blkt-profilis`, with
+  aggregate counts and per-million rates for the whole corpus and, when the
+  disclosure rules allow them, five broad document types and four periods.
+  The lookup publishes no raw text or document identity data and fetches at
+  most one bounded data chunk for a query.
 - Search, filter by part of speech, sort by word/frequency/type, and browse a
   50-row page at a time.
 - Export the complete active filtered and sorted result set as UTF-8 CSV.
@@ -73,6 +78,15 @@ mistaken for an authorized public product.
 Larger and non-generic collections have implementation-ready source contracts in
 [docs/source-contracts.md](docs/source-contracts.md). The complete public JSON
 delivery model is documented in [docs/data-products.md](docs/data-products.md).
+The BLKT profile is built from the pinned source snapshot only after the
+project owner's permission to publish derived aggregates and datasets has been
+recorded; its separate preparation and disclosure rules are described in those
+two documents. The source contains two verified licence groups: 8,267,437
+NewGenLTU OpenRAIL-D rows and 170,718 `Vikipedija` rows under CC BY-SA 4.0.
+The generated product carries both complete licence texts, both attributions,
+and a prominent modification notice. BLKT is not representative of all
+Lithuanian language use because media and document texts dominate its document
+and token composition.
 
 ```bash
 npm run data:build -- --config data/datasets/utka-2018-lemmatized-totals.json --source-root /path/to/reviewed-source-root --output static/datasets/utka-2018-lemmatized-totals.json --catalog static/datasets/catalog.json

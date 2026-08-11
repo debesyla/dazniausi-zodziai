@@ -27,7 +27,8 @@ copying the raw source repository into the application source tree.
 | `utka-ccll-wordforms` | Published chunked JSON and bounded genre profile | Wordform token counts for the aggregate and five named subcorpora; exact-form comparison across the five named subcorpora | Static manifest, source-order index, bounded chunks, and a compact routed lookup that excludes the aggregate |
 | `dadurkevicius-dml6-vs-jcl-comparison` | Published chunked comparison JSON and coverage profile | JCL token counts, DML6 coverage categories, lemma/POS occurrences, missing types, and form/token shares by six transparent frequency bands | Three separate views plus a compact, checksum-described profile with on-demand bounded examples |
 | `utka-ccll2-war-ukraine-comparison` | Published chunked comparison JSON | Six normalized token/document metrics across three source collections | Null-preserving view with source denominators in every field definition |
-| `kapociute-dzikiene-2017-parliament-frequency-aggregates` | Published chunked frequency JSON | Corpus-wide legislative-speech wordform and lemma totals | Two separate aggregate-only views; no raw text, document, time, or person-level data is in the public product |
+| `kapociute-dzikiene-2017-parliament-frequency-aggregates` | Published chunked frequency JSON | Corpus-wide legislative-speech wordform and lemma totals | Two separate aggregate-only views; the [disclosure policy](parliament-disclosure-policy.md) and full-artifact verifier reject raw text, document, time, and person-level structure |
+| `vssa-2026-blkt-wordform-profile` | Published privacy-safe chunked comparison JSON | Exact normalized wordform counts, document support, and per-million rates for the corpus plus eligible document-type and period families | Owner-confirmed project-specific publication permission; verified NewGenLTU and CC BY-SA source inventories; both full licence texts, both attributions, and a modification notice; thresholded aggregate rows only; exact bounded lookup; no raw text, identity fields, subtypes, or crossed dimensions; explicit warning that media and document texts dominate BLKT |
 | `bielinskiene-2019-delfi-1grams` | Published chunked frequency JSON | Every raw CSV one-gram and its raw count | CSV quoting, header handling, and integer-valued scientific notation are verified before chunking |
 | `rimkute-2024-matas-v3-frequencies` | Published chunked derived-frequency JSON | Non-punctuation MATAS lemma/POS and wordform/POS frequencies | The reviewed ZIP is checksummed; the single CoNLL-U member is selected during a verified build, and derivation totals and record counts are pinned per view |
 | `zemriete-2025-lithuanian-homoforms` | Published chunked lexical JSON | Homoform, lemma, morphology, two separate MATAS-related counts, and type/subtype | The reviewed artifacts are checksummed; source order is retained because it is not a consistent frequency order |
@@ -40,6 +41,58 @@ The comparison contracts deliberately have no generic `frequency` field. A
 coverage code is categorical, document counts are not token counts, and a
 normalized count cannot be compared with a raw count without its denominator.
 Missing source metrics remain `null`; they are not converted to zero.
+
+## BLKT exact-word profile boundary
+
+The pinned public BLKT Parquet snapshot remains inside the non-public source
+workspace during preparation. Its original NewGenLTU OpenRAIL-D v1.0 terms
+still apply, and the project owner confirmed on 2026-08-02 that this
+Lithuanian-word project has permission to publish BLKT-derived aggregate
+results and datasets. The permission status is recorded in the derived-product
+metadata; private correspondence is not published as evidence.
+The public manifest and each selected-result download carry the official
+licence URL, an aggregate-derivative modification notice, the BLKT attribution,
+the language-technology/model-training field-of-use restriction, and the ban
+on extracting, reconstructing, or publishing personal data. Redistributors
+must retain those notices and restrictions.
+
+The only public row key is a normalized wordform. Before tokenization, text is
+NFC-normalized. A token is a maximal contiguous sequence of Unicode letters
+(`\p{L}+`); hyphens, apostrophes, and digits are separators. Tokens use
+DuckDB's simple Unicode lowercase mapping per code point and are NFC-normalized
+again; the browser mirrors that mapping for exact queries. Forms longer than 64 Unicode code
+points are excluded. The derived-token total for each scope, rather than the
+source's `alpha_word_count`, is the denominator for the displayed per-million
+rate.
+
+The canonical build requires CPython 3.14 with Unicode data 16.0.0 and DuckDB
+1.5.5. The companion source manifest is pinned by its own byte count and
+SHA-256 before its 25 raw-file descriptors are trusted. Per-file partials are
+versioned, checksum-verified, resumable, and kept in an owner-only private work
+directory; processing time, configured memory, and private-work size are
+reported as run diagnostics without making the canonical summary vary between
+identical builds.
+
+The public dimensions are deliberately limited to the whole corpus, five
+broad document types (fiction, non-fiction, media, speech, and documents), and
+four periods (1922–1940, 1941–1990, 1990–2004, and 2008–2026). The eleven
+subtypes observed in the pinned snapshot are validated against their parent types during the build but
+are not published. Type-by-period intersections are not built or exposed.
+
+A corpus wordform is eligible only with at least 100 token occurrences in at
+least 20 distinct document rows. Type and period cells use the same two
+thresholds and an all-or-nothing family rule: if any positive sibling in a
+family misses either threshold, every cell in that family is emitted as
+`null`. Consequently a missing public result intentionally does not reveal
+whether a word was absent or suppressed. The derived artifact contains no raw
+text, excerpts, document rows, titles, authors, URLs, source identifiers,
+publication dates, or personal data.
+
+The view is sorted by normalized wordform. A compact exact-range root selects
+one routing page, which selects one JSON data chunk; the root, routing page,
+and data chunk are each at most 64 KiB. The browser performs an exact search in
+that one data chunk. `/blkt-profilis` therefore does not preload or enumerate
+the published word list and downloads only the selected answer as JSON.
 
 ## DML6 coverage profile delivery
 

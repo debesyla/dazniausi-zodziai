@@ -17,8 +17,16 @@ The automated journey uses a controlled catalog and dataset fixture so it can
 reliably prove catalog/data loading, search, POS filter, sorting, pagination,
 dashboard control change, table-equivalent disclosure, reset, keyboard sort,
 CSV download, console health, first-party request health, page-level overflow,
-and mobile touch-target dimensions. Failure screenshots, traces, videos, and
-reports are uploaded from CI when present.
+and mobile touch-target dimensions. CI runs this matrix from a non-root
+`/lietuviu-zodziai/` base path so absolute-navigation regressions cannot hide
+behind a root deployment.
+
+CI combines the GitHub annotation reporter with a complete HTML report. The
+HTML report is a separately required artifact on green and failing browser
+runs. Screenshots, traces, videos, and `test-results` are uploaded as optional
+diagnostics when Playwright creates them. A missing HTML report makes the
+required artifact step fail instead of silently leaving the release without
+browser evidence.
 
 ## Local and hosted runs
 
@@ -33,11 +41,14 @@ For release sign-off against the chosen server, supply its fully qualified
 public base URL, including a trailing subpath and slash when applicable:
 
 ```bash
-PLAYWRIGHT_BASE_URL=https://zodziai.example.lt/ npm run test:browser:deployed
+PLAYWRIGHT_BASE_URL=https://zodziai.example.lt/lietuviu-zodziai/ npm run test:browser:deployed
 ```
 
 The hosted run uses the same controlled dataset routes, while exercising the
 published application shell, base path, static assets, and browser behavior.
+All test navigation is relative to `PLAYWRIGHT_BASE_URL`, so a URL below a
+hosting subpath remains below that subpath. The runner normalizes a missing
+trailing slash, while the documented command keeps it explicit for clarity.
 
 ## Manual release record
 
