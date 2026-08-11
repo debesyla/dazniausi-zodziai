@@ -23,8 +23,8 @@ test('makes every public data product discoverable with scope, limits, and a saf
 
   await page.goto('duomenu-katalogas');
   await expect(page.getByRole('heading', { name: 'Viešų duomenų katalogas' })).toBeVisible();
-  await expect(page.getByText('Kataloge: 14 produktų.')).toBeVisible();
-  await expect(page.locator('article.product-card')).toHaveCount(14);
+  await expect(page.getByText('Kataloge: 15 produktų.')).toBeVisible();
+  await expect(page.locator('article.product-card')).toHaveCount(15);
 
   for (const heading of ['Dažnumo sąrašai', 'Palyginimai', 'Leksiniai rinkiniai', 'Sintaksės kontekstai', 'Metaduomenys be eilučių']) {
     await expect(page.getByRole('heading', { name: heading })).toBeVisible();
@@ -47,7 +47,7 @@ test('makes every public data product discoverable with scope, limits, and a saf
   const tableDetails = page.locator('details.table-equivalent');
   await tableDetails.locator('summary').click();
   await expect(tableDetails.getByRole('table')).toBeVisible();
-  await expect(tableDetails.locator('tbody tr')).toHaveCount(14);
+  await expect(tableDetails.locator('tbody tr')).toHaveCount(15);
   await expect.poll(() => page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
 
   assertHealthy();

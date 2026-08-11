@@ -30,7 +30,9 @@ the reviewed source changes. `products:verify` re-reads every generated JSON fil
 every chunk checksum and byte size, validates every record shape, recomputes
 totals and null counts, and confirms that metadata-only products do not contain
 rows. `public:verify` rejects internal locator fields and unsafe public
-provenance before release.
+provenance before release; it also runs the BLKT disclosure quarantine, which
+rejects extra files or keys, raw-text/identity fields, crossed dimensions,
+threshold failures, partial-family disclosure, and payloads over 64 KiB.
 
 Use `--output`, `--static-root`, `--plan`, or `--contract` only for an isolated
 review or test build. The normal command has no hard-coded local source path.
@@ -104,6 +106,32 @@ selected bucket off the main thread. It never adds the aggregate list, turns a
 missing value into zero, filters punctuation, or exposes a universal
 genre-signal leaderboard.
 
+`vssa-2026-blkt-wordform-profile` is a separate privacy-safe exact-wordform
+product rather than a generic frequency list. Its compact root index carries
+ordered ranges for bounded routing pages; the selected routing page carries
+the first and last key for each data chunk in that range. A query at
+`/blkt-profilis` fetches one routing page and at most one data chunk, each
+capped at 64 KiB, and then performs an exact lookup. It never downloads the
+complete profile or exposes a browseable word leaderboard.
+
+Each eligible word has non-null corpus token and document counts. Its five
+document-type pairs and four period pairs are either all present within their
+family or all `null`. A positive value is publishable only with at least 100
+tokens and support from at least 20 document rows; if one positive sibling
+misses either threshold, the complete family is suppressed. An absent lookup
+and a threshold-suppressed word produce the same public no-result response.
+Rates per million are calculated in the browser from the published count and
+the matching derived-token denominator.
+
+The pinned source audit records 8,267,437 NewGenLTU OpenRAIL-D rows
+(3,906,734,476 source alpha words) and 170,718 `Vikipedija` rows under CC BY-SA
+4.0 (34,741,743 source alpha words). Every generated BLKT JSON file carries a
+compact attribution and modification notice. The product root includes the
+complete NewGenLTU licence, including Attachment A, and the complete CC BY-SA
+4.0 legal code; selected-result downloads embed both terms. These counts do not
+make BLKT representative of all Lithuanian: media and document texts dominate
+its composition.
+
 ## Published collection coverage
 
 - `utka-2018-lemmatized-totals`, `dadurkevicius-2020-jcl-lemmas`, and
@@ -127,6 +155,17 @@ genre-signal leaderboard.
   contains no text, quotations, document rows, calendar bins, source IDs,
   speaker or author data, or rankings; its counts are not general Lithuanian
   frequency claims.
+- `vssa-2026-blkt-wordform-profile` publishes thresholded aggregate wordform
+  counts for the whole BLKT and eligible type/period families. Its tokenizer
+  extracts maximal Unicode-letter sequences from NFC text, lower-cases and
+  NFC-normalizes them, and excludes forms over 64 code points. It publishes no
+  raw text, document identities, subtypes, crossed type-by-period cells, or
+  personal data. Owner-confirmed project-specific permission covers publishing
+  these BLKT-derived aggregates and datasets. Its mixed NewGenLTU/CC BY-SA
+  source inventory, full licence copies, VSSA and Wikipedia-contributor
+  attributions, and modification notice are retained with the product. Media
+  and document texts dominate BLKT, so its counts are not representative of all
+  Lithuanian language use.
 - `bielinskiene-2019-delfi-1grams` publishes all 1,030,562 raw one-gram rows
   in bounded chunks. Its counts are not lemma frequencies.
 - `rimkute-2024-matas-v3-frequencies` derives separate lemma/POS and
