@@ -40,6 +40,15 @@ interface Provenance {
   sourceUrl: string;
   licence: string;
   citation: string;
+  permission?: {
+    status: string;
+    confirmedOn: string;
+    scope: string;
+    privateCorrespondencePublished: boolean;
+  };
+  attributionNotice?: string;
+  modificationNotice?: string;
+  downstreamRequirements?: string[];
 }
 
 interface ProductContent {
@@ -168,6 +177,25 @@ function validateManifest(value: unknown, catalogEntry: DataProductCatalogEntry,
     || !isNonEmptyString(value.provenance.licence) || !isNonEmptyString(value.provenance.citation)) {
     fail(`the manifest for ${catalogEntry.id} is malformed`);
   }
+  if (value.provenance.permission !== undefined
+    && (!isRecord(value.provenance.permission) || !isNonEmptyString(value.provenance.permission.status)
+      || typeof value.provenance.permission.confirmedOn !== 'string'
+      || !/^\d{4}-\d{2}-\d{2}$/.test(value.provenance.permission.confirmedOn)
+      || !isNonEmptyString(value.provenance.permission.scope)
+      || typeof value.provenance.permission.privateCorrespondencePublished !== 'boolean')) {
+    fail(`the permission provenance for ${catalogEntry.id} is malformed`);
+  }
+  if (value.provenance.attributionNotice !== undefined && !isNonEmptyString(value.provenance.attributionNotice)) {
+    fail(`the attribution notice for ${catalogEntry.id} is malformed`);
+  }
+  if (value.provenance.modificationNotice !== undefined && !isNonEmptyString(value.provenance.modificationNotice)) {
+    fail(`the modification notice for ${catalogEntry.id} is malformed`);
+  }
+  if (value.provenance.downstreamRequirements !== undefined
+    && (!Array.isArray(value.provenance.downstreamRequirements) || value.provenance.downstreamRequirements.length === 0
+      || value.provenance.downstreamRequirements.some((requirement) => !isNonEmptyString(requirement)))) {
+    fail(`the downstream requirements for ${catalogEntry.id} are malformed`);
+  }
   if (value.publication.status !== catalogEntry.publicationStatus) fail(`the manifest status for ${catalogEntry.id} does not match the catalog`);
 
   const publicationRecord = value.publication;
@@ -183,6 +211,23 @@ function validateManifest(value: unknown, catalogEntry: DataProductCatalogEntry,
     licence: provenanceRecord.licence as string,
     citation: provenanceRecord.citation as string
   };
+  if (isRecord(provenanceRecord.permission)) {
+    provenance.permission = {
+      status: provenanceRecord.permission.status as string,
+      confirmedOn: provenanceRecord.permission.confirmedOn as string,
+      scope: provenanceRecord.permission.scope as string,
+      privateCorrespondencePublished: provenanceRecord.permission.privateCorrespondencePublished as boolean
+    };
+  }
+  if (provenanceRecord.attributionNotice !== undefined) {
+    provenance.attributionNotice = provenanceRecord.attributionNotice as string;
+  }
+  if (provenanceRecord.modificationNotice !== undefined) {
+    provenance.modificationNotice = provenanceRecord.modificationNotice as string;
+  }
+  if (Array.isArray(provenanceRecord.downstreamRequirements)) {
+    provenance.downstreamRequirements = provenanceRecord.downstreamRequirements as string[];
+  }
 
   let content: ProductContent | undefined;
   if (value.content !== undefined) {

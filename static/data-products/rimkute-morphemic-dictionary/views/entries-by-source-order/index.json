@@ -1,0 +1,244 @@
+{
+  "schemaVersion": 1,
+  "productId": "rimkute-morphemic-dictionary",
+  "viewId": "entries-by-source-order",
+  "recordEncoding": "array",
+  "fields": [
+    {
+      "id": "wordform",
+      "label": "Source word form",
+      "type": "string",
+      "sourceColumn": 0
+    },
+    {
+      "id": "frequency",
+      "label": "Source frequency",
+      "type": "raw-token-count",
+      "unit": "tokens in the dictionary source corpus",
+      "sourceColumn": 1
+    },
+    {
+      "id": "morphemicAnalysis",
+      "label": "Source morphemic analysis",
+      "type": "string",
+      "sourceColumn": 2
+    },
+    {
+      "id": "lemmaAndMorphology",
+      "label": "Source lemma and morphological information",
+      "type": "string",
+      "sourceColumn": 3
+    },
+    {
+      "id": "volume",
+      "label": "Source volume",
+      "type": "string",
+      "sourceColumn": 4
+    },
+    {
+      "id": "sourcePage",
+      "label": "Printed source page",
+      "type": "string",
+      "sourceColumn": 5
+    }
+  ],
+  "ordering": {
+    "field": "source",
+    "direction": "as-stored"
+  },
+  "sourceFile": {
+    "role": "morphemic-entries",
+    "artifactId": "rimkute-morphemic-dictionary-entries",
+    "format": "text",
+    "bytes": 6351453,
+    "sha256": "5a579304382a6f4a3447d1e36b5b638ad890d33fb8df9076976c01e3eade9dca",
+    "rows": 72325,
+    "columns": 6,
+    "delimiter": "\t",
+    "hasHeader": true
+  },
+  "maxChunkBytes": 262144,
+  "notice": {
+    "modificationNotice": "MODIFIED FILE: Deterministically extracted and reviewed by the dazniausi-zodziai Lithuanian word project from the three 2011 dictionary PDFs; this derivative is not an official VDU database export.",
+    "attribution": "Rimkutė, Erika; Kazlauskienė, Asta; Raškinis, Gailius. 2011. Dažninis lietuvių kalbos morfemikos žodynas. Vytauto Didžiojo universitetas.",
+    "licence": "Rightsholder permission"
+  },
+  "summary": {
+    "sourceRows": 72325,
+    "recordCount": 72325,
+    "numericTotals": {
+      "frequency": 310012
+    },
+    "nullCounts": {}
+  },
+  "chunks": [
+    {
+      "file": "chunks/000001.json",
+      "records": 3048,
+      "bytes": 262124,
+      "sha256": "f54f2c2fc66b3a9aaebf35611a60e7aff5afa5151e1ab9a6e05706f1ee4f33c3"
+    },
+    {
+      "file": "chunks/000002.json",
+      "records": 3039,
+      "bytes": 262077,
+      "sha256": "e6768dda559de595ee41240ae8a801f20cbfddd6b41f4575987d7d71d7b62f69"
+    },
+    {
+      "file": "chunks/000003.json",
+      "records": 3031,
+      "bytes": 262095,
+      "sha256": "a35c7e2a8fc08458f945bc65f6155b36d473df8fc06c0b06ea8dc353fccfb8f9"
+    },
+    {
+      "file": "chunks/000004.json",
+      "records": 3058,
+      "bytes": 262144,
+      "sha256": "fb87255cb6654d903257f68440fdeed2598e319e8cc8f52ef2590c6fcbe1b141"
+    },
+    {
+      "file": "chunks/000005.json",
+      "records": 3023,
+      "bytes": 262107,
+      "sha256": "93bd56e4a087534a0e64f31ab60505a4f018c91678350bcf199a6411ca7e700b"
+    },
+    {
+      "file": "chunks/000006.json",
+      "records": 3033,
+      "bytes": 262087,
+      "sha256": "48edba579ab920a0a3b027abbf7d7a9e13b52205370921e4693e022b601d62b0"
+    },
+    {
+      "file": "chunks/000007.json",
+      "records": 3012,
+      "bytes": 262073,
+      "sha256": "03765669944740dac842bfa422196371f752a6b5b4cacce1f6f4bed6138e8357"
+    },
+    {
+      "file": "chunks/000008.json",
+      "records": 2983,
+      "bytes": 262143,
+      "sha256": "6cf228fff7f73b1bc4e0810b9bb6a147a5bb8b235d98f8c9208816807ef74895"
+    },
+    {
+      "file": "chunks/000009.json",
+      "records": 3006,
+      "bytes": 262082,
+      "sha256": "22b8c5f20b67994ec26eda9332c3ba2be5a786124bfcbaf0b0defedf00da6471"
+    },
+    {
+      "file": "chunks/000010.json",
+      "records": 3045,
+      "bytes": 262141,
+      "sha256": "f7c683802c566b69bd941de59bdd0b8f5a404b119074951a23d8da685202352c"
+    },
+    {
+      "file": "chunks/000011.json",
+      "records": 2603,
+      "bytes": 262057,
+      "sha256": "cd7ab2112f0600afe1cf7414b2c05a961821633ba4f47bb5293471588b551b47"
+    },
+    {
+      "file": "chunks/000012.json",
+      "records": 2622,
+      "bytes": 262114,
+      "sha256": "f884ef1d283abbe0aaa2dd565bd0699ae44164194625284a16ea05e9c9590b3c"
+    },
+    {
+      "file": "chunks/000013.json",
+      "records": 2606,
+      "bytes": 262030,
+      "sha256": "8481fbfc5f6c82af5e3c2225761bd7604a5fdd4979f07a876a967cf9122b448c"
+    },
+    {
+      "file": "chunks/000014.json",
+      "records": 2589,
+      "bytes": 262134,
+      "sha256": "ef41a16e358099fed1c38fb2ec80a1e18a6922293cb4519cf1f96ccb4e998d8e"
+    },
+    {
+      "file": "chunks/000015.json",
+      "records": 3037,
+      "bytes": 262127,
+      "sha256": "28aef694afec7daf28a5fdda5c09cca7d9d422c950f3e685d1d531255c1c730f"
+    },
+    {
+      "file": "chunks/000016.json",
+      "records": 3611,
+      "bytes": 262066,
+      "sha256": "075d2c35cbb753903f9fe3838489064b13e8d3ad9dfa7ed4d8d9ff3d0d6173fe"
+    },
+    {
+      "file": "chunks/000017.json",
+      "records": 3263,
+      "bytes": 262136,
+      "sha256": "a86838c4172f3d1711b44a0a8d7eb92378f7723497d2f616bfb8939094e9611d"
+    },
+    {
+      "file": "chunks/000018.json",
+      "records": 3173,
+      "bytes": 262078,
+      "sha256": "8830b511d64a6d1013fa2371e7ec46c8e267f70f491e6987917c21ca46fa64f9"
+    },
+    {
+      "file": "chunks/000019.json",
+      "records": 3066,
+      "bytes": 262077,
+      "sha256": "5bd957ce0157b1965879001802fc0e67b647c88c5e5b5562b3e555a9c3a6e203"
+    },
+    {
+      "file": "chunks/000020.json",
+      "records": 2813,
+      "bytes": 262104,
+      "sha256": "0094b664fe16ab2e67370f2212bd5cc6e970af6bb2fe12a3082be88b0dbf22a6"
+    },
+    {
+      "file": "chunks/000021.json",
+      "records": 1436,
+      "bytes": 261998,
+      "sha256": "87f85817355f20150f1c2582aa82c4be834c8f4e48f30cc3e01fe3c042e49ddf"
+    },
+    {
+      "file": "chunks/000022.json",
+      "records": 1469,
+      "bytes": 262005,
+      "sha256": "916fef1a59a91402c3078be0b2806454736324e5250a04e78f7703e84c93ffb3"
+    },
+    {
+      "file": "chunks/000023.json",
+      "records": 1594,
+      "bytes": 262079,
+      "sha256": "4172c922c15cd80ce7e39eeb45f362703cdcd2dfd6735b5667d2d592dd2c624a"
+    },
+    {
+      "file": "chunks/000024.json",
+      "records": 1522,
+      "bytes": 262066,
+      "sha256": "660e86f71f61efcba9712059b19213bc774eb56240a2d22284bea171ba142eb0"
+    },
+    {
+      "file": "chunks/000025.json",
+      "records": 1501,
+      "bytes": 261927,
+      "sha256": "e14afa17840b1f11893dc5e3381f31b7faac9fce03c90d320b0b936f6f77ced8"
+    },
+    {
+      "file": "chunks/000026.json",
+      "records": 1540,
+      "bytes": 262120,
+      "sha256": "5caeb50d9d4b24dbb0289f6465f81f07e20ed46e6b7d2012df8c02604ab956c2"
+    },
+    {
+      "file": "chunks/000027.json",
+      "records": 1687,
+      "bytes": 262134,
+      "sha256": "7f0367d27731a7a4ec9b9818415d5b0e292b6953256e07705a923632fa4ca3ee"
+    },
+    {
+      "file": "chunks/000028.json",
+      "records": 1915,
+      "bytes": 158340,
+      "sha256": "67d3ebe6f2470401639557eade50dd149fcab4c7b746ff98fe29dfa981221501"
+    }
+  ]
+}

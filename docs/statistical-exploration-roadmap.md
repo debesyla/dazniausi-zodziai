@@ -38,7 +38,7 @@ The table records the strongest safe claim for each collection. “No” means t
 | BLKT exact-word profile | Thresholded wordform token and document counts, with rates per million derived tokens | Whole corpus; five broad document types; four broad periods | Four categorical periods, not annual bins | No | Exact-form corpus/type/period comparison when every published cell passes the 100-token and 20-document safeguards; no ranking, subtype, or crossed-dimension claim |
 | Delfi.lt 1-grams | Raw wordform token frequency, including punctuation and non-alphabetic forms | None | No | No | Within-list rank and concentration; not lemma or POS analysis |
 | MATAS v3 derived frequencies | Derived lemma/POS and wordform/POS frequency views | Universal POS | No | Aggregate product: no. Reviewed source: sentence and document structure, but no syntactic relations | Within-list frequency/POS today; future concordance and window co-occurrence after a new derived product |
-| Morphemic dictionary | Metadata only | None | No | No | Citation and provenance only, until [issue #41](https://github.com/debesyla/dazniausi-zodziai/issues/41) resolves rights and a machine-readable source |
+| Morphemic dictionary | Source wordform frequency with literal morphemic and combined lemma/morphology analyses | Dictionary part and grammatical descriptions in the retained source text | No | No | Source-scoped frequency and morphemic-structure exploration; retain duplicate rows and do not treat the PDF derivative as a live Morfema export |
 
 ### MATAS context audit
 

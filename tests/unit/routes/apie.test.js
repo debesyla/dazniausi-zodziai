@@ -32,6 +32,28 @@ vi.mock('../../../src/lib/publication', () => ({
       views: [],
       viewCount: 0,
       manifestUrl: '/data-products/blocked/manifest.json'
+    },
+    {
+      id: 'rimkute-morphemic-dictionary',
+      title: 'Dažninis lietuvių kalbos morfemikos žodynas',
+      productType: 'chunked-lexical-collection',
+      publication: { status: 'published', scope: 'Every row.', access: 'Chunks.' },
+      provenance: {
+        sourceUrl: 'https://hdl.handle.net/20.500.12259/249',
+        licence: 'Rightsholder permission',
+        citation: 'Rimkutė, Kazlauskienė ir Raškinis (2011).',
+        permission: {
+          status: 'rightsholder-permission-confirmed',
+          confirmedOn: '2026-08-13',
+          scope: 'Pilno išvestinio rinkinio skelbimas ir pernaudojimas su priskyrimu.',
+          privateCorrespondencePublished: false
+        },
+        attributionNotice: 'Rimkutė, Erika; Kazlauskienė, Asta; Raškinis, Gailius. 2011.',
+        modificationNotice: 'MODIFIED FILE: deterministiškai išgauta iš PDF.'
+      },
+      views: [{ id: 'entries', title: 'Įrašai' }],
+      viewCount: 1,
+      manifestUrl: '/data-products/rimkute-morphemic-dictionary/manifest.json'
     }
   ]))
 }));
@@ -50,6 +72,10 @@ describe('Methodology page', () => {
     expect(getByText('CC BY 4.0')).toBeInTheDocument();
     expect(getAllByRole('link', { name: 'Pirminis šaltinio įrašas' })[0]).toHaveAttribute('href', 'https://example.test/lemmas');
     expect(getByText(/Šaltinio eilutės sąmoningai neskelbiamos/)).toBeInTheDocument();
+    expect(getByText(/Leidžiama išgauti ir taisyti PDF duomenis/)).toBeInTheDocument();
+    expect(getByText(/Privatus susirašinėjimas neskelbiamas/)).toBeInTheDocument();
+    expect(getByText(/Rimkutė, Erika/)).toBeInTheDocument();
+    expect(getByText(/MODIFIED FILE/)).toBeInTheDocument();
     expect(getByRole('link', { name: '← Tyrinėti duomenis' })).toHaveAttribute('href', '/');
   });
 

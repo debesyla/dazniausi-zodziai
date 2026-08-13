@@ -105,7 +105,7 @@
       'rimkute-2019-alksnis-syntactic-context': 'ALKSNIS medyno priklausomybių ryšiai, žanrai, lemos ir riboti sakinių kontekstai.',
       'kapociute-dzikiene-2017-parliament-frequency-aggregates': 'Lietuvos parlamento kalbų tekstyno bendri lemų ir žodžių formų dažniai.',
       'vssa-2026-blkt-wordform-profile': 'Vienos tikslios žodžio formos rodikliai visame BLKT ir saugiai paskelbtuose penkių teksto tipų bei keturių laikotarpių pjūviuose.',
-      'rimkute-morphemic-dictionary': 'Citata, failų inventorius ir skelbimo sprendimas be žodyno įrašų.'
+      'rimkute-morphemic-dictionary': 'Iš trijų 2011 m. PDF tomų deterministiškai išgauti 72 325 įrašai; šaltinio dažnių suma – 310 012.'
     };
     return scopes[product.id] ?? product.publication.scope;
   }
@@ -114,7 +114,7 @@
     const sourceSpecificLimits: Record<string, string> = {
       'kapociute-dzikiene-2017-parliament-frequency-aggregates': 'Pateikiamos tik viso tekstyno suvestinės; tai nėra autorystės nustatymo, politikų reitingavimo, citatų ar kalendorinės analizės priemonė.',
       'vssa-2026-blkt-wordform-profile': 'BLKT nėra reprezentatyvus visos lietuvių kalbos portretas, nes jame vyrauja žiniasklaida ir dokumentai. Tokenizatoriaus raidžių sekos nėra taisyklingumo ar lietuviškumo įvertinimas. Ieškoma tik viena tiksli forma; neskelbiami reitingai, potipiai, sankirtos ar saugos slenksčio nepasiekusios pjūvių šeimos.',
-      'rimkute-morphemic-dictionary': 'Turimi PDF failai nėra mašininiu būdu tinkami pernaudoti, o jų pakartotinio naudojimo sąlygos neišspręstos.'
+      'rimkute-morphemic-dictionary': 'Dažniai aprašo tik žodyno šaltinio tekstyną. PDF turi 61 eilute daugiau nei vėlesnei gyvai „Morfema“ bazei nurodomi 72 264 įrašai; gyvos bazės skaičius pateikiamas tik kontekstui, o ne kaip išgavimo tikslas. Tai nėra gyvos bazės eksportas.'
     };
     if (sourceSpecificLimits[product.id]) return sourceSpecificLimits[product.id];
     if (product.publication.reason) return product.publication.reason;
@@ -149,6 +149,13 @@
     return product.publication.status === 'published'
       ? 'Viešas JSON duomenų produktas'
       : 'Tik metaduomenys; įrašai neskelbiami';
+  }
+
+  function permissionDescription(product: PublicDataProduct) {
+    if (product.id === 'rimkute-morphemic-dictionary') {
+      return 'Leidžiama išgauti ir taisyti PDF duomenis, skelbti bei platinti visą išvestinį rinkinį ir statistiką, taip pat pernaudoti su įprastu priskyrimu.';
+    }
+    return product.provenance.permission?.scope ?? '';
   }
 
   function primaryAction(product: PublicDataProduct): PrimaryAction {
@@ -262,9 +269,24 @@
                   <dt>Prieiga</dt>
                   <dd>{accessDescription(product)}</dd>
                 </div>
+                {#if product.provenance.permission}
+                  <div class="scope">
+                    <dt>Teisių turėtojo leidimo apimtis</dt>
+                    <dd>{permissionDescription(product)} ({product.provenance.permission.confirmedOn})</dd>
+                  </div>
+                {/if}
+                {#if product.provenance.attributionNotice}
+                  <div class="scope">
+                    <dt>Priskyrimas</dt>
+                    <dd>{product.provenance.attributionNotice}</dd>
+                  </div>
+                {/if}
               </dl>
 
               <p class="limitation"><strong>Interpretavimo riba:</strong> {limitation(product)}</p>
+              {#if product.provenance.modificationNotice}
+                <p class="modification-notice"><strong>Pakeitimo pranešimas:</strong> {product.provenance.modificationNotice}</p>
+              {/if}
 
               <div class="card-actions">
                 {#if action}
@@ -418,6 +440,11 @@
 
   .limitation {
     border-left: 2px solid var(--text-color);
+    padding-left: var(--sm);
+  }
+
+  .modification-notice {
+    border-left: 2px dashed var(--text-color);
     padding-left: var(--sm);
   }
 

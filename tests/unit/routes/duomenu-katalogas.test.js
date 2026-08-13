@@ -45,6 +45,28 @@ const products = [
     manifestUrl: '/data-products/lexical/manifest.json'
   },
   {
+    id: 'rimkute-morphemic-dictionary',
+    title: 'Dažninis lietuvių kalbos morfemikos žodynas',
+    productType: 'chunked-lexical-collection',
+    publication: { status: 'published', scope: 'Visi peržiūrėti įrašai.', access: 'JSON dalimis.' },
+    provenance: {
+      sourceUrl: 'https://hdl.handle.net/20.500.12259/249',
+      licence: 'Rightsholder permission',
+      citation: 'Rimkutė, Kazlauskienė ir Raškinis (2011).',
+      permission: {
+        status: 'rightsholder-permission-confirmed',
+        confirmedOn: '2026-08-13',
+        scope: 'Pilno išvestinio rinkinio skelbimas ir pernaudojimas su priskyrimu.',
+        privateCorrespondencePublished: false
+      },
+      attributionNotice: 'Rimkutė, Erika; Kazlauskienė, Asta; Raškinis, Gailius. 2011.',
+      modificationNotice: 'MODIFIED FILE: deterministiškai išgauta iš trijų PDF tomų.'
+    },
+    views: [{ id: 'entries-by-source-order', title: 'Įrašai' }],
+    viewCount: 1,
+    manifestUrl: '/data-products/rimkute-morphemic-dictionary/manifest.json'
+  },
+  {
     id: 'rimkute-2019-alksnis-syntactic-context',
     title: 'ALKSNIS bandomieji kontekstai',
     productType: 'chunked-syntactic-context',
@@ -96,6 +118,14 @@ describe('Public data catalogue page', () => {
       'href',
       '/data-products/lexical/manifest.json'
     );
+
+    const morphemicCard = getByRole('article', { name: 'Dažninis lietuvių kalbos morfemikos žodynas' });
+    expect(within(morphemicCard).getByText('Rightsholder permission')).toBeInTheDocument();
+    expect(within(morphemicCard).getByText(/Leidžiama išgauti ir taisyti PDF duomenis/)).toBeInTheDocument();
+    expect(within(morphemicCard).getByText(/Rimkutė, Erika/)).toBeInTheDocument();
+    expect(within(morphemicCard).getByText(/MODIFIED FILE/)).toBeInTheDocument();
+    expect(within(morphemicCard).getByText(/72 325 įrašai.*310 012/i)).toBeInTheDocument();
+    expect(within(morphemicCard).getByText(/61 eilute daugiau.*tik kontekstui.*ne kaip išgavimo tikslas/i)).toBeInTheDocument();
 
     const comparisonCard = getByRole('article', { name: 'DML6 palyginimas' });
     expect(within(comparisonCard).getByRole('link', { name: 'Tyrinėti žodyno aprėptį' })).toHaveAttribute('href', '/zodyno-apreptis');

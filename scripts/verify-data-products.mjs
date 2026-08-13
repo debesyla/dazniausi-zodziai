@@ -122,6 +122,40 @@ const BLKT_FILE_NOTICE = {
   licenceLocation: 'product-root',
   licences: BLKT_RIGHTS.licences.map(({ name, file }) => ({ name, file }))
 };
+const RIMKUTE_PRODUCT_ID = 'rimkute-morphemic-dictionary';
+const RIMKUTE_RIGHTS = {
+  licence: 'Rightsholder permission',
+  permission: {
+    status: 'rightsholder-permission-confirmed',
+    confirmedOn: '2026-08-13',
+    scope: 'Extraction and correction of the three 2011 dictionary PDFs; publication and redistribution of the complete derived dataset and derived statistics; and downstream reuse, with normal attribution.',
+    privateCorrespondencePublished: false
+  },
+  attributionNotice: 'Rimkutė, Erika; Kazlauskienė, Asta; Raškinis, Gailius. 2011. Dažninis lietuvių kalbos morfemikos žodynas. Vytauto Didžiojo universitetas.',
+  modificationNotice: 'MODIFIED FILE: Deterministically extracted and reviewed by the dazniausi-zodziai Lithuanian word project from the three 2011 dictionary PDFs; this derivative is not an official VDU database export.',
+  downstreamRequirements: [
+    'Retain the attribution notice and identify the files as a modified derivative when redistributing the dataset or statistics.'
+  ]
+};
+const RIMKUTE_FILE_NOTICE = {
+  modificationNotice: RIMKUTE_RIGHTS.modificationNotice,
+  attribution: RIMKUTE_RIGHTS.attributionNotice,
+  licence: RIMKUTE_RIGHTS.licence
+};
+const RIMKUTE_COLUMNS = ['wordform', 'frequency', 'morphemic_analysis', 'lemma_and_morphology', 'volume', 'source_page'];
+const RIMKUTE_METHOD = {
+  id: 'pdf-coordinate-columns-v1',
+  normalization: 'Unicode NFC; source text otherwise preserved',
+  rowOrder: 'PDF volume order I, II, III; page order; top-to-bottom order',
+  columnBoundariesPoints: [0, 145, 180, 285, 612],
+  continuationPolicy: "A pure x >= 285 pt line is buffered: it is prepended to the next same-page row only when that row's description lacks a semicolon; otherwise it is appended to the preceding row, including across page boundaries.",
+  splitFragmentPolicy: 'A reviewed non-row split line is joined to its adjacent row using source-layout direction; forward joins require the next row on the same page within 17 pt. Every split-line digest must match the manifest set.'
+};
+const RIMKUTE_PDF_IDENTITIES = [
+  { volume: 'I', artifactId: 'rimkute-morphemic-dictionary-volume-one' },
+  { volume: 'II', artifactId: 'rimkute-morphemic-dictionary-volume-two' },
+  { volume: 'III', artifactId: 'rimkute-morphemic-dictionary-volume-three' }
+];
 
 function fail(message) {
   throw new Error(`Data-product verification failed: ${message}`);
@@ -188,6 +222,89 @@ function validateProductProvenance(value, description) {
   assertNoInternalSourceLocator(value, description);
   for (const [index, file] of value.files.entries()) {
     validatePublicSourceFile(file, `${description}.files[${index}]`);
+  }
+  if (value.permission !== undefined
+    && (!isPlainObject(value.permission) || !normalizeString(value.permission.status)
+      || !/^\d{4}-\d{2}-\d{2}$/.test(value.permission.confirmedOn)
+      || !normalizeString(value.permission.scope)
+      || typeof value.permission.privateCorrespondencePublished !== 'boolean')) {
+    fail(`${description}.permission is invalid`);
+  }
+  if (value.attributionNotice !== undefined && !normalizeString(value.attributionNotice)) {
+    fail(`${description}.attributionNotice is invalid`);
+  }
+  if (value.modificationNotice !== undefined && !normalizeString(value.modificationNotice)) {
+    fail(`${description}.modificationNotice is invalid`);
+  }
+  if (value.downstreamRequirements !== undefined
+    && (!Array.isArray(value.downstreamRequirements) || value.downstreamRequirements.length === 0
+      || value.downstreamRequirements.some((requirement) => !normalizeString(requirement)))) {
+    fail(`${description}.downstreamRequirements is invalid`);
+  }
+  if (value.extraction !== undefined && !isPlainObject(value.extraction)) {
+    fail(`${description}.extraction is invalid`);
+  }
+}
+
+function validateRimkuteProvenance(value) {
+  const extraction = value.extraction;
+  const canonicalFile = value.files.find((file) => file.artifactId === 'rimkute-morphemic-dictionary-entries');
+  const expectedArtifactIds = [
+    ...RIMKUTE_PDF_IDENTITIES.map(({ artifactId }) => artifactId),
+    'rimkute-morphemic-dictionary-entries',
+    'rimkute-morphemic-dictionary-extraction-summary'
+  ];
+  const extractionIsValid = isPlainObject(extraction)
+    && sameObject(extraction.method, RIMKUTE_METHOD)
+    && isPlainObject(extraction.runtime) && extraction.runtime.python === '3.12.13'
+    && extraction.runtime.popplerPdftotext === '26.05.0'
+    && Number.isSafeInteger(extraction.rows) && extraction.rows > 0
+    && Number.isSafeInteger(extraction.frequencyTotal) && extraction.frequencyTotal > 0
+    && Array.isArray(extraction.volumes) && extraction.volumes.length === 3
+    && extraction.volumes.every((volume, index) => isPlainObject(volume)
+      && volume.volume === ['I', 'II', 'III'][index]
+      && Number.isSafeInteger(volume.rows) && volume.rows > 0
+      && Number.isSafeInteger(volume.frequencyTotal) && volume.frequencyTotal > 0)
+    && extraction.volumes.reduce((total, volume) => total + volume.rows, 0) === extraction.rows
+    && extraction.volumes.reduce((total, volume) => total + volume.frequencyTotal, 0) === extraction.frequencyTotal
+    && Array.isArray(extraction.representativeSamples) && extraction.representativeSamples.length >= 3
+    && extraction.representativeSamples.every((sample) => isPlainObject(sample)
+      && Object.keys(sample).sort().join(',') === [...RIMKUTE_COLUMNS].sort().join(',')
+      && normalizeString(sample.wordform) && Number.isSafeInteger(sample.frequency) && sample.frequency > 0
+      && normalizeString(sample.morphemic_analysis) && normalizeString(sample.lemma_and_morphology)
+      && ['I', 'II', 'III'].includes(sample.volume) && Number.isSafeInteger(sample.source_page) && sample.source_page > 0)
+    && isPlainObject(extraction.summaryArtifact)
+    && extraction.summaryArtifact.artifactId === 'rimkute-morphemic-dictionary-extraction-summary'
+    && extraction.summaryArtifact.format === 'rimkute-extraction-summary'
+    && Number.isSafeInteger(extraction.summaryArtifact.bytes) && extraction.summaryArtifact.bytes > 0
+    && isSha256(extraction.summaryArtifact.sha256);
+  const summaryFile = value.files.find((file) => file.artifactId === 'rimkute-morphemic-dictionary-extraction-summary');
+  const expectedSummaryFile = extractionIsValid ? {
+    artifactId: summaryFile?.artifactId,
+    format: summaryFile?.format,
+    bytes: summaryFile?.bytes,
+    sha256: summaryFile?.sha256
+  } : null;
+  if (value.licence !== RIMKUTE_RIGHTS.licence
+    || !sameObject(value.permission, RIMKUTE_RIGHTS.permission)
+    || value.attributionNotice !== RIMKUTE_RIGHTS.attributionNotice
+    || value.modificationNotice !== RIMKUTE_RIGHTS.modificationNotice
+    || !sameObject(value.downstreamRequirements, RIMKUTE_RIGHTS.downstreamRequirements)
+    || !extractionIsValid
+    || value.files.length !== expectedArtifactIds.length
+    || new Set(value.files.map((file) => file.artifactId)).size !== expectedArtifactIds.length
+    || expectedArtifactIds.some((artifactId) => !value.files.some((file) => file.artifactId === artifactId))
+    || value.files.filter((file) => file.role !== undefined).length !== 1
+    || !canonicalFile || canonicalFile.role !== 'morphemic-entries'
+    || canonicalFile.format !== 'text' || canonicalFile.rows !== extraction.rows
+    || canonicalFile.columns !== RIMKUTE_COLUMNS.length || canonicalFile.delimiter !== '\t'
+    || canonicalFile.hasHeader !== true
+    || !summaryFile || summaryFile.format !== 'rimkute-extraction-summary'
+    || !sameObject(extraction.summaryArtifact, expectedSummaryFile)
+    || RIMKUTE_PDF_IDENTITIES.some((expected) => !value.files.some((file) => file.volume === expected.volume
+      && file.artifactId === expected.artifactId && file.format === 'binary'
+      && Number.isSafeInteger(file.pages) && file.pages > 0))) {
+    fail(`${RIMKUTE_PRODUCT_ID} does not retain the reviewed rightsholder-permission provenance`);
   }
 }
 
@@ -1325,6 +1442,25 @@ async function verifyChunkedProduct({ manifest, productDirectory }) {
     const blktLayout = manifest.wordformProfile?.viewId === view.id
       ? blktRecordLayout(manifest.wordformProfile, fields, `${manifest.id}/${view.id} BLKT profile`)
       : null;
+    const rimkuteLayout = manifest.id === RIMKUTE_PRODUCT_ID;
+    const rimkuteCanonicalHeader = `${RIMKUTE_COLUMNS.join('\t')}\n`;
+    const rimkuteCanonicalHash = rimkuteLayout ? createHash('sha256').update(rimkuteCanonicalHeader) : null;
+    let rimkuteCanonicalBytes = rimkuteLayout ? Buffer.byteLength(rimkuteCanonicalHeader) : 0;
+    if (rimkuteLayout && (!sameObject(index.sourceFile, manifest.provenance.files.find((file) => file.role === 'morphemic-entries'))
+      || view.sourceRole !== 'morphemic-entries' || index.ordering?.field !== 'source' || index.ordering?.direction !== 'as-stored'
+      || index.fields.length !== 6
+      || index.fields.some((field, fieldIndex) => field.sourceColumn !== fieldIndex)
+      || index.fields[0].id !== 'wordform' || index.fields[0].type !== 'string'
+      || index.fields[1].id !== 'frequency' || index.fields[1].type !== 'raw-token-count'
+      || index.fields[2].id !== 'morphemicAnalysis' || index.fields[2].type !== 'string'
+      || index.fields[3].id !== 'lemmaAndMorphology' || index.fields[3].type !== 'string'
+      || index.fields[4].id !== 'volume' || index.fields[4].type !== 'string'
+      || index.fields[5].id !== 'sourcePage' || index.fields[5].type !== 'string'
+      || index.summary.sourceRows !== manifest.provenance.extraction.rows
+      || index.summary.recordCount !== manifest.provenance.extraction.rows
+      || index.summary.numericTotals?.frequency !== manifest.provenance.extraction.frequencyTotal)) {
+      fail(`${manifest.id}/${view.id} schema, source identity, rows, or frequency total do not match the extraction provenance`);
+    }
     if (blktLayout && index.maxChunkBytes > 65536) {
       fail(`${manifest.id}/${view.id} BLKT data chunks exceed the 65536-byte lookup budget`);
     }
@@ -1353,6 +1489,9 @@ async function verifyChunkedProduct({ manifest, productDirectory }) {
       if (index.chunks !== undefined) fail(`${manifest.id}/${view.id} BLKT lookup must use bounded range routing pages`);
       chunkDescriptors = await readBlktRangeRouting({ manifest, view, index, indexPath });
     } else {
+      if (rimkuteLayout && !sameObject(index.notice, RIMKUTE_FILE_NOTICE)) {
+        fail(`${manifest.id}/${view.id} index is missing its attribution and modification notice`);
+      }
       if (index.routing !== undefined || !Array.isArray(index.chunks) || index.chunks.length === 0) {
         fail(`${manifest.id}/${view.id} chunk descriptors are invalid`);
       }
@@ -1414,11 +1553,21 @@ async function verifyChunkedProduct({ manifest, productDirectory }) {
       const chunk = parseJson(buffer, `${manifest.id}/${view.id} chunk ${chunkIndex}`);
       if (!isPlainObject(chunk) || chunk.schemaVersion !== 1 || chunk.productId !== manifest.id || chunk.viewId !== view.id
         || chunk.chunk !== chunkIndex || (blktLayout && !sameObject(chunk.notice, BLKT_FILE_NOTICE))
+        || (rimkuteLayout && !sameObject(chunk.notice, RIMKUTE_FILE_NOTICE))
         || !Array.isArray(chunk.records) || chunk.records.length !== descriptor.records) {
         fail(`${manifest.id}/${view.id} chunk ${chunkIndex} content is invalid`);
       }
       for (const [recordIndex, record] of chunk.records.entries()) {
         validateRecord(record, fields, `${manifest.id}/${view.id} chunk ${chunkIndex} record ${recordIndex}`, totals, nullCounts, lexicalCounts);
+        if (rimkuteLayout) {
+          const canonicalLine = `${record.map(String).join('\t')}\n`;
+          if (/[\t\r\n]/.test(record[0]) || /[\t\r\n]/.test(record[2]) || /[\t\r\n]/.test(record[3])
+            || /[\t\r\n]/.test(record[4]) || /[\t\r\n]/.test(record[5])) {
+            fail(`${manifest.id}/${view.id} chunk ${chunkIndex} record ${recordIndex} cannot reconstruct a canonical TSV row`);
+          }
+          rimkuteCanonicalHash.update(canonicalLine);
+          rimkuteCanonicalBytes += Buffer.byteLength(canonicalLine);
+        }
         if (blktLayout) {
           validateBlktRecord(record, blktLayout, `${manifest.id}/${view.id} chunk ${chunkIndex} record ${recordIndex}`);
         }
@@ -1463,6 +1612,29 @@ async function verifyChunkedProduct({ manifest, productDirectory }) {
     };
     if (!sameObject(index.summary, expectedSummary) || !sameObject(view.summary, expectedSummary)) {
       fail(`${manifest.id}/${view.id} summary does not match its chunks`);
+    }
+    if (rimkuteLayout) {
+      const canonicalSha256 = rimkuteCanonicalHash.digest('hex');
+      if (rimkuteCanonicalBytes !== index.sourceFile.bytes || canonicalSha256 !== index.sourceFile.sha256) {
+        fail(`${manifest.id}/${view.id} records do not byte-reconstruct the pinned canonical TSV`);
+      }
+      const firstRecord = parseJson(await readFile(resolveProductPath(
+        path.dirname(indexPath),
+        chunkDescriptors[0].file,
+        `${manifest.id}/${view.id} first representative chunk`
+      )), `${manifest.id}/${view.id} first representative chunk`).records[0];
+      const lastDescriptor = chunkDescriptors.at(-1);
+      const lastChunk = parseJson(await readFile(resolveProductPath(
+        path.dirname(indexPath),
+        lastDescriptor.file,
+        `${manifest.id}/${view.id} last representative chunk`
+      )), `${manifest.id}/${view.id} last representative chunk`);
+      const sampleToRecord = (sample) => [sample.wordform, sample.frequency, sample.morphemic_analysis,
+        sample.lemma_and_morphology, sample.volume, String(sample.source_page)];
+      if (!sameObject(firstRecord, sampleToRecord(manifest.provenance.extraction.representativeSamples[0]))
+        || !sameObject(lastChunk.records.at(-1), sampleToRecord(manifest.provenance.extraction.representativeSamples.at(-1)))) {
+        fail(`${manifest.id}/${view.id} boundary records do not match the extraction samples`);
+      }
     }
     chunkedViews += 1;
     chunks += chunkDescriptors.length;
@@ -1525,12 +1697,16 @@ function validateManifest(manifest, catalogEntry) {
     validateDatasetProvenance(manifest.provenance, `${manifest.id} provenance`);
   } else {
     validateProductProvenance(manifest.provenance, `${manifest.id} provenance`);
+    if (manifest.id === RIMKUTE_PRODUCT_ID) validateRimkuteProvenance(manifest.provenance);
   }
   if (manifest.wordformProfile !== undefined) {
     validateBlktWordformProfile(manifest);
     if (!sameObject(manifest.notice, BLKT_FILE_NOTICE)) {
       fail(`${manifest.id} BLKT manifest is missing its licence and modification notice`);
     }
+  }
+  if (manifest.id === RIMKUTE_PRODUCT_ID && !sameObject(manifest.notice, RIMKUTE_FILE_NOTICE)) {
+    fail(`${manifest.id} manifest is missing its attribution and modification notice`);
   }
 }
 

@@ -35,12 +35,33 @@ copying the raw source repository into the application source tree.
 | `raskinis-2025-foreign-name-transliterations` | Published chunked lexical JSON | Source left and parenthesized name strings plus a source match count | Every one of 68,167 source lines must match the reviewed pair grammar; source string direction and documented noise remain literal |
 | `birvinskaite-2026-lithuanian-basketball-slang` | Published chunked lexical JSON | Entry, source, senses, definitions, examples, variants, user groups, and compilers | The reviewed artifacts are checksummed; parser totals pin 223 entries despite the record page's 233-entry claim |
 | `rimkute-2019-alksnis-syntactic-context` | Published prefix-chunked syntax-context JSON | ALKSNIS dependency-relation and genre totals, non-punctuation lemmas, and bounded sentence contexts | The reviewed ZIP and canonical sorted-member hash are pinned; source sentence-count discrepancy, root rows, punctuation exclusion, direction, and context cap are explicit |
-| `rimkute-morphemic-dictionary` | Published metadata-only JSON | Citation and source-file inventory only | Licensable machine-readable source and reuse terms, tracked in [issue #41](https://github.com/debesyla/dazniausi-zodziai/issues/41) |
+| `rimkute-morphemic-dictionary` | Published chunked lexical JSON | Source wordform, corpus-scoped frequency, literal morphemic analysis, combined lemma-and-morphology text, volume, and printed page | The three PDF checksums, deterministic canonical TSV, extraction summary, row count, total frequency, and representative samples are pinned; owner-confirmed rightsholder permission, attribution, and modification notices accompany the complete derivative |
 
 The comparison contracts deliberately have no generic `frequency` field. A
 coverage code is categorical, document counts are not token counts, and a
 normalized count cannot be compared with a raw count without its denominator.
 Missing source metrics remain `null`; they are not converted to zero.
+
+## Rimkutė morphemic-dictionary boundary
+
+On 2026-08-13 the project owner confirmed rightsholder permission for
+deterministic extraction and correction of the three 2011 dictionary PDFs,
+publication and redistribution of the complete derived dataset and its
+statistics, and downstream reuse with normal attribution. The public metadata
+records the permission scope and date but does not publish private
+correspondence.
+
+The canonical source-order TSV is the only row input to the web product. The
+source contract pins that TSV and its extraction summary alongside all three
+input PDF checksums. It retains duplicate wordforms, the literal morphemic
+analysis, the source's combined lemma-and-morphology text, volume, and printed
+page; it does not heuristically split alternative analyses. The public
+manifest exposes the `pdf-coordinate-columns-v1` method, Python 3.12.13 and
+Poppler `pdftotext` 26.05.0 runtime, per-volume and combined row/frequency
+totals, representative samples, summary identity, citation, and a modification
+notice. The compact notice is repeated on each independently downloadable
+index and data chunk. The separate live Morfema database is neither an input
+nor an implied snapshot of this product.
 
 ## BLKT exact-word profile boundary
 

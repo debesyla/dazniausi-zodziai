@@ -123,6 +123,21 @@ describe('loadPublicDataProducts', () => {
 			viewCount: 1,
 			publication: { status: 'published' }
 		});
+		expect(products.find((product) => product.id === 'rimkute-morphemic-dictionary')).toMatchObject({
+			productType: 'chunked-lexical-collection',
+			viewCount: 1,
+			publication: { status: 'published' },
+			provenance: {
+				licence: 'Rightsholder permission',
+				permission: {
+					status: 'rightsholder-permission-confirmed',
+					confirmedOn: '2026-08-13',
+					privateCorrespondencePublished: false
+				},
+				attributionNotice: expect.stringContaining('Rimkutė'),
+				modificationNotice: expect.stringContaining('MODIFIED FILE')
+			}
+		});
     expect(products.find((product) => product.id === 'birvinskaite-2026-lithuanian-basketball-slang')).toMatchObject({
       productType: 'chunked-lexical-collection',
       viewCount: 1
