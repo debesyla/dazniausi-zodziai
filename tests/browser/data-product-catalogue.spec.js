@@ -26,9 +26,10 @@ test('makes every public data product discoverable with scope, limits, and a saf
   await expect(page.getByText('Kataloge: 15 produktų.')).toBeVisible();
   await expect(page.locator('article.product-card')).toHaveCount(15);
 
-  for (const heading of ['Dažnumo sąrašai', 'Palyginimai', 'Leksiniai rinkiniai', 'Sintaksės kontekstai', 'Metaduomenys be eilučių']) {
+  for (const heading of ['Dažnumo sąrašai', 'Palyginimai', 'Leksiniai rinkiniai', 'Sintaksės kontekstai']) {
     await expect(page.getByRole('heading', { name: heading })).toBeVisible();
   }
+  await expect(page.getByRole('heading', { name: 'Metaduomenys be eilučių' })).toHaveCount(0);
 
   const parliament = page.getByRole('article', { name: 'Lithuanian Parliament Corpus corpus-wide frequency aggregates' });
   await expect(parliament.getByText('Šaltinio apimtis')).toBeVisible();
@@ -39,10 +40,16 @@ test('makes every public data product discoverable with scope, limits, and a saf
     /data-products\/kapociute-dzikiene-2017-parliament-frequency-aggregates\/manifest\.json$/
   );
 
-  const blocked = page.getByRole('article', { name: 'Dažninis lietuvių kalbos morfemikos žodynas' });
-  await expect(blocked.getByText('Tik metaduomenys; įrašai neskelbiami')).toBeVisible();
-  await expect(blocked.getByRole('link', { name: 'Peržiūrėti viešą sprendimo aprašą' })).toBeVisible();
-  await expect(blocked.getByRole('link', { name: 'Atverti JSON aprašą ir prieigą' })).toHaveCount(0);
+  const morphemicDictionary = page.getByRole('article', { name: 'Dažninis lietuvių kalbos morfemikos žodynas' });
+  await expect(morphemicDictionary.getByText('Viešas JSON duomenų produktas')).toBeVisible();
+  await expect(morphemicDictionary.getByText('Rightsholder permission')).toBeVisible();
+  await expect(morphemicDictionary.getByText(/72 325 įrašai.*310 012/i)).toBeVisible();
+  await expect(morphemicDictionary.getByText(/61 eilute daugiau.*tik kontekstui.*ne kaip išgavimo tikslas/i)).toBeVisible();
+  await expect(morphemicDictionary.getByRole('link', { name: 'Atverti JSON aprašą ir prieigą' })).toHaveAttribute(
+    'href',
+    /data-products\/rimkute-morphemic-dictionary\/manifest\.json$/
+  );
+  await expect(morphemicDictionary.getByRole('link', { name: 'Peržiūrėti viešą sprendimo aprašą' })).toHaveCount(0);
 
   const tableDetails = page.locator('details.table-equivalent');
   await tableDetails.locator('summary').click();

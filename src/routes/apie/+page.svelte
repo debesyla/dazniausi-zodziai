@@ -29,6 +29,13 @@
     return product.publication.status === 'published' ? 'Viešas JSON duomenų produktas' : 'Metaduomenys; įrašai neskelbiami';
   }
 
+  function permissionDescription(product: PublicDataProduct) {
+    if (product.id === 'rimkute-morphemic-dictionary') {
+      return 'Leidžiama išgauti ir taisyti PDF duomenis, skelbti bei platinti visą išvestinį rinkinį ir statistiką, taip pat pernaudoti su įprastu priskyrimu.';
+    }
+    return product.provenance.permission?.scope ?? '';
+  }
+
   $effect(() => {
     let cancelled = false;
     loadPublicDataProducts().then((loadedProducts) => {
@@ -112,6 +119,15 @@
               <p class="notice">Šaltinio eilutės sąmoningai neskelbiamos, kol nėra patikimo mašininiu būdu apdorojamo šaltinio ir aiškių pakartotinio naudojimo sąlygų.</p>
             {/if}
             <p><strong>Citata:</strong> {product.provenance.citation}</p>
+            {#if product.provenance.permission}
+              <p><strong>Teisių turėtojo leidimas:</strong> {permissionDescription(product)} ({product.provenance.permission.confirmedOn}). Privatus susirašinėjimas neskelbiamas.</p>
+            {/if}
+            {#if product.provenance.attributionNotice}
+              <p><strong>Priskyrimas:</strong> {product.provenance.attributionNotice}</p>
+            {/if}
+            {#if product.provenance.modificationNotice}
+              <p class="notice"><strong>Pakeitimo pranešimas:</strong> {product.provenance.modificationNotice}</p>
+            {/if}
             <p><a href={product.provenance.sourceUrl} target="_blank" rel="noreferrer">Pirminis šaltinio įrašas</a> · <a href={product.manifestUrl}>Viešo JSON produkto aprašas</a></p>
           </article>
         {/each}

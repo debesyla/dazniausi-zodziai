@@ -148,10 +148,52 @@ describe('project hygiene', () => {
 			wordformProfile: { validatedSubtypes: { count: 11, published: false } }
 		});
 		expect(plan.contractProducts.find((product) => product.contractId === 'rimkute-morphemic-dictionary')).toMatchObject({
-			productType: 'metadata-only',
-			publication: { status: 'metadata-only' },
-			blockedBy: ['https://github.com/debesyla/dazniausi-zodziai/issues/41']
+			productType: 'chunked-lexical-collection',
+			publication: { status: 'published' },
+			views: [{
+				id: 'entries-by-source-order',
+				ordering: { field: 'source', direction: 'as-stored' },
+				fields: [
+					{ id: 'wordform' },
+					{ id: 'frequency', type: 'raw-token-count' },
+					{ id: 'morphemicAnalysis' },
+					{ id: 'lemmaAndMorphology' },
+					{ id: 'volume' },
+					{ id: 'sourcePage' }
+				]
+			}]
 		});
+	});
+
+	it('pins the reviewed Rimkute source identities through the public product', async () => {
+		const contracts = JSON.parse(await readRepositoryFile('data/contracts/deferred-sources.json'));
+		const manifest = JSON.parse(await readRepositoryFile('static/data-products/rimkute-morphemic-dictionary/manifest.json'));
+		const index = JSON.parse(await readRepositoryFile('static/data-products/rimkute-morphemic-dictionary/views/entries-by-source-order/index.json'));
+		const contract = contracts.contracts.find((candidate) => candidate.id === 'rimkute-morphemic-dictionary');
+		const expectedFiles = [
+			{ artifactId: 'rimkute-morphemic-dictionary-volume-one', volume: 'I', format: 'binary', bytes: 2404144, sha256: '982b0080e08b314246d2aa0995248bf10a6b0d9a1424b593d56e410e34547dfa', pages: 801 },
+			{ artifactId: 'rimkute-morphemic-dictionary-volume-two', volume: 'II', format: 'binary', bytes: 1065088, sha256: '546ada8c3e99cd978b25e4edcadc7958d4f6c0ecf38bc3ee4825db767838cdbc', pages: 357 },
+			{ artifactId: 'rimkute-morphemic-dictionary-volume-three', volume: 'III', format: 'binary', bytes: 2670927, sha256: '016f23e6bffba91ee53de74871793221177091fd8e950c60901e921efd6f266e', pages: 961 },
+			{ artifactId: 'rimkute-morphemic-dictionary-entries', role: 'morphemic-entries', format: 'text', bytes: 6351453, sha256: '5a579304382a6f4a3447d1e36b5b638ad890d33fb8df9076976c01e3eade9dca', rows: 72325 },
+			{ artifactId: 'rimkute-morphemic-dictionary-extraction-summary', format: 'rimkute-extraction-summary', bytes: 4848, sha256: '845bcc9cf3609305492472b777dd29f6a1077023df424f59ee4478b6ee4832b4' }
+		];
+		const identity = ({ artifactId, volume, role, format, bytes, sha256, pages, rows }) => ({
+			artifactId,
+			...(volume === undefined ? {} : { volume }),
+			...(role === undefined ? {} : { role }),
+			format,
+			bytes,
+			sha256,
+			...(pages === undefined ? {} : { pages }),
+			...(rows === undefined ? {} : { rows })
+		});
+
+		expect(contract.source.files.map(identity)).toEqual(expectedFiles);
+		expect(manifest.provenance.files.map(identity)).toEqual(expectedFiles);
+		expect(contract.source.extraction).toMatchObject({ rows: 72325, frequencyTotal: 310012 });
+		expect(manifest.provenance.extraction).toEqual(contract.source.extraction);
+		expect(index.sourceFile).toMatchObject(expectedFiles[3]);
+		expect(index.summary).toMatchObject({ sourceRows: 72325, recordCount: 72325, numericTotals: { frequency: 310012 } });
 	});
 
 	it('documents which statistical explorations the reviewed data can support', async () => {

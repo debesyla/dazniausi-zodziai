@@ -222,6 +222,235 @@ describe('public data-product preparation', () => {
     expect(manifest).not.toHaveProperty('entries');
   });
 
+  it('publishes the permission-backed Rimkute PDF derivative with attribution and a modification notice', async () => {
+    const root = await makeDirectory();
+    const sourceRoot = path.join(root, 'sources');
+    const staticRoot = path.join(root, 'static');
+    const outputRoot = path.join(staticRoot, 'data-products');
+    const planPath = path.join(root, 'plan.json');
+    const contractPath = path.join(root, 'contract.json');
+    const source = 'wordform\tfrequency\tmorphemic_analysis\tlemma_and_morphology\tvolume\tsource_page\n'
+      + 'darbo\t1136\tdarb-o\tdarbas; dkt. vyr. g. vns. kilm.\tI\t9\n'
+      + 'aišku\t186\taišk-u\taiškus; bdv. bev. g.\tII\t5\n'
+      + 'būti\t982\tbū-ti\tbūti; vksm. bendr.\tIII\t5\n';
+    const permission = {
+      status: 'rightsholder-permission-confirmed',
+      confirmedOn: '2026-08-13',
+      scope: 'Extraction and correction of the three 2011 dictionary PDFs; publication and redistribution of the complete derived dataset and derived statistics; and downstream reuse, with normal attribution.',
+      privateCorrespondencePublished: false
+    };
+    const attributionNotice = 'Rimkutė, Erika; Kazlauskienė, Asta; Raškinis, Gailius. 2011. Dažninis lietuvių kalbos morfemikos žodynas. Vytauto Didžiojo universitetas.';
+    const modificationNotice = 'MODIFIED FILE: Deterministically extracted and reviewed by the dazniausi-zodziai Lithuanian word project from the three 2011 dictionary PDFs; this derivative is not an official VDU database export.';
+    const downstreamRequirements = [
+      'Retain the attribution notice and identify the files as a modified derivative when redistributing the dataset or statistics.'
+    ];
+    const representativeSamples = [
+      { wordform: 'darbo', frequency: 1136, morphemic_analysis: 'darb-o', lemma_and_morphology: 'darbas; dkt. vyr. g. vns. kilm.', volume: 'I', source_page: 9 },
+      { wordform: 'aišku', frequency: 186, morphemic_analysis: 'aišk-u', lemma_and_morphology: 'aiškus; bdv. bev. g.', volume: 'II', source_page: 5 },
+      { wordform: 'būti', frequency: 982, morphemic_analysis: 'bū-ti', lemma_and_morphology: 'būti; vksm. bendr.', volume: 'III', source_page: 5 }
+    ];
+    const method = {
+      id: 'pdf-coordinate-columns-v1',
+      normalization: 'Unicode NFC; source text otherwise preserved',
+      rowOrder: 'PDF volume order I, II, III; page order; top-to-bottom order',
+      columnBoundariesPoints: [0, 145, 180, 285, 612],
+      continuationPolicy: "A pure x >= 285 pt line is buffered: it is prepended to the next same-page row only when that row's description lacks a semicolon; otherwise it is appended to the preceding row, including across page boundaries.",
+      splitFragmentPolicy: 'A reviewed non-row split line is joined to its adjacent row using source-layout direction; forward joins require the next row on the same page within 17 pt. Every split-line digest must match the manifest set.'
+    };
+    const pdfFixtures = [
+      { volume: 'I', artifactId: 'rimkute-morphemic-dictionary-volume-one', name: 'I.pdf', pages: 801, content: 'fixture-volume-one' },
+      { volume: 'II', artifactId: 'rimkute-morphemic-dictionary-volume-two', name: 'II.pdf', pages: 357, content: 'fixture-volume-two-longer' },
+      { volume: 'III', artifactId: 'rimkute-morphemic-dictionary-volume-three', name: 'III.pdf', pages: 961, content: 'fixture-volume-three-longest' }
+    ];
+    const pdfDescriptors = pdfFixtures.map(({ volume, artifactId, name, pages, content }) => ({
+      artifactId,
+      volume,
+      name,
+      format: 'binary',
+      bytes: Buffer.byteLength(content),
+      pages,
+      sha256: checksum(content)
+    }));
+    const volumes = [
+      { volume: 'I', rows: 1, frequencyTotal: 1136, continuationLines: 0, reviewedSplitLines: 0, sectionHeadings: [{ page: 9, text: 'Daiktavardžiai' }] },
+      { volume: 'II', rows: 1, frequencyTotal: 186, continuationLines: 0, reviewedSplitLines: 0, sectionHeadings: [{ page: 5, text: 'Būdvardžiai' }] },
+      { volume: 'III', rows: 1, frequencyTotal: 982, continuationLines: 0, reviewedSplitLines: 0, sectionHeadings: [{ page: 5, text: 'Bendratys' }] }
+    ];
+    const summaryObject = {
+      schemaVersion: 1,
+      id: 'rimkute-2011-dazninis-morfemikos-zodynas',
+      source: {
+        scope: 'the three reviewed 2011 PDF volumes only; the live Morfema database was not accessed',
+        files: pdfDescriptors.map(({ volume, name, pages, bytes, sha256 }) => ({ volume, name, pages, bytes, sha256 }))
+      },
+      method,
+      runtime: { python: '3.12.13', popplerPdftotext: '26.05.0', dependencyLock: 'extraction-runtime.json' },
+      volumes,
+      output: {
+        file: 'morphemic-entries.tsv',
+        format: 'UTF-8 TSV with LF line endings',
+        columns: ['wordform', 'frequency', 'morphemic_analysis', 'lemma_and_morphology', 'volume', 'source_page'],
+        rows: 3,
+        frequencyTotal: 2304,
+        rowsByVolume: { I: 1, II: 1, III: 1 },
+        bytes: Buffer.byteLength(source),
+        sha256: checksum(source)
+      },
+      manualReview: { unresolvedRows: 0, corrections: 0, note: 'All fixture rows reviewed.' },
+      representativeSamples
+    };
+    const summary = `${JSON.stringify(summaryObject, null, 2)}\n`;
+    const summaryArtifact = {
+      artifactId: 'rimkute-morphemic-dictionary-extraction-summary',
+      format: 'rimkute-extraction-summary',
+      bytes: Buffer.byteLength(summary),
+      sha256: checksum(summary)
+    };
+    const extraction = {
+      method,
+      runtime: { python: '3.12.13', popplerPdftotext: '26.05.0' },
+      rows: 3,
+      frequencyTotal: 2304,
+      volumes: volumes.map(({ volume, rows, frequencyTotal }) => ({ volume, rows, frequencyTotal })),
+      representativeSamples,
+      summaryArtifact
+    };
+    const contract = {
+      schemaVersion: 1,
+      contracts: [{
+        id: 'rimkute-morphemic-dictionary',
+        title: 'Dažninis lietuvių kalbos morfemikos žodynas',
+        decision: 'publish-rightsholder-permission',
+        source: {
+          sourceUrl: 'https://hdl.handle.net/20.500.12259/249',
+          licence: 'Rightsholder permission',
+          citation: attributionNotice,
+          permission,
+          attributionNotice,
+          modificationNotice,
+          downstreamRequirements,
+          extraction,
+          files: [
+            ...pdfDescriptors,
+            {
+              artifactId: 'rimkute-morphemic-dictionary-entries',
+              role: 'morphemic-entries',
+              format: 'text',
+              bytes: Buffer.byteLength(source),
+              rows: 3,
+              sha256: checksum(source),
+              hasHeader: true,
+              header: ['wordform', 'frequency', 'morphemic_analysis', 'lemma_and_morphology', 'volume', 'source_page'],
+              delimiter: '\t',
+              columns: 6,
+              numericColumns: [1, 5],
+              numericTotals: { 1: 2304 },
+              samples: representativeSamples.map((sample) => [sample.wordform, sample.frequency, sample.morphemic_analysis, sample.lemma_and_morphology, sample.volume, sample.source_page].join('\t'))
+            },
+            {
+              ...summaryArtifact
+            }
+          ]
+        },
+        delivery: { constraints: ['Retain source order.'] }
+      }]
+    };
+    const plan = {
+      schemaVersion: 1,
+      title: 'Fixture data products',
+      genericProducts: [],
+      contractProducts: [{
+        contractId: 'rimkute-morphemic-dictionary',
+        productType: 'chunked-lexical-collection',
+        publication: { status: 'published', scope: 'Every source row.', access: 'Chunked JSON.' },
+        views: [{
+          id: 'entries-by-source-order',
+          sourceRole: 'morphemic-entries',
+          title: 'Morphemic dictionary entries',
+          description: 'Every reviewed source entry.',
+          ordering: { field: 'source', direction: 'as-stored' },
+          chunkBytes: 1024,
+          fields: [
+            { id: 'wordform', label: 'Source word form', type: 'string', sourceColumn: 0 },
+            { id: 'frequency', label: 'Source frequency', type: 'raw-token-count', unit: 'source tokens', sourceColumn: 1 },
+            { id: 'morphemicAnalysis', label: 'Morphemic analysis', type: 'string', sourceColumn: 2 },
+            { id: 'lemmaAndMorphology', label: 'Lemma and morphology', type: 'string', sourceColumn: 3 },
+            { id: 'volume', label: 'Volume', type: 'string', sourceColumn: 4 },
+            { id: 'sourcePage', label: 'Printed source page', type: 'string', sourceColumn: 5 }
+          ]
+        }]
+      }]
+    };
+    await mkdir(sourceRoot, { recursive: true });
+    await Promise.all([
+      ...pdfFixtures.map((fixture) => writeFile(path.join(sourceRoot, fixture.name), fixture.content)),
+      writeFile(path.join(sourceRoot, 'rimkute.tsv'), source),
+      writeFile(path.join(sourceRoot, 'extraction-summary.json'), summary),
+      writeJson(planPath, plan),
+      writeJson(contractPath, contract)
+    ]);
+
+    await buildDataProducts({ sourceRoot, staticRoot, outputRoot, planPath, contractPath });
+    await expect(verifyDataProducts({ outputRoot, staticRoot })).resolves.toMatchObject({
+      products: 1,
+      chunkedViews: 1,
+      records: 3,
+      metadataOnlyProducts: 0
+    });
+    const manifest = JSON.parse(await readFile(path.join(outputRoot, 'rimkute-morphemic-dictionary', 'manifest.json'), 'utf8'));
+    expect(manifest.provenance).toMatchObject({
+      licence: 'Rightsholder permission',
+      permission,
+      attributionNotice,
+      modificationNotice,
+      downstreamRequirements,
+      extraction
+    });
+    expect(manifest.notice).toEqual({
+      modificationNotice,
+      attribution: attributionNotice,
+      licence: 'Rightsholder permission'
+    });
+    const index = JSON.parse(await readFile(path.join(outputRoot, 'rimkute-morphemic-dictionary', 'views', 'entries-by-source-order', 'index.json'), 'utf8'));
+    const chunk = JSON.parse(await readFile(path.join(outputRoot, 'rimkute-morphemic-dictionary', 'views', 'entries-by-source-order', index.chunks[0].file), 'utf8'));
+    expect(index.notice).toEqual(manifest.notice);
+    expect(chunk.notice).toEqual(manifest.notice);
+    expect(chunk.records).toEqual([
+      ['darbo', 1136, 'darb-o', 'darbas; dkt. vyr. g. vns. kilm.', 'I', '9'],
+      ['aišku', 186, 'aišk-u', 'aiškus; bdv. bev. g.', 'II', '5'],
+      ['būti', 982, 'bū-ti', 'būti; vksm. bendr.', 'III', '5']
+    ]);
+
+    chunk.records[1][2] = 'tampered-analysis';
+    const chunkPath = path.join(outputRoot, 'rimkute-morphemic-dictionary', 'views', 'entries-by-source-order', index.chunks[0].file);
+    const tamperedChunk = `${JSON.stringify(chunk, null, 2)}\n`;
+    await writeFile(chunkPath, tamperedChunk);
+    index.chunks[0].bytes = Buffer.byteLength(tamperedChunk);
+    index.chunks[0].sha256 = checksum(tamperedChunk);
+    await writeJson(path.join(outputRoot, 'rimkute-morphemic-dictionary', 'views', 'entries-by-source-order', 'index.json'), index);
+    await expect(verifyDataProducts({ outputRoot, staticRoot })).rejects.toThrow(
+      'records do not byte-reconstruct the pinned canonical TSV'
+    );
+
+    await buildDataProducts({ sourceRoot, staticRoot, outputRoot, planPath, contractPath });
+    manifest.provenance.modificationNotice = 'Changed notice';
+    await writeJson(path.join(outputRoot, 'rimkute-morphemic-dictionary', 'manifest.json'), manifest);
+    await expect(verifyDataProducts({ outputRoot, staticRoot })).rejects.toThrow(
+      'does not retain the reviewed rightsholder-permission provenance'
+    );
+
+    contract.contracts[0].source.files.push({
+      artifactId: 'rimkute-live-morfema-export',
+      format: 'binary',
+      bytes: 1,
+      sha256: checksum('x')
+    });
+    await writeJson(contractPath, contract);
+    await expect(buildDataProducts({ sourceRoot, staticRoot, outputRoot, planPath, contractPath })).rejects.toThrow(
+      'must contain exactly the three pinned PDFs, canonical TSV, and extraction summary'
+    );
+  });
+
   it('publishes a headered CSV frequency list with integer-valued scientific notation', async () => {
     const root = await makeDirectory();
     const sourceRoot = path.join(root, 'sources');

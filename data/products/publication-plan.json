@@ -1162,15 +1162,63 @@
     },
     {
       "contractId": "rimkute-morphemic-dictionary",
-      "productType": "metadata-only",
+      "productType": "chunked-lexical-collection",
       "publication": {
-        "status": "metadata-only",
-        "scope": "Citation, source-file inventory, and the publication decision only; no dictionary entries or PDF pages are included.",
-        "access": "A JSON manifest documents the blocked collection without redistributing or extracting the source PDFs.",
-        "reason": "The available input is PDF-only and its machine-readable reuse terms have not been resolved."
+        "status": "published",
+        "scope": "Every reviewed dictionary entry deterministically extracted from the three pinned 2011 PDF volumes.",
+        "access": "Static JSON chunks preserve the source wordform, frequency, morphemic analysis, combined lemma-and-morphology text, volume, and source page."
       },
-      "blockedBy": [
-        "https://github.com/debesyla/dazniausi-zodziai/issues/41"
+      "views": [
+        {
+          "id": "entries-by-source-order",
+          "sourceRole": "morphemic-entries",
+          "title": "Morphemic dictionary entries",
+          "description": "Every reviewed entry in PDF volume and page order; duplicate wordforms and the source's combined lemma-and-morphology text are retained.",
+          "ordering": {
+            "field": "source",
+            "direction": "as-stored"
+          },
+          "chunkBytes": 262144,
+          "fields": [
+            {
+              "id": "wordform",
+              "label": "Source word form",
+              "type": "string",
+              "sourceColumn": 0
+            },
+            {
+              "id": "frequency",
+              "label": "Source frequency",
+              "type": "raw-token-count",
+              "unit": "tokens in the dictionary source corpus",
+              "sourceColumn": 1
+            },
+            {
+              "id": "morphemicAnalysis",
+              "label": "Source morphemic analysis",
+              "type": "string",
+              "sourceColumn": 2
+            },
+            {
+              "id": "lemmaAndMorphology",
+              "label": "Source lemma and morphological information",
+              "type": "string",
+              "sourceColumn": 3
+            },
+            {
+              "id": "volume",
+              "label": "Source volume",
+              "type": "string",
+              "sourceColumn": 4
+            },
+            {
+              "id": "sourcePage",
+              "label": "Printed source page",
+              "type": "string",
+              "sourceColumn": 5
+            }
+          ]
+        }
       ]
     }
   ]

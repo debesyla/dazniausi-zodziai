@@ -184,10 +184,19 @@ its composition.
   sentence contexts. It preserves dependency direction, relation, document,
   genre, and sentence identifier; it is not a general frequency ranking or a
   similarity product.
-- `rimkute-morphemic-dictionary` has a metadata-only manifest. It deliberately
-  contains neither PDF content nor extracted dictionary rows while
-  [issue #41](https://github.com/debesyla/dazniausi-zodziai/issues/41) seeks a
-  licensable machine-readable source.
+- `rimkute-morphemic-dictionary` publishes the reviewed source-order entries
+  deterministically extracted from the three pinned 2011 PDF volumes. Each row
+  keeps the source wordform, corpus-scoped frequency, morphemic analysis,
+  combined lemma-and-morphology text, volume, and printed page. The three PDF
+  volumes yield 72,325 rows with a source-frequency total of 310,012. That PDF
+  snapshot has 61 more rows than the 72,264 entries reported by the later live
+  Morfema database; the live count is contextual only, not an extraction target
+  or verification oracle. Rightsholder
+  permission covers extraction and correction, complete derivative and
+  statistics publication and redistribution, and downstream reuse with normal
+  attribution. The public provenance records that permission without exposing
+  private correspondence and identifies the files as a modified PDF
+  derivative, not an export of the separate live Morfema database.
 
 The full public decision table is in [source-catalog.md](source-catalog.md),
 and the fixed raw-source inventory is in

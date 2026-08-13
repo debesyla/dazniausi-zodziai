@@ -1076,39 +1076,138 @@
     {
       "id": "rimkute-morphemic-dictionary",
       "title": "Dažninis lietuvių kalbos morfemikos žodynas",
-      "decision": "metadata-only",
-      "reason": "The source directory contains PDFs but no reviewed machine-readable input, and reuse terms for a converted public artifact are unresolved. A metadata-only JSON manifest is publishable while issue #41 remains open.",
+      "decision": "publish-rightsholder-permission",
+      "reason": "Rightsholder permission confirmed by the project owner covers deterministic extraction and correction, publication and redistribution of the complete derivative and statistics, and downstream reuse with attribution. The reviewed canonical TSV preserves every extracted entry from the three pinned PDFs.",
       "source": {
         "sourceUrl": "https://hdl.handle.net/20.500.12259/249",
-        "licence": "unresolved",
-        "citation": "Rimkutė, E., Kazlauskienė, A., Raškinis, G. 2011. Dažninis lietuvių kalbos morfemikos žodynas.",
+        "licence": "Rightsholder permission",
+        "citation": "Rimkutė, Erika; Kazlauskienė, Asta; Raškinis, Gailius. 2011. Dažninis lietuvių kalbos morfemikos žodynas. Vytauto Didžiojo universitetas.",
+        "encoding": "utf-8",
+        "entryKind": "morphemic-dictionary-entry",
+        "permission": {
+          "status": "rightsholder-permission-confirmed",
+          "confirmedOn": "2026-08-13",
+          "scope": "Extraction and correction of the three 2011 dictionary PDFs; publication and redistribution of the complete derived dataset and derived statistics; and downstream reuse, with normal attribution.",
+          "privateCorrespondencePublished": false
+        },
+        "attributionNotice": "Rimkutė, Erika; Kazlauskienė, Asta; Raškinis, Gailius. 2011. Dažninis lietuvių kalbos morfemikos žodynas. Vytauto Didžiojo universitetas.",
+        "modificationNotice": "MODIFIED FILE: Deterministically extracted and reviewed by the dazniausi-zodziai Lithuanian word project from the three 2011 dictionary PDFs; this derivative is not an official VDU database export.",
+        "downstreamRequirements": [
+          "Retain the attribution notice and identify the files as a modified derivative when redistributing the dataset or statistics."
+        ],
         "files": [
           {
             "artifactId": "rimkute-morphemic-dictionary-volume-one",
+            "volume": "I",
+            "name": "Dažninis lietuvių kalbos morfemikos žodynas (Rimkutė E., Kazlauskienė A., Raškinis G.).pdf",
             "format": "binary",
             "bytes": 2404144,
-            "sha256": "982b0080e08b314246d2aa0995248bf10a6b0d9a1424b593d56e410e34547dfa"
+            "sha256": "982b0080e08b314246d2aa0995248bf10a6b0d9a1424b593d56e410e34547dfa",
+            "pages": 801
           },
           {
             "artifactId": "rimkute-morphemic-dictionary-volume-two",
+            "volume": "II",
+            "name": "Dažninis lietuvių kalbos morfemikos žodynas. II dalis (Rimkutė Erika, Kazlauskienė Asta etc.).pdf",
             "format": "binary",
             "bytes": 1065088,
-            "sha256": "546ada8c3e99cd978b25e4edcadc7958d4f6c0ecf38bc3ee4825db767838cdbc"
+            "sha256": "546ada8c3e99cd978b25e4edcadc7958d4f6c0ecf38bc3ee4825db767838cdbc",
+            "pages": 357
           },
           {
             "artifactId": "rimkute-morphemic-dictionary-volume-three",
+            "volume": "III",
+            "name": "Dažninis lietuvių kalbos morfemikos žodynas. III dalis (Rimkutė Erika, Kazlauskienė Asta etc.).pdf",
             "format": "binary",
             "bytes": 2670927,
-            "sha256": "016f23e6bffba91ee53de74871793221177091fd8e950c60901e921efd6f266e"
+            "sha256": "016f23e6bffba91ee53de74871793221177091fd8e950c60901e921efd6f266e",
+            "pages": 961
+          },
+          {
+            "artifactId": "rimkute-morphemic-dictionary-entries",
+            "role": "morphemic-entries",
+            "format": "text",
+            "bytes": 6351453,
+            "sha256": "5a579304382a6f4a3447d1e36b5b638ad890d33fb8df9076976c01e3eade9dca",
+            "rows": 72325,
+            "columns": 6,
+            "delimiter": "\t",
+            "hasHeader": true,
+            "header": ["wordform", "frequency", "morphemic_analysis", "lemma_and_morphology", "volume", "source_page"],
+            "numericColumns": [1, 5],
+            "numericTotals": {"1": 310012},
+            "allowedValues": {"4": ["I", "II", "III"]},
+            "valueCounts": {"4": {"I": 30178, "II": 12532, "III": 29615}},
+            "samples": [
+              "darbo\t1136\tdarb-o\tdarbas; dkt. vyr. g. vns. kilm.\tI\t9",
+              "aišku\t186\taišk-u\taiškus; bdv. bev. g.\tII\t5",
+              "būti\t982\tbū-ti\tbūti; vksm. bendr.\tIII\t5",
+              "žvalgantis\t1\tžvalg-ant-is\tžvalgyti; vksm. pad. es. l. sngr.\tIII\t961"
+            ]
+          },
+          {
+            "artifactId": "rimkute-morphemic-dictionary-extraction-summary",
+            "format": "rimkute-extraction-summary",
+            "bytes": 4848,
+            "sha256": "845bcc9cf3609305492472b777dd29f6a1077023df424f59ee4478b6ee4832b4"
           }
-        ]
+        ],
+        "extraction": {
+          "method": {
+            "id": "pdf-coordinate-columns-v1",
+            "normalization": "Unicode NFC; source text otherwise preserved",
+            "rowOrder": "PDF volume order I, II, III; page order; top-to-bottom order",
+            "columnBoundariesPoints": [0, 145, 180, 285, 612],
+            "continuationPolicy": "A pure x >= 285 pt line is buffered: it is prepended to the next same-page row only when that row's description lacks a semicolon; otherwise it is appended to the preceding row, including across page boundaries.",
+            "splitFragmentPolicy": "A reviewed non-row split line is joined to its adjacent row using source-layout direction; forward joins require the next row on the same page within 17 pt. Every split-line digest must match the manifest set."
+          },
+          "runtime": {
+            "python": "3.12.13",
+            "popplerPdftotext": "26.05.0"
+          },
+          "rows": 72325,
+          "frequencyTotal": 310012,
+          "volumes": [
+            {"volume": "I", "rows": 30178, "frequencyTotal": 142058},
+            {"volume": "II", "rows": 12532, "frequencyTotal": 75541},
+            {"volume": "III", "rows": 29615, "frequencyTotal": 92413}
+          ],
+          "representativeSamples": [
+            {"wordform": "darbo", "frequency": 1136, "morphemic_analysis": "darb-o", "lemma_and_morphology": "darbas; dkt. vyr. g. vns. kilm.", "volume": "I", "source_page": 9},
+            {"wordform": "aišku", "frequency": 186, "morphemic_analysis": "aišk-u", "lemma_and_morphology": "aiškus; bdv. bev. g.", "volume": "II", "source_page": 5},
+            {"wordform": "būti", "frequency": 982, "morphemic_analysis": "bū-ti", "lemma_and_morphology": "būti; vksm. bendr.", "volume": "III", "source_page": 5},
+            {"wordform": "žvalgantis", "frequency": 1, "morphemic_analysis": "žvalg-ant-is", "lemma_and_morphology": "žvalgyti; vksm. pad. es. l. sngr.", "volume": "III", "source_page": 961}
+          ],
+          "summaryArtifact": {
+            "artifactId": "rimkute-morphemic-dictionary-extraction-summary",
+            "format": "rimkute-extraction-summary",
+            "bytes": 4848,
+            "sha256": "845bcc9cf3609305492472b777dd29f6a1077023df424f59ee4478b6ee4832b4"
+          }
+        }
       },
-      "schema": null,
+      "schema": {
+        "key": "source volume, printed page, and row order",
+        "frequencyField": "frequency",
+        "fields": [
+          "wordform",
+          "frequency",
+          "morphemicAnalysis",
+          "lemmaAndMorphology",
+          "volume",
+          "sourcePage"
+        ],
+        "preservation": "Keep the source morphemic analysis and combined lemma-and-morphology text literal. Retain duplicate wordforms and source order; do not infer or split ambiguous alternative analyses."
+      },
       "delivery": {
-        "status": "metadata-only-published",
-        "mode": "manifest-only",
+        "status": "published-static-json",
+        "mode": "static-chunked-lexical-json",
         "constraints": [
-          "Do not extract, publish, or add the PDFs or dictionary rows to the web catalog until machine-readable provenance and reuse terms are reviewed in issue #41."
+          "Publish only entries reproduced by the reviewed deterministic extractor from the three pinned PDF volumes.",
+          "Retain the source frequency as a corpus-scoped raw count, not a general Lithuanian-language ranking.",
+          "Retain duplicate wordforms, source order, volume and printed-page provenance, and the literal combined lemma-and-morphology field.",
+          "Carry the rightsholder-permission basis, attribution notice, and modification notice with the public product.",
+          "Do not present this PDF derivative as an export or snapshot of the separate live Morfema database."
         ]
       }
     }

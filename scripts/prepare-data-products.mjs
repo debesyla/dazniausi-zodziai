@@ -61,6 +61,35 @@ const CCLL_GENRE_PROFILE_SOURCES = [
 ];
 const BLKT_PRODUCT_ID = 'vssa-2026-blkt-wordform-profile';
 const BLKT_PROVENANCE_LICENCE = 'NewGenLTU OpenRAIL-D v1.0; CC BY-SA 4.0 for BLKT rows labelled Vikipedija';
+const RIMKUTE_PRODUCT_ID = 'rimkute-morphemic-dictionary';
+const RIMKUTE_RIGHTS = {
+  licence: 'Rightsholder permission',
+  permission: {
+    status: 'rightsholder-permission-confirmed',
+    confirmedOn: '2026-08-13',
+    scope: 'Extraction and correction of the three 2011 dictionary PDFs; publication and redistribution of the complete derived dataset and derived statistics; and downstream reuse, with normal attribution.',
+    privateCorrespondencePublished: false
+  },
+  attributionNotice: 'Rimkutė, Erika; Kazlauskienė, Asta; Raškinis, Gailius. 2011. Dažninis lietuvių kalbos morfemikos žodynas. Vytauto Didžiojo universitetas.',
+  modificationNotice: 'MODIFIED FILE: Deterministically extracted and reviewed by the dazniausi-zodziai Lithuanian word project from the three 2011 dictionary PDFs; this derivative is not an official VDU database export.',
+  downstreamRequirements: [
+    'Retain the attribution notice and identify the files as a modified derivative when redistributing the dataset or statistics.'
+  ]
+};
+const RIMKUTE_FILE_NOTICE = {
+  modificationNotice: RIMKUTE_RIGHTS.modificationNotice,
+  attribution: RIMKUTE_RIGHTS.attributionNotice,
+  licence: RIMKUTE_RIGHTS.licence
+};
+const RIMKUTE_COLUMNS = ['wordform', 'frequency', 'morphemic_analysis', 'lemma_and_morphology', 'volume', 'source_page'];
+const RIMKUTE_METHOD = {
+  id: 'pdf-coordinate-columns-v1',
+  normalization: 'Unicode NFC; source text otherwise preserved',
+  rowOrder: 'PDF volume order I, II, III; page order; top-to-bottom order',
+  columnBoundariesPoints: [0, 145, 180, 285, 612],
+  continuationPolicy: "A pure x >= 285 pt line is buffered: it is prepended to the next same-page row only when that row's description lacks a semicolon; otherwise it is appended to the preceding row, including across page boundaries.",
+  splitFragmentPolicy: 'A reviewed non-row split line is joined to its adjacent row using source-layout direction; forward joins require the next row on the same page within 17 pt. Every split-line digest must match the manifest set.'
+};
 
 function fail(message) {
   throw new Error(`Data-product preparation failed: ${message}`);
@@ -636,16 +665,110 @@ function validateContractManifest(manifest) {
 function publicSourceFile(file) {
   return {
     ...(file.role ? { role: file.role } : {}),
+    ...(file.volume ? { volume: file.volume } : {}),
     artifactId: file.artifactId,
     format: file.format ?? 'text',
     bytes: file.bytes,
     sha256: file.sha256,
+    ...(file.pages === undefined ? {} : { pages: file.pages }),
     ...(file.rows === undefined ? {} : { rows: file.rows }),
     ...(file.columns === undefined ? {} : { columns: file.columns }),
     ...(file.delimiter === undefined ? {} : { delimiter: file.delimiter }),
     ...(file.hasHeader === undefined ? {} : { hasHeader: file.hasHeader }),
     ...(file.conlluSummary === undefined ? {} : { conlluSummary: file.conlluSummary })
   };
+}
+
+function publicProductProvenance(contract) {
+  const publicationNotices = contract.id === RIMKUTE_PRODUCT_ID ? {
+    permission: contract.source.permission,
+    attributionNotice: contract.source.attributionNotice,
+    modificationNotice: contract.source.modificationNotice,
+    downstreamRequirements: contract.source.downstreamRequirements,
+    extraction: contract.source.extraction
+  } : {};
+  return {
+    sourceUrl: contract.source.sourceUrl,
+    licence: contract.source.licence,
+    citation: contract.source.citation,
+    files: contract.source.files.map(publicSourceFile),
+    ...publicationNotices
+  };
+}
+
+function publicFileNotice(productId) {
+  if (productId === BLKT_PRODUCT_ID) return BLKT_FILE_NOTICE;
+  if (productId === RIMKUTE_PRODUCT_ID) return RIMKUTE_FILE_NOTICE;
+  return null;
+}
+
+function assertRimkutePublicationContract(contract, contractProduct) {
+  if (contract.id !== RIMKUTE_PRODUCT_ID) return;
+  const extraction = contract.source.extraction;
+  const canonicalSource = contract.source.files.find((file) => file.role === 'morphemic-entries');
+  const summaryArtifact = contract.source.files.find((file) => file.artifactId === 'rimkute-morphemic-dictionary-extraction-summary');
+  const expectedArtifactIds = [
+    'rimkute-morphemic-dictionary-volume-one',
+    'rimkute-morphemic-dictionary-volume-two',
+    'rimkute-morphemic-dictionary-volume-three',
+    'rimkute-morphemic-dictionary-entries',
+    'rimkute-morphemic-dictionary-extraction-summary'
+  ];
+  const extractionIsValid = isPlainObject(extraction)
+    && sameObject(extraction.method, RIMKUTE_METHOD)
+    && isPlainObject(extraction.runtime) && extraction.runtime.python === '3.12.13'
+    && extraction.runtime.popplerPdftotext === '26.05.0'
+    && Number.isSafeInteger(extraction.rows) && extraction.rows > 0
+    && Number.isSafeInteger(extraction.frequencyTotal) && extraction.frequencyTotal > 0
+    && Array.isArray(extraction.volumes) && extraction.volumes.length === 3
+    && extraction.volumes.every((volume, index) => isPlainObject(volume)
+      && volume.volume === ['I', 'II', 'III'][index]
+      && Number.isSafeInteger(volume.rows) && volume.rows > 0
+      && Number.isSafeInteger(volume.frequencyTotal) && volume.frequencyTotal > 0)
+    && extraction.volumes.reduce((total, volume) => total + volume.rows, 0) === extraction.rows
+    && extraction.volumes.reduce((total, volume) => total + volume.frequencyTotal, 0) === extraction.frequencyTotal
+    && Array.isArray(extraction.representativeSamples) && extraction.representativeSamples.length >= 3
+    && extraction.representativeSamples.every((sample) => isPlainObject(sample)
+      && Object.keys(sample).sort().join(',') === [...RIMKUTE_COLUMNS].sort().join(',')
+      && normalizeString(sample.wordform) && Number.isSafeInteger(sample.frequency) && sample.frequency > 0
+      && normalizeString(sample.morphemic_analysis) && normalizeString(sample.lemma_and_morphology)
+      && ['I', 'II', 'III'].includes(sample.volume) && Number.isSafeInteger(sample.source_page) && sample.source_page > 0)
+    && isPlainObject(extraction.summaryArtifact)
+    && extraction.summaryArtifact.artifactId === 'rimkute-morphemic-dictionary-extraction-summary'
+    && extraction.summaryArtifact.format === 'rimkute-extraction-summary'
+    && Number.isSafeInteger(extraction.summaryArtifact.bytes) && extraction.summaryArtifact.bytes > 0
+    && typeof extraction.summaryArtifact.sha256 === 'string' && /^[a-f0-9]{64}$/.test(extraction.summaryArtifact.sha256);
+  if (contract.decision !== 'publish-rightsholder-permission'
+    || contractProduct.productType !== 'chunked-lexical-collection'
+    || contractProduct.publication.status !== 'published'
+    || contract.source.licence !== RIMKUTE_RIGHTS.licence
+    || !sameObject(contract.source.permission, RIMKUTE_RIGHTS.permission)
+    || contract.source.attributionNotice !== RIMKUTE_RIGHTS.attributionNotice
+    || contract.source.modificationNotice !== RIMKUTE_RIGHTS.modificationNotice
+    || !sameObject(contract.source.downstreamRequirements, RIMKUTE_RIGHTS.downstreamRequirements)) {
+    fail(`${RIMKUTE_PRODUCT_ID} must retain the reviewed rightsholder-permission record and publish as a chunked lexical collection`);
+  }
+  if (!extractionIsValid || contract.source.files.length !== expectedArtifactIds.length
+    || new Set(contract.source.files.map((file) => file.artifactId)).size !== expectedArtifactIds.length
+    || expectedArtifactIds.some((artifactId) => !contract.source.files.some((file) => file.artifactId === artifactId))
+    || contract.source.files.filter((file) => file.role !== undefined).length !== 1
+    || !canonicalSource || !summaryArtifact
+    || canonicalSource.artifactId !== 'rimkute-morphemic-dictionary-entries'
+    || canonicalSource.format !== 'text' || canonicalSource.rows !== extraction.rows
+    || canonicalSource.columns !== RIMKUTE_COLUMNS.length || canonicalSource.delimiter !== '\t'
+    || canonicalSource.hasHeader !== true || !sameObject(canonicalSource.header, RIMKUTE_COLUMNS)
+    || !sameObject(canonicalSource.numericColumns, [1, 5])
+    || canonicalSource.numericTotals?.[1] !== extraction.frequencyTotal
+    || !sameObject(canonicalSource.samples, extraction.representativeSamples.map((sample) => RIMKUTE_COLUMNS.map((column) => String(sample[column])).join('\t')))
+    || summaryArtifact.format !== 'rimkute-extraction-summary'
+    || !sameObject(extraction.summaryArtifact, {
+      artifactId: summaryArtifact.artifactId,
+      format: summaryArtifact.format,
+      bytes: summaryArtifact.bytes,
+      sha256: summaryArtifact.sha256
+    })) {
+    fail(`${RIMKUTE_PRODUCT_ID} must pin a reviewed canonical TSV, extraction summary, totals, and representative samples`);
+  }
 }
 
 function fieldTotals(fields) {
@@ -799,7 +922,7 @@ async function buildChunkedView({ productId, productDirectory, view, sourceFile,
   let chunkLastLookupKey = null;
   const numericTotals = fieldTotals(view.fields);
   const nullCounts = fieldNullCounts(view.fields);
-  const fileNotice = productId === BLKT_PRODUCT_ID ? BLKT_FILE_NOTICE : null;
+  const fileNotice = publicFileNotice(productId);
 
   async function flushChunk() {
     if (recordJsons.length === 0) return;
@@ -2915,12 +3038,7 @@ async function buildSyntacticContextProduct({ contract, contractProduct, sourceR
     title: contract.title,
     productType: SYNTACTIC_CONTEXT_PRODUCT_TYPE,
     publication: contractProduct.publication,
-    provenance: {
-      sourceUrl: contract.source.sourceUrl,
-      licence: contract.source.licence,
-      citation: contract.source.citation,
-      files: contract.source.files.map(publicSourceFile)
-    },
+    provenance: publicProductProvenance(contract),
     delivery: {
       mode: 'static-prefix-chunked-syntax-context-json',
       constraints: contract.delivery?.constraints ?? []
@@ -3032,12 +3150,7 @@ function buildMetadataOnlyManifest({ contract, contractProduct }) {
     productType: 'metadata-only',
     publication: contractProduct.publication,
     blockedBy: contractProduct.blockedBy,
-    provenance: {
-      sourceUrl: contract.source.sourceUrl,
-      licence: contract.source.licence,
-      citation: contract.source.citation,
-      files: contract.source.files.map(publicSourceFile)
-    }
+    provenance: publicProductProvenance(contract)
   };
 }
 
@@ -3059,6 +3172,7 @@ async function writeBlktLicenceFiles(productDirectory) {
 }
 
 async function buildContractProduct({ contract, contractProduct, sourceResolver, outputRoot }) {
+  assertRimkutePublicationContract(contract, contractProduct);
   const productDirectory = path.join(outputRoot, contract.id);
   if (contractProduct.productType === 'metadata-only') {
     const manifest = buildMetadataOnlyManifest({ contract, contractProduct });
@@ -3181,18 +3295,13 @@ async function buildContractProduct({ contract, contractProduct, sourceResolver,
     title: contract.title,
     productType: contractProduct.productType,
     publication: contractProduct.publication,
-    provenance: {
-      sourceUrl: contract.source.sourceUrl,
-      licence: contract.source.licence,
-      citation: contract.source.citation,
-      files: contract.source.files.map(publicSourceFile)
-    },
+    provenance: publicProductProvenance(contract),
     delivery: {
       mode: 'static-chunked-json',
       constraints: contract.delivery?.constraints ?? []
     },
     views,
-    ...(contractProduct.wordformProfile === undefined ? {} : { notice: BLKT_FILE_NOTICE }),
+    ...(publicFileNotice(contract.id) === null ? {} : { notice: publicFileNotice(contract.id) }),
     ...(contractProduct.wordformProfile === undefined ? {} : { wordformProfile: contractProduct.wordformProfile }),
     ...(analysisProfiles.length === 0 ? {} : { analysisProfiles })
   };

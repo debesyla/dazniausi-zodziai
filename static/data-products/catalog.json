@@ -145,11 +145,11 @@
     {
       "id": "rimkute-morphemic-dictionary",
       "title": "Dažninis lietuvių kalbos morfemikos žodynas",
-      "productType": "metadata-only",
-      "publicationStatus": "metadata-only",
+      "productType": "chunked-lexical-collection",
+      "publicationStatus": "published",
       "manifest": "rimkute-morphemic-dictionary/manifest.json",
-      "licence": "unresolved",
-      "viewCount": 0,
+      "licence": "Rightsholder permission",
+      "viewCount": 1,
       "recordCount": null
     }
   ]
