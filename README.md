@@ -41,7 +41,8 @@ taisyklės aprašytos [docs/data-preparation.md](docs/data-preparation.md).
 
 ## Licencija
 
-Programos kodas platinamas pagal [GNU GPL v3 arba vėlesnę versiją](LICENSE).
+Programos kodas (Copyright (C) 2026 Debesyla) platinamas pagal
+[GNU GPL v3 arba vėlesnę versiją](LICENSE).
 Duomenų rinkiniai nėra automatiškai GPL: kiekvienam rinkiniui galioja jo
 metaduomenyse nurodyta licencija ir atskiri šaltinio reikalavimai.
 
