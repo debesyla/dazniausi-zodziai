@@ -1,155 +1,48 @@
 # Dažniausi lietuviški žodžiai
 
-A static SvelteKit application for exploring Lithuanian word-frequency lists.
-It loads one catalog-selected dataset at a time, then offers filters, a
-frequency dashboard, a paginated table, and a faithful CSV export.
+SvelteKit svetainė lietuvių kalbos žodžių dažniams ir rinkiniams tyrinėti.
 
-The browser catalog includes reviewed Lithuanian lemma-frequency datasets. Their
-source licences and citations are shown in the app and preserved in dataset
-metadata; larger products are explained in the public catalogue at
-`/duomenu-katalogas` and remain available through the public JSON catalog.
+## Ką galima daryti
 
-## What the app does
+- naršyti skirtingus lietuvių kalbos duomenų rinkinius;
+- ieškoti, filtruoti ir rikiuoti žodžius bei žodžių formas;
+- matyti dažnį, kalbos dalį ir kitą rinkinio informaciją;
+- atsisiųsti atrinktus duomenis CSV formatu;
+- peržiūrėti morfologijos, sintaksės ir žodynų duomenis.
 
-- Select a curated dataset from `static/datasets/catalog.json`.
-- Inspect headline totals, top words, rank/frequency, cumulative coverage, and
-  source-provided part-of-speech composition.
-- Explore DML6 dictionary coverage across transparent JCL frequency bands,
-  with separate form and token shares plus bounded example lists.
-- Compare an exact word form across CCLL2, wartime media, and wartime social
-  networks without loading the full 2.26-million-row comparison dataset.
-- Look up one exact wordform across the five named CCLL subcorpora at
-  `/zanru-profilis`, with raw counts, source denominators, and per-million
-  rates but no aggregate-plus-genre total or generic genre leaderboard.
-- Look up one lower-cased exact BLKT wordform at `/blkt-profilis`, with
-  aggregate counts and per-million rates for the whole corpus and, when the
-  disclosure rules allow them, five broad document types and four periods.
-  The lookup publishes no raw text or document identity data and fetches at
-  most one bounded data chunk for a query.
-- Search, filter by part of speech, sort by word/frequency/type, and browse a
-  50-row page at a time.
-- Export the complete active filtered and sorted result set as UTF-8 CSV.
-- Explore bounded dependency-relation and sentence contexts from the ALKSNIS
-  v3.0 syntactic treebank at `/sintakse`.
-- Browse every public data product by source scope, licence, access, and
-  interpretation limit at `/duomenu-katalogas`.
+## Paleidimas
 
-## Development
-
-Requires Node.js 20 or newer.
+Reikia Node.js 20 arba naujesnės versijos.
 
 ```bash
 npm ci
 npm run dev
 ```
 
-Run the same checks used for pull requests and a self-hosted release:
+## Patikra
 
 ```bash
 npm run check
 npm test
-npx playwright install chromium firefox webkit # once per machine
-npm run test:browser
-npm run products:verify
-npm run public:verify
 npm run build
-```
-
-Build and launch the production version locally:
-
-```bash
-npm start
-```
-
-Open `http://127.0.0.1:4173/`. The repeatable browser-release matrix and
-hosted-site sign-off steps are in
-[docs/browser-acceptance.md](docs/browser-acceptance.md); use the
-[release-record template](docs/release-record.md) for the final go/no-go
-decision.
-
-## Dataset maintenance
-
-Datasets are prepared rarely by a maintainer, not uploaded through the public
-app. The canonical schema, source configuration, validation rules, and command
-are in [docs/data-preparation.md](docs/data-preparation.md). Approved source
-decisions and externally gated research candidates are tracked separately in
-[docs/source-catalog.md](docs/source-catalog.md), so a known source is not
-mistaken for an authorized public product.
-Larger and non-generic collections have implementation-ready source contracts in
-[docs/source-contracts.md](docs/source-contracts.md). The complete public JSON
-delivery model is documented in [docs/data-products.md](docs/data-products.md).
-The BLKT profile is built from the pinned source snapshot only after the
-project owner's permission to publish derived aggregates and datasets has been
-recorded; its separate preparation and disclosure rules are described in those
-two documents. The source contains two verified licence groups: 8,267,437
-NewGenLTU OpenRAIL-D rows and 170,718 `Vikipedija` rows under CC BY-SA 4.0.
-The generated product carries both complete licence texts, both attributions,
-and a prominent modification notice. BLKT is not representative of all
-Lithuanian language use because media and document texts dominate its document
-and token composition.
-
-```bash
-npm run data:build -- --config data/datasets/utka-2018-lemmatized-totals.json --source-root /path/to/reviewed-source-root --output static/datasets/utka-2018-lemmatized-totals.json --catalog static/datasets/catalog.json
-npm run data:verify -- --source-root /path/to/reviewed-source-root
-npm run source:verify -- --source-root /path/to/reviewed-source-root
-npm run products:build -- --source-root /path/to/reviewed-source-root
 npm run products:verify
 npm run public:verify
 ```
 
-Review provenance, licence, citation, source snapshot, summary totals, and the
-generated catalog entry before committing a new dataset. `products:build`
-recreates the checked-in `static/data-products/` artifacts from the pinned
-raw-source snapshot; stage those regenerated JSON files together with their
-contract change. `products:verify` checks every generated manifest and chunk.
-The table's large-list strategy is documented in [docs/scalable-exploration.md](docs/scalable-exploration.md).
-The evidence-based plan for future statistical and contextual explorations is in
-[docs/statistical-exploration-roadmap.md](docs/statistical-exploration-roadmap.md).
-The public visual and interaction baseline is documented in
-[docs/design-system.md](docs/design-system.md).
+Pagrindinis prižiūrimas rinkinio failas yra
+`data/datasets/utka-2018-lemmatized-totals.json`. Duomenų tikrinimas:
+`npm run data:verify`.
 
-## Local launch and self-hosting
+## Duomenys
 
-The default production build is portable and uses the domain root:
+Rinkinių šaltiniai, citatos, prieigos sąlygos ir licencijos nurodytos
+programoje bei `static/data-products/` metaduomenyse. Duomenų paruošimo
+taisyklės aprašytos [docs/data-preparation.md](docs/data-preparation.md).
 
-```bash
-npm run build
-npm run preview
-```
+## Licencija
 
-The complete static site is written to `build/`. A future server can publish
-that directory directly. Configure the public URL at build time so canonical,
-social-preview, sitemap, and robots metadata point to the real host:
+Programos kodas platinamas pagal [GNU GPL v3 arba vėlesnę versiją](LICENSE).
+Duomenų rinkiniai nėra automatiškai GPL: kiekvienam rinkiniui galioja jo
+metaduomenyse nurodyta licencija ir atskiri šaltinio reikalavimai.
 
-```bash
-PUBLIC_SITE_URL=https://zodziai.example.lt npm run build
-```
-
-If the server exposes the site below a path rather than at the domain root,
-configure both values and include the path in the public URL:
-
-```bash
-BASE_PATH=/lietuviu-zodziai PUBLIC_SITE_URL=https://example.lt/lietuviu-zodziai npm run build
-```
-
-Copy `.env.example` to `.env` for persistent local build settings. The static
-server must resolve extensionless routes such as `/apie` to the generated
-`apie.html`; `npm run preview` already does this.
-
-Pull requests and pushes to `main` run the verification workflow in
-`.github/workflows/verify.yml`. The checked-in public data products are
-verified before a release build and copied unchanged into the static site.
-Maintainers rebuild them locally from the reviewed source root before updating
-a product.
-
-## Analytics and privacy
-
-The application contains no analytics, tracking script, referrer collection, or
-browser-storage telemetry. The static host may still have its own operational
-logs under its service terms.
-
-## Licence
-
-The application code is available under the [MIT License](LICENSE). Individual
-datasets retain the licences and attribution recorded in their provenance;
-those terms can differ from the code licence.
+Projektas nenaudoja analitikos ar sekimo.
