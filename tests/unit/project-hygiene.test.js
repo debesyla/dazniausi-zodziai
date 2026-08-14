@@ -10,9 +10,11 @@ async function readRepositoryFile(filename) {
 }
 
 describe('project hygiene', () => {
-	it('ships a declared MIT licence', async () => {
+	it('ships a declared GPL licence for the application code', async () => {
 		await expect(access(path.join(repositoryRoot, 'LICENSE'))).resolves.toBeUndefined();
-		expect(await readRepositoryFile('LICENSE')).toContain('MIT License');
+		const license = await readRepositoryFile('LICENSE');
+		expect(license).toContain('GNU GENERAL PUBLIC LICENSE');
+		expect(license).toContain('Version 3');
 	});
 
 	it('keeps the application shell free of client-side telemetry', async () => {
